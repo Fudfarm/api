@@ -14,32 +14,28 @@ export const USER_STATUSES = [
 export type IUserStatus = (typeof USER_STATUSES)[number];
 
 export interface IUser {
-    id: string;
-    email: string;
-    password: string;
-    role: string;
-    phone?: string;
-    birthdate: Date;
-    firstname: string;
-    gender: string;
-    maritalStatus: string;
-    otherInfo: string;
-    othernames: string;
-    surname: string;
-    noOfFamily?: number;
-    disease?: string;
-    settings?: {
-        theme?: string;
-        language?: string;
-    };
-    status?: IUserStatus;
-    lastLoginAt?: Date;
-    isVerified: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
-    createdBy: string;
+  id: string;
+  email: string;
+  password: string;
+  birthdate: Date;
+  firstname: string;
+  gender: string;
+  maritalStatus: string;
+  otherInfo?: string;
+  othernames: string;
+  surname: string;
+  phone?: string;
+  noOfFamily?: number;
+  disease?: string;
+  role: IUserRole;
+  status?: IUserStatus;
+  lastLoginAt?: Date;
+  isVerified: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  createdBy: string;
 }
 
 export interface IUserMethods {
-    comparePassword(password: string): Promise<boolean>;
+  comparePassword(password: string): Promise<boolean>;
 }
