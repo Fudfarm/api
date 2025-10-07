@@ -1,36 +1,40 @@
 import express from "express";
-// import cors from "cors";
+import cors from "cors";
 import cookieParser from "cookie-parser";
+import authRouter from "./routes/v1/authRoutes";
 
 const app = express();
 const apiRouter = express.Router();
 
-// const allowedOrigins = [
-//   "http://localhost:3000",
-//   "https://localhost:3000",
-//   "https://habideenibrahim.com.ng",
-// ];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://localhost:3000",
+  "https://habideenibrahim.com.ng",
+];
 
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         console.error("Blocked by CORS:", origin);
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.error("Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 //
 
 app.use(express.json());
 app.use(cookieParser());
 
+apiRouter.use("/", authRouter);
+
 app.use("/api/v1", apiRouter);
+
 
 // Handle 404 for API routes
 app.use((req, res) => {

@@ -1,0 +1,89 @@
+import { Request, Response } from "express";
+import { handleError } from "../../../function/error";
+import User from "../../../models/v1/User";
+import { generateAccessToken, generateRefreshToken, hashToken } from "../../../utils/token";
+import { getClientIp } from "../../../function/function3";
+import { RefreshToken } from "../../../models/v1/RefreshToken";
+import { handleAuthTokens } from "../../../function/cookie";
+import { config } from "../../../config";
+
+export const loginUser = async (req: Request, res: Response) => {
+  try {
+    const { email, password, device } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch)
+      return res.status(401).json({ message: "Invalid credentials" });
+
+    // check account status
+    if (user.status !== "Active")
+      return res.status(403).json({ message: "Account is not active" });
+
+    const accessToken = generateAccessToken({
+      _id: user._id as string,
+      email: user.email,
+    });
+    const refreshToken = generateRefreshToken({ _id: String(user._id) });
+    const tokenHash = hashToken(refreshToken);
+
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 30);
+
+    const currentIp = getClientIp(req);
+
+    // Delete any token with same userAgent and IP
+    await RefreshToken.deleteMany({
+      userId: user._id,
+      userAgent: req.headers["user-agent"],
+      ip: currentIp,
+    });
+
+    await RefreshToken.create({
+      userId: user._id,
+      tokenHash,
+      userAgent: req.headers["user-agent"],
+      ip: currentIp,
+      expiresAt: expires,
+    });
+
+    // Update user's last login time
+    await User.updateOne(
+      { _id: user._id },
+      {
+        updatedAt: new Date(),
+        lastLoginAt: new Date(),
+      }
+    );
+
+    const responseData: Record<string, any> = {};
+
+    handleAuthTokens(
+      res,
+      device,
+      accessToken,
+      refreshToken,
+      config,
+      responseData,
+      "" // prefix to job application specific cookies
+    );
+
+    return res.status(200).json({
+      message: "Login successful",
+      nonCookieToken: responseData, // used for non-web clients
+      data: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        surname: user.surname,
+        firstname: user.firstname,
+        othernames: user.othernames,
+        gender: user.gender,
+      },
+    });
+  } catch (error) {
+    return handleError(error, res, "Error logging in");
+  }
+};
