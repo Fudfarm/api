@@ -1,0 +1,18 @@
+# # This file deploys only Firebase Functions, not Hosting
+# name: Deploy the dev branch
+
+on:
+  push:
+    branches:
+      - dev
+jobs:
+  main:
+    name: Deploy to Firebase
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: jsryudev/deploy-firebase-functions@v20.0.1
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_PROJECT: fudfarmer
+          FUNCTIONS_DIR: functions

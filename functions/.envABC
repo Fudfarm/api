@@ -1,0 +1,19 @@
+# once they are uncommented, these lines will load environment variables from a .env file.
+
+# APP_NAME=
+
+# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/mydb?retryWrites=true&w=majority
+# PORT=3000
+# JWT_SECRET=your_jwt_secret
+# JWT_REFRESH_SECRET=your_refresh_token_secret
+# ACCESS_TOKEN_EXPIRES_IN=1h
+# REFRESH_TOKEN_EXPIRES_IN=7d
+# ROOT_DOMAIN=yourdomain.com
+
+# EMAIL_USERNAME=
+# EMAIL_PASSWORD=
+# EMAIL_FROM=
+# EMAIL_CONTACT=
+# EMAIL_HOST=
+# EMAIL_PORT=
+# EMAIL_SECURE=
