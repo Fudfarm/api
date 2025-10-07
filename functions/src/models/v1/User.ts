@@ -54,6 +54,16 @@ const userSchema = new Schema<UserDocument>(
       type: String,
       required: false,
     },
+    noOfFamily: {
+      type: Number,
+      default: 0,
+      required: false,
+    },
+    disease: {
+      type: String,
+      default: "",
+      required: false,
+    },
     role: {
       type: String,
       required: true,

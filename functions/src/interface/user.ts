@@ -26,6 +26,8 @@ export interface IUser {
     otherInfo: string;
     othernames: string;
     surname: string;
+    noOfFamily?: number;
+    disease?: string;
     settings?: {
         theme?: string;
         language?: string;
