@@ -2,14 +2,14 @@ export const USER_ROLES = ["User", "Admin"] as const;
 export type IUserRole = (typeof USER_ROLES)[number];
 
 export const USER_STATUSES = [
-    "Pending",
-    "Active",
-    "Inactive",
-    "Banned",
-    "Resigned",
-    "Retired",
-    "Terminated",
-    "Dead",
+  "Pending",
+  "Active",
+  "Inactive",
+  "Banned",
+  "Resigned",
+  "Retired",
+  "Terminated",
+  "Dead",
 ] as const;
 export type IUserStatus = (typeof USER_STATUSES)[number];
 
@@ -18,7 +18,7 @@ export interface IUser {
     email: string;
     password: string;
     role: string;
-    phone: string;
+    phone?: string;
     birthdate: Date;
     firstname: string;
     gender: string;

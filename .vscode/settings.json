@@ -1,0 +1,23 @@
+{
+  // Use 2 spaces for indentation
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  // Always add a newline at the end of the file
+  "files.insertFinalNewline": true,
+  // Format automatically on save
+  "editor.formatOnSave": true,
+  // Use ESLint as the default formatter for TS/JS
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  // Auto fix ESLint problems on save
+  "eslint.alwaysShowStatus": true,
+  "eslint.format.enable": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always",
+    "source.fixAll.eslint": "always"
+  }
+}
