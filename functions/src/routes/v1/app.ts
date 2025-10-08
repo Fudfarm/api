@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import authRouter from "./authRoutes";
 import generalRouter from "../generalRoutes";
 import staffRouter from "./admin/staffRoutes";
+import { systemInfoRouter } from "./systeminfo";
 
 const app = express();
 const apiRouter = express.Router();
@@ -37,6 +38,7 @@ app.use(cookieParser());
 app.use("/", generalRouter);
 apiRouter.use("/", authRouter);
 apiRouter.use("/staff", staffRouter);
+apiRouter.use("/", systemInfoRouter);
 app.use("/api/v1", apiRouter);
 
 
