@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { randomPassword } from "../../../function/function3";
+import { formatDateToShort, randomPassword } from "../../../function/function3";
 import { AuthenticatedRequest } from "../../../middleware/auth";
 import { cleanStr } from "../../../function/function1";
 import { IUserRole } from "../../../interface/user";
@@ -55,12 +55,17 @@ export const onboard = async (req: AuthenticatedRequest, res: Response) => {
         othernames: newUser.othernames,
         gender: newUser.gender,
         maritalStatus: newUser.maritalStatus,
-        birthdate: newUser.birthdate,
+        birthdate: formatDateToShort(newUser.birthdate ? newUser.birthdate.toISOString() : undefined),
         email: newUser.email,
         phone: newUser.phone,
         role: newUser.role,
         status: newUser.status,
-        createdAt: newUser.createdAt,
+        createdAt: newUser.createdAt
+          ? formatDateToShort(
+            new Date(newUser.createdAt).toISOString().replace("T", " ").split(".")[0],
+            { includeTime: true }
+          )
+          : null,
       },
     });
   } catch (error) {

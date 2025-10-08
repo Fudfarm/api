@@ -2,6 +2,7 @@ import { Response } from "express";
 import User from "../../../models/v1/User";
 import { AuthenticatedRequest } from "../../../middleware/auth";
 import { fields } from "./onboard";
+import { formatDateToShort } from "../../../function/function3";
 
 export const userEdit = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -52,7 +53,7 @@ export const userEdit = async (req: AuthenticatedRequest, res: Response) => {
         othernames: data.othernames,
         gender: data.gender,
         maritalStatus: data.maritalStatus,
-        birthdate: data.birthdate,
+        birthdate: formatDateToShort(data.birthdate),
         email: data.email,
         phone: data.phone,
         otherInfo: data.otherInfo,

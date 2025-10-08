@@ -79,3 +79,40 @@ export function randomPassword(length = 12): string {
     .map((byte) => charset[byte % charsetLength])
     .join("");
 }
+
+/**
+ * Formats a date string into a short, human-readable format.
+ * @param {string} dateString
+ * @param {object} options
+ * @return {string} Formatted date string or "N/A" if input is invalid.
+ */
+export function formatDateToShort(
+  dateString?: string | null,
+  options?: { includeTime?: boolean }
+): string {
+  if (!dateString) return "N/A";
+
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Invalid date";
+
+    const datePart = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    });
+
+    if (options?.includeTime) {
+      const timePart = date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+      return `${datePart} ${timePart}`;
+    }
+
+    return datePart;
+  } catch {
+    return "Invalid date";
+  }
+}
