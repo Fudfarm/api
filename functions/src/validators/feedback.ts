@@ -19,10 +19,25 @@ export const feedbackSchema = z.object({
     .min(10, "Message must be at least 10 characters long")
     .max(2500, "Message must be at most 2500 characters long"),
 
-  receiveFeedback: z.boolean(),
-  rating: z.number().min(1).max(5),
-  type: z.enum(["System Error", "Update Required", "Compliment"]),
+  // Coerce string 'true'/'false' to boolean
+  receiveFeedback: z
+    .string({ required_error: "Required" })
+    .transform((val) => val === "true"),
 
+  // Coerce string numbers to actual numbers
+  rating: z
+    .string({ required_error: "Required" })
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => val >= 1 && val <= 5, "Rating must be between 1 and 5"),
+
+  type: z
+    .string({ required_error: "Required" })
+    .refine(
+      (val) => ["System Error", "Update Required", "Compliment"].includes(val),
+      "Type must be one of System Error, Update Required, Compliment"
+    ),
+
+  // Files come as strings (paths) or undefined
   image1: z.string().optional(),
   image2: z.string().optional(),
 });
