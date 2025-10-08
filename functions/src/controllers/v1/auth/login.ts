@@ -23,10 +23,10 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(403).json({ message: "Account is not active" });
 
     const accessToken = generateAccessToken({
-      _id: user._id as string,
+      _id: user.id as string,
       email: user.email,
     });
-    const refreshToken = generateRefreshToken({ _id: String(user._id) });
+    const refreshToken = generateRefreshToken({ _id: String(user.id) });
     const tokenHash = hashToken(refreshToken);
 
     const expires = new Date();
@@ -36,13 +36,13 @@ export const loginUser = async (req: Request, res: Response) => {
 
     // Delete any token with same userAgent and IP
     await RefreshToken.deleteMany({
-      userId: user._id,
+      userId: user.id,
       userAgent: req.headers["user-agent"],
       ip: currentIp,
     });
 
     await RefreshToken.create({
-      userId: user._id,
+      userId: user.id,
       tokenHash,
       userAgent: req.headers["user-agent"],
       ip: currentIp,
@@ -51,7 +51,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     // Update user's last login time
     await User.updateOne(
-      { _id: user._id },
+      { _id: user.id },
       {
         updatedAt: new Date(),
         lastLoginAt: new Date(),
