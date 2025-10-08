@@ -55,7 +55,7 @@ export const onboard = async (req: AuthenticatedRequest, res: Response) => {
         othernames: newUser.othernames,
         gender: newUser.gender,
         maritalStatus: newUser.maritalStatus,
-        birthdate: formatDateToShort(newUser.birthdate ? newUser.birthdate.toISOString() : undefined),
+        birthdate: newUser.birthdate ? formatDateToShort(newUser.birthdate.toISOString()) : undefined,
         email: newUser.email,
         phone: newUser.phone,
         role: newUser.role,

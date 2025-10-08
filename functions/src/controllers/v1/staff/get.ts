@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from "../../../middleware/auth";
 import { cleanStr } from "../../../function/function1";
 import { handleError } from "../../../function/error";
 import User from "../../../models/v1/User";
+import { formatDateToShort } from "../../../function/function3";
 
 export const staffInfo = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -24,15 +25,15 @@ export const staffInfo = async (req: AuthenticatedRequest, res: Response) => {
         othernames: user.othernames,
         gender: user.gender,
         maritalStatus: user.maritalStatus,
-        birthdate: user.birthdate,
+        birthdate: user.birthdate ? formatDateToShort(user.birthdate.toISOString()) : undefined,
         email: user.email,
         phone: user.phone,
         otherInfo: user.otherInfo,
         role: user.role,
         status: user.status,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        lastLoginAt: user.lastLoginAt,
+        createdAt: user.createdAt ? formatDateToShort(user.createdAt.toISOString()) : undefined,
+        updatedAt: user.updatedAt ? formatDateToShort(user.updatedAt.toISOString()) : undefined,
+        lastLoginAt: user.lastLoginAt ? formatDateToShort(user.lastLoginAt.toISOString()) : undefined,
         isVerified: user.isVerified,
         createdBy: {
           id: createdByUser?.id,
