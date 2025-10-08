@@ -36,8 +36,4 @@ export const feedbackSchema = z.object({
       (val) => ["System Error", "Update Required", "Compliment"].includes(val),
       "Type must be one of System Error, Update Required, Compliment"
     ),
-
-  // Files come as strings (paths) or undefined
-  image1: z.string().optional(),
-  image2: z.string().optional(),
 });
