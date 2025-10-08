@@ -16,6 +16,6 @@ staffRouter
   .post(validateM(onboardSchema), onboard)
   .put(validateM(onboardSchema), userEdit);
 
-staffRouter.get("/onboard/:id", staffInfo);
+staffRouter.get("/:id", staffInfo);
 
 export default staffRouter;
