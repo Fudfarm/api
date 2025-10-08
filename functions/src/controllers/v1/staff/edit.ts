@@ -39,7 +39,7 @@ export const userEdit = async (req: AuthenticatedRequest, res: Response) => {
         otherInfo: data.otherInfo,
         role: data.role,
         updatedAt: new Date(),
-        updatedBy: req.user.id,
+        updatedBy: req.user?.id,
       }
     );
 
