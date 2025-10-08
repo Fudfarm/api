@@ -64,6 +64,8 @@ export const onboard = async (req: AuthenticatedRequest, res: Response) => {
  */
 export function fields(req: AuthenticatedRequest) {
   return {
+    id: cleanStr(req.body.id) || undefined,
+
     surname: cleanStr(req.body.surname),
     firstname: cleanStr(req.body.firstname),
     othername: cleanStr(req.body.othername),
