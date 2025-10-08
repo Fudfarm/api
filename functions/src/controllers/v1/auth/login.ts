@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { handleError } from "../../../function/error";
-import User, { hashPassword } from "../../../models/v1/User";
+import User from "../../../models/v1/User";
 import { generateAccessToken, generateRefreshToken, hashToken } from "../../../utils/token";
 import { getClientIp } from "../../../function/function3";
 import { RefreshToken } from "../../../models/v1/RefreshToken";
@@ -13,8 +13,6 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
-
-    console.log("Hash password:  ", await hashPassword(password));
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch)
@@ -62,7 +60,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const responseData: Record<string, any> = {};
 
-    handleAuthTokens(
+    const token = handleAuthTokens(
       res,
       device,
       accessToken,
@@ -74,7 +72,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       message: "Login successful",
-      nonCookieToken: responseData, // used for non-web clients
+      nonCookieToken: token, // used for non-web clients
       data: {
         id: user.id,
         email: user.email,
