@@ -10,8 +10,8 @@ export const resetPasswordBody = ({
   return `
 <p>Hi ${name},</p>
 
-<p>You requested a password reset. If you received this request, 
-you can either click the button below to continue in your browser, 
+<p>Ignore this message if you didn't request a password reset. 
+You can either click the button below to continue in your browser, 
 or enter the reset token in the password reset form.</p>
 
 <p style="font-weight: bold; font-size: 18px; color: #1f640eff;">
