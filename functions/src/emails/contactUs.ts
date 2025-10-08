@@ -5,15 +5,17 @@ export const contactUsSystemEmailBody = ({
   phone,
   title,
   message,
+  appName,
 }: {
   fullname: string;
   email: string;
   phone: string;
   title: string;
   message: string;
+  appName: string;
 }): string => {
   return `
-<p>You have received a new contact message from your website/app:</p>
+<p>You have received a new contact message from your ${appName}:</p>
 
 <p><strong>Full Name:</strong> ${fullname}</p>
 <p><strong>Email:</strong> ${email}</p>
@@ -21,7 +23,7 @@ export const contactUsSystemEmailBody = ({
 <p><strong>Title:</strong> ${title}</p>
 <p><strong>Message:</strong><br/>${message}</p>
 
-<p>Best regards,<br/>Your Website/App</p>
+<p>Best regards,<br/>Your ${appName}</p>
 `;
 };
 

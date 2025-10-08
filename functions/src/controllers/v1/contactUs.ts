@@ -3,6 +3,7 @@ import { sendEmail } from "../../utils/mailer";
 import { getOrCreateSystemInfo } from "./system/helper";
 import { handleError } from "../../function/error";
 import { contactUsSystemEmailBody, contactUsUserEmailBody } from "../../emails/contactUs";
+import { config } from "../../config";
 
 export const contactUs = async (req: Request, res: Response) => {
   try {
@@ -27,6 +28,7 @@ export const contactUs = async (req: Request, res: Response) => {
         phone: phone,
         title: title,
         message: body,
+        appName: config.appName,
       }),
     });
 
