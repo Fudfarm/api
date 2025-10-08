@@ -27,7 +27,7 @@ const userSchema = new Schema<UserDocument>(
     lastLoginAt: { type: Date, default: null},
     isVerified: { type: Boolean, default: false},
     allowNotifications: { type: Boolean, default: true},
-    createdBy: { type: String, required: true},
+    createdBy: { type: String, required: false},
     createdAt: { type: Date, required: false },
     updatedAt: { type: Date, required: false },
   },
