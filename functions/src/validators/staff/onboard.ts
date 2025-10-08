@@ -18,7 +18,7 @@ export const onboardSchema = z.object({
     .max(30, "First name must be at most 30 characters")
     .regex(/^[a-zA-Z-]+$/, "First name must contain only letters and hyphens"),
 
-  othername: z
+  othernames: z
     .string()
     .trim()
     .max(60, "Other name must be at most 60 characters")

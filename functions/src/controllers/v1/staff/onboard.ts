@@ -23,7 +23,7 @@ export const onboard = async (req: AuthenticatedRequest, res: Response) => {
     const newUser = new User({
       surname: data.surname,
       firstname: data.firstname,
-      othername: data.othername,
+      othernames: data.othernames,
       gender: data.gender,
       maritalStatus: data.maritalStatus,
       birthdate: data.birthdate,
@@ -52,7 +52,7 @@ export const onboard = async (req: AuthenticatedRequest, res: Response) => {
         id: newUser._id,
         surname: newUser.surname,
         firstname: newUser.firstname,
-        othername: newUser.othernames,
+        othernames: newUser.othernames,
         gender: newUser.gender,
         maritalStatus: newUser.maritalStatus,
         birthdate: newUser.birthdate,
@@ -80,7 +80,7 @@ export function fields(req: AuthenticatedRequest) {
 
     surname: cleanStr(req.body.surname),
     firstname: cleanStr(req.body.firstname),
-    othername: cleanStr(req.body.othername),
+    othernames: cleanStr(req.body.othernames),
     gender: cleanStr(req.body.gender),
     maritalStatus: cleanStr(req.body.maritalStatus),
     birthdate: cleanStr(req.body.birthdate),

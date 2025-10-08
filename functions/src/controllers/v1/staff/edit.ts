@@ -30,7 +30,7 @@ export const userEdit = async (req: AuthenticatedRequest, res: Response) => {
       {
         surname: data.surname,
         firstname: data.firstname,
-        othername: data.othername,
+        othernames: data.othernames,
         gender: data.gender,
         maritalStatus: data.maritalStatus,
         birthdate: data.birthdate,
@@ -49,7 +49,7 @@ export const userEdit = async (req: AuthenticatedRequest, res: Response) => {
         id: data.id,
         surname: data.surname,
         firstname: data.firstname,
-        othername: data.othername,
+        othernames: data.othernames,
         gender: data.gender,
         maritalStatus: data.maritalStatus,
         birthdate: data.birthdate,
