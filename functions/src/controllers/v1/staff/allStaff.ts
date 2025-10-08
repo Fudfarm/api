@@ -22,7 +22,7 @@ export const staffList = async (req: AuthenticatedRequest, res: Response) => {
     const filter: any = {};
 
     // Default status = Active
-    if (status) filter.status = cleanStr(String(status));
+    if (status && status !== "All") filter.status = cleanStr(String(status));
 
     if (firstname)
       filter.firstname = { $regex: cleanStr(String(firstname)), $options: "i" };
@@ -67,12 +67,28 @@ export const staffList = async (req: AuthenticatedRequest, res: Response) => {
         : undefined,
     }));
 
+    // Prepare search parameters summary
+    const searchParams = {
+      firstname: firstname ? cleanStr(String(firstname)) : undefined,
+      othernames: othernames ? cleanStr(String(othernames)) : undefined,
+      surname: surname ? cleanStr(String(surname)) : undefined,
+      id: id ? cleanStr(String(id)) : undefined,
+      status,
+      createdAtStart: createdAtStart
+        ? cleanStr(String(createdAtStart))
+        : undefined,
+      createdAtEnd: createdAtEnd ? cleanStr(String(createdAtEnd)) : undefined,
+      page: pageNum,
+      limit: limitNum,
+    };
+
     return res.status(200).json({
       message: "Users retrieved successfully",
       total,
       currentPage: pageNum,
       totalPages: Math.ceil(total / limitNum),
       limit: limitNum,
+      searchParams, // ✅ include this
       data: formattedUsers,
     });
   } catch (error) {
