@@ -32,7 +32,7 @@ export const onboard = async (req: AuthenticatedRequest, res: Response) => {
       otherInfo: data.otherInfo,
       role: data.role,
       password,
-      createdBy: req.user.id,
+      createdBy: req.user?.id,
     });
 
     await newUser.save();
