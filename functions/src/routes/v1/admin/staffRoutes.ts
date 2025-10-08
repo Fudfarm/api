@@ -6,6 +6,8 @@ import { AuthGuard } from "../../../middleware/auth";
 import { userEdit } from "../../../controllers/v1/staff/edit";
 import { staffInfo } from "../../../controllers/v1/staff/get";
 import { staffList } from "../../../controllers/v1/staff/allStaff";
+import { updateUserStatus } from "../../../controllers/v1/staff/staffStatusUpdate";
+import { userSchema } from "../../../validators/staff/status";
 
 const staffRouter = Router();
 
@@ -18,6 +20,8 @@ staffRouter
   .put(validateM(onboardSchema), userEdit);
 
 staffRouter.get("/:id", staffInfo);
+staffRouter.put("/status/:id", validateM(userSchema), updateUserStatus);
+
 staffRouter.get("", staffList);
 
 export default staffRouter;
