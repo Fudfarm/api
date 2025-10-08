@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
-import { emailLayout } from "../emails/layout";
 import { config } from "../config";
+import { emailLayout } from "../emails/layout";
 
 interface EmailOptions {
   to: string;
@@ -9,7 +9,7 @@ interface EmailOptions {
   body: string;
   appName?: string;
   cc?: string | string[];
-  attachments?: { filename: string; path: string }[]; // optional files
+  attachments?: { filename: string; path: string }[];
 }
 
 export const sendEmail = async ({
@@ -39,6 +39,6 @@ export const sendEmail = async ({
     cc,
     subject,
     html,
-    attachments, // nodemailer will include attachments if provided
+    attachments, // attachments optional
   });
 };
