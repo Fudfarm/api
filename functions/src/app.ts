@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/v1/authRoutes";
+import generalRouter from "./routes/generalRoutes";
 
 const app = express();
 const apiRouter = express.Router();
@@ -31,8 +32,9 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-apiRouter.use("/", authRouter);
 
+app.use("/", generalRouter);
+apiRouter.use("/", authRouter);
 app.use("/api/v1", apiRouter);
 
 
