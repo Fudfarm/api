@@ -4,6 +4,9 @@ import { AuthenticatedRequest } from "../../../middleware/auth";
 import { cleanStr } from "../../../function/function1";
 import { IUserRole } from "../../../interface/user";
 import User from "../../../models/v1/User";
+import { sendEmail } from "../../../utils/mailer";
+import { staffOnboardingWelcomeBody } from "../../../emails/onboardWelcome";
+import { config } from "../../../config";
 
 export const onboard = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -33,6 +36,15 @@ export const onboard = async (req: AuthenticatedRequest, res: Response) => {
     });
 
     await newUser.save();
+
+    await sendEmail({
+      to: data.email,
+      subject: `Welcome to the Team | ${config.appName}`,
+      title: "Welcome Aboard",
+      body: staffOnboardingWelcomeBody({
+        name: data.surname,
+      }),
+    });
 
     return res.status(201).json({
       message: "User onboarded successfully",

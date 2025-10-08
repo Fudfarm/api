@@ -8,7 +8,7 @@ export const resetPasswordBody = ({
   link: string;
 }): string => {
   return `
-<p>Hi ${name},</p>
+<p>Hi, ${name}.</p>
 
 <p>Ignore this message if you didn't request a password reset. 
 You can either click the button below to continue in your browser, 

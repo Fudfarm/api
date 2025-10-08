@@ -3,7 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRouter from "./authRoutes";
 import generalRouter from "../generalRoutes";
-import staffRouter from "./admin/userRoutes";
+import staffRouter from "./admin/staffRoutes";
 
 const app = express();
 const apiRouter = express.Router();

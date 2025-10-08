@@ -39,8 +39,8 @@ export const resetPassword = async (req: Request, res: Response) => {
 
   await sendEmail({
     to: user.email,
-    subject: `Reset Your Password | ${config.appName}`,
-    title: "Password Reset",
+    subject: `Password Reset Successfully | ${config.appName}`,
+    title: "Password Reset Successfully",
     body: passwordResetSuccessfulBody({
       name: user.surname,
     }),
