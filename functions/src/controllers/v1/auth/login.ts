@@ -58,21 +58,17 @@ export const loginUser = async (req: Request, res: Response) => {
       }
     );
 
-    const responseData: Record<string, any> = {};
-
-    const token = handleAuthTokens(
+    const nonCookieToken = handleAuthTokens(
       res,
       device,
       accessToken,
       refreshToken,
-      config,
-      responseData,
-      "" // prefix to job application specific cookies
+      config
     );
 
     return res.status(200).json({
       message: "Login successful",
-      nonCookieToken: token, // used for non-web clients
+      nonCookieToken, // used for non-web clients
       data: {
         id: user.id,
         email: user.email,

@@ -2,6 +2,11 @@ import { Request, Response } from "express";
 import { parseDuration } from "./function2";
 import { verifyRefreshToken } from "../utils/token";
 
+interface TokenConfig {
+  accessTokenExpiry: string;
+  refreshTokenExpiry: string;
+}
+
 /**
  * Handles the setting of authentication tokens in cookies or response body.
  * This function checks if the device is a web client and sets cookies accordingly.
@@ -22,37 +27,42 @@ export function handleAuthTokens(
   device: string | undefined,
   accessToken: string,
   refreshToken: string,
-  config: {
-    accessTokenExpiry: string;
-    refreshTokenExpiry: string;
-  },
-  responseData: Record<string, any> = {},
-  tokenAppend = ""
-): Record<string, any> {
-  const isWebClient = !device || device === "web";
+  config: TokenConfig
+): Record<string, string> {
+  const deviceType = device?.toLowerCase();
+  const isWebClient = !deviceType || deviceType === "web";
 
   if (isWebClient) {
-    res.cookie(`${tokenAppend}authorization`, accessToken, {
+    // ✅ For web clients → store in cookies
+    res.cookie("authorization", accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      domain: `.${process.env.ROOT_DOMAIN}`,
+      domain: process.env.ROOT_DOMAIN
+        ? `.${process.env.ROOT_DOMAIN}`
+        : undefined,
       maxAge: parseDuration(config.accessTokenExpiry),
     });
 
-    res.cookie(`${tokenAppend}refreshToken`, refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      domain: `.${process.env.ROOT_DOMAIN}`,
+      domain: process.env.ROOT_DOMAIN
+        ? `.${process.env.ROOT_DOMAIN}`
+        : undefined,
       maxAge: parseDuration(config.refreshTokenExpiry),
     });
-  } else {
-    responseData.accessToken = accessToken;
-    responseData.refreshToken = refreshToken;
+
+    // Web clients don’t need token in body
+    return {};
   }
 
-  return responseData;
+  // ✅ For mobile / non-web clients → return tokens directly
+  return {
+    accessToken,
+    refreshToken,
+  };
 }
 
 /**
