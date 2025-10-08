@@ -2,7 +2,7 @@ import { Response } from "express";
 import bcrypt from "bcrypt";
 import { AuthenticatedRequest } from "../../../middleware/auth";
 import { handleError } from "../../../function/error";
-import User from "../../../models/v1/User";
+import User, { hashPassword } from "../../../models/v1/User";
 
 export const updatePassword = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -37,12 +37,8 @@ export const updatePassword = async (req: AuthenticatedRequest, res: Response) =
       return res.status(400).json({ message: "Old password is incorrect." });
     }
 
-    // 3️⃣ Hash new password
-    const salt = await bcrypt.genSalt(10);
-    const hashed = await bcrypt.hash(newPassword, salt);
-
     // 4️⃣ Update and save
-    user.password = hashed;
+    user.password = await hashPassword(newPassword);
     await user.save();
 
     return res.status(200).json({

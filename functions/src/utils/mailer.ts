@@ -8,7 +8,8 @@ interface EmailOptions {
   title: string;
   body: string;
   appName?: string;
-  cc?: string | string[]; // Optional single email or array of emails
+  cc?: string | string[];
+  attachments?: { filename: string; path: string }[]; // optional files
 }
 
 export const sendEmail = async ({
@@ -18,6 +19,7 @@ export const sendEmail = async ({
   body,
   appName = config.appName,
   cc,
+  attachments,
 }: EmailOptions) => {
   const transporter = nodemailer.createTransport({
     host: config.emailHost,
@@ -34,8 +36,9 @@ export const sendEmail = async ({
   await transporter.sendMail({
     from: `"${config.appName} Support" <${config.emailUsername}>`,
     to,
-    cc, // Nodemailer will ignore if undefined
+    cc,
     subject,
     html,
+    attachments, // nodemailer will include attachments if provided
   });
 };
