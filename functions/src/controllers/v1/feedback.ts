@@ -6,8 +6,12 @@ import { feedbackBotSystemEmailBody, feedbackBotUserEmailBody } from "../../emai
 
 export const feedbackBotContact = async (req: Request, res: Response) => {
   try {
+    console.log("Feedback Bot Contact Request Body:", req.body);
+    console.log("Feedback Bot Contact Request Files:", req.files);
+    console.log("All logs:", req);
     const { fullname, email, phone, body, receiveFeedback, rating, type, image1, image2 } = req.body;
 
+    return;
     // Get system contact email
     const info = await getOrCreateSystemInfo();
     const systemEmail = info.contactEmail;

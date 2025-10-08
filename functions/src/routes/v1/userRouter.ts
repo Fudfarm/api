@@ -6,7 +6,6 @@ import { updateNotification } from "../../controllers/v1/user/updateNotification
 import { contactUs } from "../../controllers/v1/contactUs";
 import { contactUsSchema } from "../../validators/contactUs";
 import { validateM } from "../../middleware/validate";
-import { feedbackSchema } from "../../validators/feedback";
 import { feedbackBotContact } from "../../controllers/v1/feedback";
 
 const userRouter = express.Router();
@@ -17,6 +16,6 @@ userRouter.put("/update-password", updatePassword);
 userRouter.put("/update-notification", updateNotification);
 
 userRouter.post("/contact-us", validateM(contactUsSchema), contactUs);
-userRouter.post("/feedback", validateM(feedbackSchema), feedbackBotContact);
+userRouter.post("/feedback", feedbackBotContact);
 
 export default userRouter;
