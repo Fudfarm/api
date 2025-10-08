@@ -12,7 +12,6 @@ interface TokenConfig {
  * This function checks if the device is a web client and sets cookies accordingly.
  * If the device is not web, it adds the tokens to the response data.
  * @param {Response} res - The Express response object
- * @param {string | undefined} device - The device type (e.g., "web", "mobile")
  * @param {string} accessToken - The generated access token
  * @param {string} refreshToken - The generated refresh token
  * @param {Object} config - Configuration object containing token expiry settings
@@ -20,49 +19,33 @@ interface TokenConfig {
  * @param {string} config.refreshTokenExpiry - Expiry duration for refresh token
  * @param {AuthResponse} responseData - The response data to be sent back
  * @param {string} [tokenAppend] - Optional prefix for cookie names
- * @return {Record<string, any>} - The updated response data with tokens if device is not web
  */
 export function handleAuthTokens(
   res: Response,
-  device: string | undefined,
   accessToken: string,
   refreshToken: string,
   config: TokenConfig
-): Record<string, string> {
-  const deviceType = device?.toLowerCase();
-  const isWebClient = !deviceType || deviceType === "web";
+) {
+  // ✅ For web clients → store in cookies
+  res.cookie("authorization", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    domain: process.env.ROOT_DOMAIN
+      ? `.${process.env.ROOT_DOMAIN}`
+      : undefined,
+    maxAge: parseDuration(config.accessTokenExpiry),
+  });
 
-  if (isWebClient) {
-    // ✅ For web clients → store in cookies
-    res.cookie("authorization", accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      domain: process.env.ROOT_DOMAIN
-        ? `.${process.env.ROOT_DOMAIN}`
-        : undefined,
-      maxAge: parseDuration(config.accessTokenExpiry),
-    });
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      domain: process.env.ROOT_DOMAIN
-        ? `.${process.env.ROOT_DOMAIN}`
-        : undefined,
-      maxAge: parseDuration(config.refreshTokenExpiry),
-    });
-
-    // Web clients don’t need token in body
-    return {};
-  }
-
-  // ✅ For mobile / non-web clients → return tokens directly
-  return {
-    accessToken,
-    refreshToken,
-  };
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    domain: process.env.ROOT_DOMAIN
+      ? `.${process.env.ROOT_DOMAIN}`
+      : undefined,
+    maxAge: parseDuration(config.refreshTokenExpiry),
+  });
 }
 
 /**

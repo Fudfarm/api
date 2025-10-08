@@ -58,13 +58,18 @@ export const loginUser = async (req: Request, res: Response) => {
       }
     );
 
-    const nonCookieToken = handleAuthTokens(
-      res,
-      device,
-      accessToken,
-      refreshToken,
-      config
-    );
+    let nonCookieToken = {};
+
+    if (!device || device.toLowerCase().trim() === "web") {
+      handleAuthTokens(
+        res,
+        accessToken,
+        refreshToken,
+        config
+      );
+    } else {
+      nonCookieToken = { accessToken, refreshToken };
+    }
 
     return res.status(200).json({
       message: "Login successful",
