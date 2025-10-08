@@ -4,6 +4,8 @@ import { maritalStatuses } from "../../function/variables";
 import { isAtLeastAge } from "../../function/function1";
 
 export const onboardSchema = z.object({
+  id: z.string().optional(),
+
   surname: z
     .string({ required_error: "Surname is required" })
     .trim()
