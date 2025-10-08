@@ -29,6 +29,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     },
     {
       password: await hashPassword(newPassword),
+      isVerified: true, // User is verified after password reset
     }
   );
 

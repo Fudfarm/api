@@ -5,6 +5,7 @@ import authRouter from "./authRoutes";
 import generalRouter from "../generalRoutes";
 import staffRouter from "./admin/staffRoutes";
 import { systemInfoRouter } from "./systeminfo";
+import { userRouter } from "./userRouter";
 
 const app = express();
 const apiRouter = express.Router();
@@ -39,6 +40,7 @@ app.use("/", generalRouter);
 apiRouter.use("/", authRouter);
 apiRouter.use("/staff", staffRouter);
 apiRouter.use("/", systemInfoRouter);
+apiRouter.use("/", userRouter);
 app.use("/api/v1", apiRouter);
 
 
