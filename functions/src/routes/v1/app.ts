@@ -4,8 +4,8 @@ import cookieParser from "cookie-parser";
 import authRouter from "./authRoutes";
 import generalRouter from "../generalRoutes";
 import staffRouter from "./admin/staffRoutes";
-import { systemInfoRouter } from "./systeminfo";
-import { userRouter } from "./userRouter";
+import systemInfoRouter from "./systeminfo";
+import userRouter from "./userRouter";
 
 const app = express();
 const apiRouter = express.Router();

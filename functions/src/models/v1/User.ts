@@ -26,6 +26,7 @@ const userSchema = new Schema<UserDocument>(
     status: { type: String, enum: USER_STATUSES, default: "Pending"},
     lastLoginAt: { type: Date, default: null},
     isVerified: { type: Boolean, default: false},
+    allowNotifications: { type: Boolean, default: true},
     createdBy: { type: String, required: true},
     createdAt: { type: Date, required: false },
     updatedAt: { type: Date, required: false },

@@ -31,6 +31,7 @@ export interface IUser {
   status?: IUserStatus;
   lastLoginAt?: Date;
   isVerified: boolean;
+  allowNotifications?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   createdBy: string;

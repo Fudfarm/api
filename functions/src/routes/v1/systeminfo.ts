@@ -5,7 +5,7 @@ import { getAboutUs, updateAboutUs } from "../../controllers/v1/system/about";
 import { getToc, updateToc } from "../../controllers/v1/system/toc";
 import { AuthGuard } from "../../middleware/auth";
 
-export const systemInfoRouter = express.Router();
+const systemInfoRouter = express.Router();
 
 // 🟩 Public routes
 systemInfoRouter.get("/contact", getContactInfo);
