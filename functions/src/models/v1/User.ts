@@ -27,6 +27,8 @@ const userSchema = new Schema<UserDocument>(
     lastLoginAt: { type: Date, default: null},
     isVerified: { type: Boolean, default: false},
     createdBy: { type: String, required: true},
+    createdAt: { type: Date, required: false },
+    updatedAt: { type: Date, required: false },
   },
   {
     timestamps: true,

@@ -1,8 +1,9 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import authRouter from "./routes/v1/authRoutes";
-import generalRouter from "./routes/generalRoutes";
+import authRouter from "./authRoutes";
+import generalRouter from "../generalRoutes";
+import staffRouter from "./admin/userRoutes";
 
 const app = express();
 const apiRouter = express.Router();
@@ -35,6 +36,7 @@ app.use(cookieParser());
 
 app.use("/", generalRouter);
 apiRouter.use("/", authRouter);
+apiRouter.use("/staff", staffRouter);
 app.use("/api/v1", apiRouter);
 
 

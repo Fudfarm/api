@@ -8,7 +8,7 @@
  */
 
 import { onRequest } from "firebase-functions/v2/https";
-import app from "./app";
+import app from "./routes/v1/app";
 import { connectToMongoDB } from "./config/db";
 
 // Start writing functions
