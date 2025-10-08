@@ -3,6 +3,9 @@ import bcrypt from "bcrypt";
 import { PasswordReset } from "../../../models/v1/PasswordReset";
 import User, { hashPassword } from "../../../models/v1/User";
 import { IsUserExist } from "../../../function/exist/User";
+import { sendEmail } from "../../../utils/mailer";
+import { config } from "../../../config";
+import { passwordResetSuccessfulBody } from "../../../emails/password-reset-successful";
 
 export const resetPassword = async (req: Request, res: Response) => {
   const { id, token, newPassword } = req.body;
@@ -30,6 +33,18 @@ export const resetPassword = async (req: Request, res: Response) => {
   );
 
   await PasswordReset.deleteMany({ userId: resetRecord.userId });
+
+  const user = await User.findOne({ _id: resetRecord.userId });
+  if (!user) return res.status(404).json({ message: "Record not found" });
+
+  await sendEmail({
+    to: user.email,
+    subject: `Reset Your Password | ${config.appName}`,
+    title: "Password Reset",
+    body: passwordResetSuccessfulBody({
+      name: user.surname,
+    }),
+  });
 
   return res.status(200).json({ message: "Password successfully reset" });
 };
