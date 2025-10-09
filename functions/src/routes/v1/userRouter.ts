@@ -16,7 +16,7 @@ userRouter.use(AuthGuard([...USER_ROLES]));
 userRouter.put("/update-password", AuthGuard([...USER_ROLES]), updatePassword);
 userRouter.put("/update-notification", AuthGuard([...USER_ROLES]), updateNotification);
 
-userRouter.post("/contact-us", validateM(contactUsSchema), AuthGuard([...USER_ROLES]), contactUs);
+userRouter.post("/contact-us", AuthGuard([...USER_ROLES]), validateM(contactUsSchema), contactUs);
 userRouter.post("/feedback", AuthGuard([...USER_ROLES]), feedbackBotContact);
 
 export default userRouter;
