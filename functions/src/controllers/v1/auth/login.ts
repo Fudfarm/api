@@ -6,6 +6,7 @@ import { getClientIp } from "../../../function/function3";
 import { RefreshToken } from "../../../models/v1/RefreshToken";
 import { handleAuthTokens } from "../../../function/cookie";
 import { config } from "../../../config";
+import { IUser } from "../../../interface/user";
 
 export const loginUser = async (req: Request, res: Response) => {
   try {
@@ -74,17 +75,29 @@ export const loginUser = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Login successful",
       nonCookieToken, // used for non-web clients
-      data: {
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-        surname: user.surname,
-        firstname: user.firstname,
-        othernames: user.othernames,
-        gender: user.gender,
-      },
+      data: await ReturnedData(user),
     });
   } catch (error) {
     return handleError(error, res, "Error logging in");
   }
 };
+
+
+/**
+ * Returns selected user data fields.
+ * @param {IUser} user - The user object.
+ * @return {object} An object containing user data.
+ */
+export async function ReturnedData(user: IUser) {
+  return {
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+    surname: user.surname,
+    firstname: user.firstname,
+    othernames: user.othernames,
+    gender: user.gender,
+    phone: user.phone || "",
+    allowNotifications: user.allowNotifications ? true : false,
+  };
+}

@@ -5,6 +5,7 @@ import { RefreshToken } from "../../../models/v1/RefreshToken";
 import User from "../../../models/v1/User";
 import { handleAuthTokens } from "../../../function/cookie";
 import { config } from "../../../config";
+import { ReturnedData } from "./login";
 
 export const refresh = async (req: Request, res: Response) => {
   try {
@@ -62,15 +63,7 @@ export const refresh = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Login successful",
       nonCookieToken, // used for non-web clients
-      data: {
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-        surname: user.surname,
-        firstname: user.firstname,
-        othernames: user.othernames,
-        gender: user.gender,
-      },
+      data: await ReturnedData(user),
     });
   } catch (err) {
     return handleError(err, res, "Error refreshing token");
