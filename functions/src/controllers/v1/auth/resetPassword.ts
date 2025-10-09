@@ -8,9 +8,18 @@ import { config } from "../../../config";
 import { passwordResetSuccessfulBody } from "../../../emails/password-reset-successful";
 
 export const resetPassword = async (req: Request, res: Response) => {
-  const { id, token, newPassword } = req.body;
+  const { id, token, email, newPassword } = req.body;
 
-  const resetRecord = await PasswordReset.findOne({ _id: id });
+  // token is madatory, either id or email is required
+  if (!token || (!id && !email)) {
+    return res
+      .status(400)
+      .json({ message: "Token invalid details" });
+  }
+
+  const resetRecord = await PasswordReset.findOne(
+    email ? { email: email.toLowerCase().trim() } : { _id: id }
+  );
   if (!resetRecord || resetRecord.expiresAt < new Date()) {
     return res.status(400).json({ message: "Token expired or invalid" });
   }
