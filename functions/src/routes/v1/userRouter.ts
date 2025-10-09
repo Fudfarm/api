@@ -10,12 +10,13 @@ import { feedbackBotContact } from "../../controllers/v1/feedback";
 
 const userRouter = express.Router();
 
+
 userRouter.use(AuthGuard([...USER_ROLES]));
 
-userRouter.put("/update-password", updatePassword);
-userRouter.put("/update-notification", updateNotification);
+userRouter.put("/update-password", AuthGuard([...USER_ROLES]), updatePassword);
+userRouter.put("/update-notification", AuthGuard([...USER_ROLES]), updateNotification);
 
-userRouter.post("/contact-us", validateM(contactUsSchema), contactUs);
-userRouter.post("/feedback", feedbackBotContact);
+userRouter.post("/contact-us", validateM(contactUsSchema), AuthGuard([...USER_ROLES]), contactUs);
+userRouter.post("/feedback", AuthGuard([...USER_ROLES]), feedbackBotContact);
 
 export default userRouter;

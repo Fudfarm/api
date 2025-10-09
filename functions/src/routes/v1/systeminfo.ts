@@ -13,12 +13,10 @@ systemInfoRouter.get("/privacy", getPrivacyPolicy);
 systemInfoRouter.get("/about", getAboutUs);
 systemInfoRouter.get("/toc", getToc);
 
-// 🟦 Admin-only updates
-systemInfoRouter.use(AuthGuard(["Admin"]));
-
-systemInfoRouter.put("/contact", updateContactInfo);
-systemInfoRouter.put("/privacy", updatePrivacyPolicy);
-systemInfoRouter.put("/about", updateAboutUs);
-systemInfoRouter.put("/toc", updateToc);
+// 🟦 Admin-only routes (guard applied per-route so they don't affect other routers)
+systemInfoRouter.put("/contact", AuthGuard(["Admin"]), updateContactInfo);
+systemInfoRouter.put("/privacy", AuthGuard(["Admin"]), updatePrivacyPolicy);
+systemInfoRouter.put("/about", AuthGuard(["Admin"]), updateAboutUs);
+systemInfoRouter.put("/toc", AuthGuard(["Admin"]), updateToc);
 
 export default systemInfoRouter;

@@ -11,17 +11,14 @@ import { userSchema } from "../../../validators/staff/status";
 
 const staffRouter = Router();
 
-// Apply auth middleware for Admins only
-staffRouter.use(AuthGuard(["Admin"]));
-
+// Admin-only section
 staffRouter
   .route("/onboard")
-  .post(validateM(onboardSchema), onboard)
-  .put(validateM(onboardSchema), userEdit);
+  .post(AuthGuard(["Admin"]), validateM(onboardSchema), onboard)
+  .put(AuthGuard(["Admin"]), validateM(onboardSchema), userEdit);
 
-staffRouter.get("/:id", staffInfo);
-staffRouter.put("/status/:id", validateM(userSchema), updateUserStatus);
-
-staffRouter.get("", staffList);
+staffRouter.get("/:id", AuthGuard(["Admin"]), staffInfo);
+staffRouter.put("/status/:id", AuthGuard(["Admin"]), validateM(userSchema), updateUserStatus);
+staffRouter.get("", AuthGuard(["Admin"]), staffList);
 
 export default staffRouter;

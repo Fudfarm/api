@@ -47,6 +47,9 @@ export const AuthGuard = (allowedRoles: string[] = []): RequestHandler => {
 
       // 6. Check if user role is allowed
       if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+        // More context for debugging: show HTTP method and path so we can
+        // identify which router / route triggered this guard instance.
+        console.log("AuthGuard denied access - method:", req.method, "path:", req.originalUrl);
         console.log("User role:", user.role);
         console.log("Allowed roles:", allowedRoles);
         console.log("email:", user.email);
