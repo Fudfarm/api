@@ -63,6 +63,7 @@ export const refresh = async (req: Request, res: Response) => {
       message: "Login successful",
       nonCookieToken, // used for non-web clients
       data: {
+        userId: user.id,
         email: user.email,
         role: user.role,
         surname: user.surname,
