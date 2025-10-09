@@ -3,13 +3,19 @@ import bcrypt from "bcrypt";
 import { PasswordReset } from "../../../models/v1/PasswordReset";
 
 export const validResetPwdToken = async (req: Request, res: Response) => {
-  const { id, token } = req.body;
+  const { id, email, token } = req.body;
 
-  if (!id || !token) {
-    return res.status(400).json({ message: "Id and token are required" });
+  // token is madatory, either id or email is required
+  if (!token || (!id && !email)) {
+    return res
+      .status(400)
+      .json({ message: "Token invalid details" });
   }
 
-  const resetRecord = await PasswordReset.findOne({ _id: id });
+  // Find record by email or id
+  const resetRecord = await PasswordReset.findOne(
+    email ? { email: email.toLowerCase().trim() } : { _id: id }
+  );
   if (!resetRecord || resetRecord.expiresAt < new Date()) {
     return res.status(400).json({ message: "Token expired or invalid" });
   }
