@@ -37,9 +37,15 @@ export const updatePassword = async (req: AuthenticatedRequest, res: Response) =
       return res.status(400).json({ message: "Old password is incorrect." });
     }
 
-    // 4️⃣ Update and save
-    user.password = await hashPassword(newPassword);
-    await user.save();
+    await User.updateOne(
+      {
+        _id: userId,
+      },
+      {
+        password: await hashPassword(newPassword),
+        isVerified: true, // User is verified after password reset
+      }
+    );
 
     return res.status(200).json({
       message: "Password updated successfully.",
