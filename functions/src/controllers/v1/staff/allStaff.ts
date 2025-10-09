@@ -78,9 +78,9 @@ export const staffList = async (req: AuthenticatedRequest, res: Response) => {
       id: id ? cleanStr(String(id)) : undefined,
       status,
       createdAtStart: createdAtStart
-        ? cleanStr(String(createdAtStart))
+        ? cleanStr(formatDateToShort(String(createdAtStart)))
         : undefined,
-      createdAtEnd: createdAtEnd ? cleanStr(String(createdAtEnd)) : undefined,
+      createdAtEnd: createdAtEnd ? cleanStr(formatDateToShort(String(createdAtEnd))) : undefined,
       page: pageNum,
       limit: limitNum,
     };
