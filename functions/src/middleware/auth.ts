@@ -47,6 +47,10 @@ export const AuthGuard = (allowedRoles: string[] = []): RequestHandler => {
 
       // 6. Check if user role is allowed
       if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+        console.log("User role:", user.role);
+        console.log("Allowed roles:", allowedRoles);
+        console.log("email:", user.email);
+        console.log("User ID:", user.id);
         return res
           .status(403)
           .json({ message: "Access forbidden. Insufficient permissions." });
