@@ -13,6 +13,7 @@ export const staffList = async (req: AuthenticatedRequest, res: Response) => {
       surname,
       id,
       status = "Active",
+      role = "All",
       createdAtStart,
       createdAtEnd,
       page = "1",
@@ -23,6 +24,7 @@ export const staffList = async (req: AuthenticatedRequest, res: Response) => {
 
     // Default status = Active
     if (status && status !== "All") filter.status = cleanStr(String(status));
+    if (role && role !== "All") filter.role = cleanStr(String(role));
 
     if (firstname)
       filter.firstname = { $regex: cleanStr(String(firstname)), $options: "i" };
@@ -69,6 +71,7 @@ export const staffList = async (req: AuthenticatedRequest, res: Response) => {
 
     // Prepare search parameters summary
     const searchParams = {
+      role: role ? cleanStr(String(role)) : undefined,
       firstname: firstname ? cleanStr(String(firstname)) : undefined,
       othernames: othernames ? cleanStr(String(othernames)) : undefined,
       surname: surname ? cleanStr(String(surname)) : undefined,
