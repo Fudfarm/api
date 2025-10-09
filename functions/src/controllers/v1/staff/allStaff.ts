@@ -38,8 +38,12 @@ export const staffList = async (req: AuthenticatedRequest, res: Response) => {
       filter.createdAt = {};
       if (createdAtStart)
         filter.createdAt.$gte = new Date(cleanStr(String(createdAtStart)));
-      if (createdAtEnd)
-        filter.createdAt.$lte = new Date(cleanStr(String(createdAtEnd)));
+      if (createdAtEnd) {
+        // Set end date to 23:59:59.999 to include all records from that day
+        const endDate = new Date(cleanStr(String(createdAtEnd)));
+        endDate.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = endDate;
+      }
     }
 
     const pageNum = Math.max(parseInt(String(page)), 1);
