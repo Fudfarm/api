@@ -21,6 +21,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
   await PasswordReset.deleteMany({ userId: user._id });
 
   const record = await PasswordReset.create({
+    email: email.toLowerCase().trim(),
     userId: user._id,
     tokenHash,
     expiresAt,
