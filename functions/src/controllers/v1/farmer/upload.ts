@@ -22,6 +22,7 @@ import {
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import { randomPassword } from "../../../function/function3";
+import { labourTypes } from "../../../models/v1/farmer/Workforce";
 
 // Security: Sanitize any database-related error messages
 const sanitizeDatabaseError = (errorMessage: string): string => {
@@ -187,8 +188,7 @@ const validateWorkforce = (workforce: any): string[] => {
   }
   // Labour type is now optional
   if (workforce.labourType &&
-    !["Permanent", "Seasonal", "Contract", "Family", "Mixed", "Other"]
-      .includes(workforce.labourType)) {
+    !labourTypes.includes(workforce.labourType)) {
     errors.push("Please select a valid labour type (Permanent, Seasonal, Contract, Family, Mixed, Other)");
   }
 

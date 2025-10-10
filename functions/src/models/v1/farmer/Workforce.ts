@@ -6,6 +6,8 @@ interface IWorkforceDoc extends Omit<IWorkforce, "_id">, Document {
   _id: string;
 }
 
+export const labourTypes = ["Permanent", "Seasonal", "Contract", "Family", "Mixed", "Other"];
+
 const workforceSchema = new Schema<IWorkforceDoc>(
   {
     _id: {
@@ -25,7 +27,7 @@ const workforceSchema = new Schema<IWorkforceDoc>(
     labourType: {
       type: String,
       required: true,
-      enum: ["Permanent", "Temporary", "Seasonal"],
+      enum: labourTypes,
     },
   },
   {
