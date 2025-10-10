@@ -1,4 +1,3 @@
-export { Biodata } from "./Biodata";
 export { Contact } from "./Contact";
 export { Address } from "./Address";
 export { Workforce } from "./Workforce";

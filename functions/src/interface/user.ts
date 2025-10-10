@@ -1,10 +1,11 @@
-export const USER_ROLES = ["Field Officer", "Admin"] as const;
+export const USER_ROLES = ["Field Officer", "Admin", "Farmer"] as const;
 export type IUserRole = (typeof USER_ROLES)[number];
 
 export const USER_STATUSES = [
   "Pending",
   "Active",
   "Inactive",
+  "Disabled",
   "Banned",
   "Resigned",
   "Retired",

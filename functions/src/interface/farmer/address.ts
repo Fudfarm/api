@@ -1,6 +1,6 @@
 export interface IAddress {
   _id?: string;
-  recordID: string; // Reference to biodata _id
+  recordID: string; // Reference to User _id
   resState: string;
   resLga: string;
   resTown: string;

@@ -2,8 +2,8 @@ import { Response } from "express";
 import { handleError } from "../../../function/error";
 import { AuthenticatedRequest } from "../../../middleware/auth";
 import { IUploadData, IUploadResponse } from "../../../interface/farmer";
+import User from "../../../models/v1/User";
 import {
-  Biodata,
   Contact,
   Address,
   Workforce,
@@ -21,9 +21,10 @@ import {
 } from "../../../models/v1/farmer";
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
+import { randomPassword } from "../../../function/function3";
 
 // Validation functions
-const validateBiodata = (biodata: any): string[] => {
+const validateUserData = (biodata: any): string[] => {
   const errors: string[] = [];
 
   if (!biodata.surname || typeof biodata.surname !== "string") {
@@ -225,7 +226,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
       for (const data of uploadData) {
         try {
           // Validate all required sections
-          const biodataErrors = validateBiodata(data.biodata);
+          const userDataErrors = validateUserData(data.biodata);
           const contactErrors = validateContact(data.contact);
           const addressErrors = validateAddress(data.address);
           const workforceErrors = validateWorkforce(data.workforce);
@@ -237,7 +238,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           const submissionStatusErrors = validateSubmissionStatus(data.submissionStatus);
 
           const allErrors = [
-            ...biodataErrors,
+            ...userDataErrors,
             ...contactErrors,
             ...addressErrors,
             ...workforceErrors,
@@ -259,29 +260,35 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             continue;
           }
 
-          // Generate UUID for biodata (this becomes the recordID for all other records)
+          // Generate UUID for user record (this becomes the recordID for all other records)
           const recordID = uuidv4();
+          const password = randomPassword(20);
 
-          // Create biodata record
-          const biodata = new Biodata({
+          // Create user record with farmer data
+          const user = new User({
             _id: recordID,
             surname: data.biodata.surname,
             firstname: data.biodata.firstname,
             othernames: data.biodata.othernames,
+            email: data.contact.email,
+            phone: data.contact.phone1,
             gender: data.biodata.gender,
-            marital: data.biodata.marital,
-            birthDate: data.biodata.birthDate,
-            families: data.biodata.families,
+            maritalStatus: data.biodata.marital,
+            birthdate: new Date(data.biodata.birthDate),
+            noOfFamily: parseInt(data.biodata.families) || 0,
             disease: data.biodata.disease,
-            others: data.biodata.others || "",
+            role: "Farmer",
+            status: "Disabled",
+            password,
+            otherInfo: data.biodata.others || "",
           });
 
-          // Create contact record
+          // Create contact record (excluding email and phone1 since they're in User)
           const contact = new Contact({
             recordID,
-            phone1: data.contact.phone1,
+            phone1: data.contact.phone1, // Keep for reference
             phone2: data.contact.phone2 || "",
-            email: data.contact.email,
+            email: data.contact.email, // Keep for reference
             website: data.contact.website || "",
             promoMeans1: data.contact.promoMeans1,
             promoMeans2: data.contact.promoMeans2,
@@ -375,7 +382,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           });
 
           // Save all main records
-          await biodata.save({ session });
+          await user.save({ session });
           await contact.save({ session });
           await address.save({ session });
           await workforce.save({ session });

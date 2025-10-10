@@ -1,6 +1,6 @@
 export interface IContact {
   _id?: string;
-  recordID: string; // Reference to biodata _id
+  recordID: string; // Reference to User _id
   phone1: string;
   phone2?: string;
   email: string;
