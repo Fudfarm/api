@@ -19,21 +19,21 @@ const otherFarmInfoSchema = new Schema<IOtherFarmInfoDoc>(
     },
     numCrops: {
       type: Number,
-      required: true,
+      // required: true,
       min: 0,
     },
     numLivestock: {
       type: Number,
-      required: true,
+      // required: true,
       min: 0,
     },
     annualHarvest: {
       type: String,
-      required: true,
+      default: "",
     },
     yearsExperience: {
       type: Number,
-      required: true,
+      // required: true,
       min: 0,
     },
     challenges: {
