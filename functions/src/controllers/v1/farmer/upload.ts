@@ -589,6 +589,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             isConsent: data.submissionStatus.isConsent,
             isImage: data.submissionStatus.isImage,
             isSubmitted: data.submissionStatus.isSubmitted,
+            submittedBy: uploadedBy,
           });
 
           // Save main records in parallel for better performance
