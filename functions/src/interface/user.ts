@@ -17,7 +17,7 @@ export type IUserStatus = (typeof USER_STATUSES)[number];
 export interface IUser {
   id: string;
   offlineID?: string;
-  email: string;
+  email?: string;
   password: string;
   birthdate: Date;
   firstname: string;

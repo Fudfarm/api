@@ -19,15 +19,12 @@ const contactSchema = new Schema<IContactDoc>(
     },
     phone1: {
       type: String,
-      required: true,
     },
     phone2: {
       type: String,
-      default: "",
     },
     email: {
       type: String,
-      required: true,
       lowercase: true,
     },
     website: {
@@ -36,11 +33,9 @@ const contactSchema = new Schema<IContactDoc>(
     },
     promoMeans1: {
       type: String,
-      required: true,
     },
     promoMeans2: {
       type: String,
-      required: true,
     },
     others: {
       type: String,

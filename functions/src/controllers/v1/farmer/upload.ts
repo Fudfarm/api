@@ -107,23 +107,22 @@ const validateUserData = (biodata: any): string[] => {
 const validateContact = (contact: any): string[] => {
   const errors: string[] = [];
 
-  if (!contact.phone1 || typeof contact.phone1 !== "string") {
-    errors.push("Please provide a valid primary phone number");
-  } else if (!isValidPhone(contact.phone1)) {
-    errors.push("Please provide a valid Nigerian phone number (e.g., 08012345678 or +2348012345678)");
-  }
-
-  if (!contact.email || typeof contact.email !== "string") {
-    errors.push("Please provide a valid email address");
-  } else if (!isValidEmail(contact.email)) {
-    errors.push("Please provide a valid email address format (e.g., user@example.com)");
+  if (contact.email && typeof contact.email === "string") {
+    if (!isValidEmail(contact.email)) {
+      errors.push("Please provide a valid email address format (e.g., user@example.com)");
+    }
   }
 
   if (!contact.promoMeans1 || typeof contact.promoMeans1 !== "string") {
     errors.push("Please specify your primary promotional preference");
   }
-  if (!contact.promoMeans2 || typeof contact.promoMeans2 !== "string") {
-    errors.push("Please specify your secondary promotional preference");
+  // if (!contact.promoMeans2 || typeof contact.promoMeans2 !== "string") {
+  //   errors.push("Please specify your secondary promotional preference");
+  // }
+
+  // Validate secondary phone if provided
+  if (contact.phone1 && contact.phone1.trim() !== "" && !isValidPhone(contact.phone1)) {
+    errors.push("Please provide a valid primary phone number or leave it empty");
   }
 
   // Validate secondary phone if provided
@@ -256,18 +255,26 @@ const validateOccupation = (occupation: any): string[] => {
 const validateOtherFarmInfo = (otherFarmInfo: any): string[] => {
   const errors: string[] = [];
 
-  if (typeof otherFarmInfo.numCrops !== "number" || otherFarmInfo.numCrops < 0) {
-    errors.push("Please provide a valid number of crops (must be 0 or greater)");
+  if (otherFarmInfo.numCrops.trim()) {
+    if (typeof otherFarmInfo.numCrops !== "number" || otherFarmInfo.numCrops < 0) {
+      errors.push("Please provide a valid number of crops (must be 0 or greater)");
+    }
   }
-  if (typeof otherFarmInfo.numLivestock !== "number" || otherFarmInfo.numLivestock < 0) {
-    errors.push("Please provide a valid number of livestock (must be 0 or greater)");
+  if (otherFarmInfo.numCrops.trim()) {
+    if (typeof otherFarmInfo.numLivestock !== "number" || otherFarmInfo.numLivestock < 0) {
+      errors.push("Please provide a valid number of livestock (must be 0 or greater)");
+    }
   }
   // Annual harvest is now optional
-  if (otherFarmInfo.annualHarvest && typeof otherFarmInfo.annualHarvest !== "string") {
-    errors.push("Please provide valid information about your annual harvest");
+  if (otherFarmInfo.annualHarvest.trim()) {
+    if (otherFarmInfo.annualHarvest && typeof otherFarmInfo.annualHarvest !== "string") {
+      errors.push("Please provide valid information about your annual harvest");
+    }
   }
-  if (typeof otherFarmInfo.yearsExperience !== "number" || otherFarmInfo.yearsExperience < 0) {
-    errors.push("Please provide valid years of farming experience (must be 0 or greater)");
+  if (otherFarmInfo.yearsExperience.trim()) {
+    if (typeof otherFarmInfo.yearsExperience !== "number" || otherFarmInfo.yearsExperience < 0) {
+      errors.push("Please provide valid years of farming experience (must be 0 or greater)");
+    }
   }
 
   return errors;
@@ -299,9 +306,9 @@ const validateSubmissionStatus = (submissionStatus: any): string[] => {
   for (const [field, label] of Object.entries(fieldLabels)) {
     const value = submissionStatus[field];
     // Convert 1/0 to true/false and validate
-    if (value === 1 || value === 0 || typeof value === "boolean") {
+    if (typeof value === "boolean" && value === true ) {
       // Valid - we'll convert this later
-      submissionStatus[field] = value === 1 ? true : value === 0 ? false : value;
+      submissionStatus[field] = value;
     } else {
       errors.push(`Please provide a valid ${label}`);
     }
@@ -480,8 +487,8 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             surname: data.biodata.surname,
             firstname: data.biodata.firstname,
             othernames: data.biodata.othernames,
-            email: data.contact.email,
-            phone: data.contact.phone1,
+            email: data.contact.email || undefined,
+            phone: data.contact.phone1 || undefined,
             gender: data.biodata.gender,
             maritalStatus: data.biodata.marital,
             birthdate: new Date(data.biodata.birthDate),
@@ -496,12 +503,12 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           // Create contact record
           const contact = new Contact({
             recordID,
-            phone1: data.contact.phone1,
+            phone1: data.contact.phone1 || "",
             phone2: data.contact.phone2 || "",
-            email: data.contact.email,
+            email: data.contact.email || "",
             website: data.contact.website || "",
             promoMeans1: data.contact.promoMeans1,
-            promoMeans2: data.contact.promoMeans2,
+            promoMeans2: data.contact.promoMeans2 || "",
             others: data.contact.others || "",
           });
 
@@ -568,10 +575,10 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           // Create other farm info record
           const otherFarmInfo = new OtherFarmInfo({
             recordID,
-            numCrops: data.otherFarmInfo.numCrops,
-            numLivestock: data.otherFarmInfo.numLivestock,
+            numCrops: data.otherFarmInfo.numCrops || 0,
+            numLivestock: data.otherFarmInfo.numLivestock || 0,
             annualHarvest: data.otherFarmInfo.annualHarvest || "",
-            yearsExperience: data.otherFarmInfo.yearsExperience,
+            yearsExperience: data.otherFarmInfo.yearsExperience || 0,
             challenges: data.otherFarmInfo.challenges || "",
           });
 
