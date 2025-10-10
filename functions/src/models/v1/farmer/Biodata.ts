@@ -47,7 +47,7 @@ const biodataSchema = new Schema<IBiodataDoc>(
     },
     disease: {
       type: String,
-      required: true,
+      default: "",
     },
     others: {
       type: String,

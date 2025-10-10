@@ -7,7 +7,7 @@ export interface IBiodata {
   marital: string;
   birthDate: string;
   families: string;
-  disease: string;
+  disease?: string;
   others?: string;
   createdAt?: Date;
   updatedAt?: Date;

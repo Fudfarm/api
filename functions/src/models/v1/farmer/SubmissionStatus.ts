@@ -33,6 +33,18 @@ const submissionStatusSchema = new Schema<ISubmissionStatusDoc>(
       type: Boolean,
       required: true,
     },
+    submittedBy: {
+      type: String,
+      required: true,
+    },
+    comments: {
+      type: String,
+      default: "",
+    },
+    approvedBy: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

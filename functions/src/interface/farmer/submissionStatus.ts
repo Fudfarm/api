@@ -5,6 +5,10 @@ export interface ISubmissionStatus {
   isConsent: boolean;
   isImage: boolean;
   isSubmitted: boolean;
+  submittedBy: string;
+  comments?: string;
+  approvedBy?: string;
+  offlineID?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -458,6 +458,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           // Create user record with farmer data
           const user = new User({
             _id: recordID,
+            offlineID: data.offlineID,
             surname: data.biodata.surname,
             firstname: data.biodata.firstname,
             othernames: data.biodata.othernames,

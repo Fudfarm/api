@@ -23,15 +23,15 @@ const verificationSchema = new Schema<IVerificationDoc>(
     },
     nin: {
       type: String,
-      required: true,
+      default: "",
     },
     businessName: {
       type: String,
-      required: true,
+      default: "",
     },
     businessNumber: {
       type: String,
-      required: true,
+      default: "",
     },
     otherType: {
       type: String,
