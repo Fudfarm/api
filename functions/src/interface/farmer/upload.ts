@@ -101,6 +101,6 @@ export interface IUploadResponse {
   failedOfflineIDs: string[];
   errors: Array<{
     offlineID: string;
-    error: string;
+    errors: string[];
   }>;
 }

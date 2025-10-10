@@ -23,33 +23,61 @@ import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import { randomPassword } from "../../../function/function3";
 
+// Helper function to validate email format
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Helper function to validate phone number format
+const isValidPhone = (phone: string): boolean => {
+  // Nigerian phone number format (starts with +234, 0, or direct number)
+  const phoneRegex = /^(\+234|0)?[789][01]\d{8}$/;
+  return phoneRegex.test(phone.replace(/\s+/g, ""));
+};
+
+// Helper function to validate BVN format
+const isValidBVN = (bvn: string): boolean => {
+  return /^\d{11}$/.test(bvn);
+};
+
+// Helper function to validate NIN format
+const isValidNIN = (nin: string): boolean => {
+  return /^\d{11}$/.test(nin);
+};
+
+// Helper function to validate account number
+const isValidAccountNumber = (accountNumber: string): boolean => {
+  return /^\d{10}$/.test(accountNumber);
+};
+
 // Validation functions
 const validateUserData = (biodata: any): string[] => {
   const errors: string[] = [];
 
   if (!biodata.surname || typeof biodata.surname !== "string") {
-    errors.push("Surname is required and must be a string");
+    errors.push("Please provide a valid surname");
   }
   if (!biodata.firstname || typeof biodata.firstname !== "string") {
-    errors.push("Firstname is required and must be a string");
+    errors.push("Please provide a valid first name");
   }
   if (!biodata.othernames || typeof biodata.othernames !== "string") {
-    errors.push("Othernames is required and must be a string");
+    errors.push("Please provide a valid other name");
   }
   if (!["Male", "Female"].includes(biodata.gender)) {
-    errors.push("Gender must be either 'Male' or 'Female'");
+    errors.push("Please select a valid gender (Male or Female)");
   }
   if (!["Single", "Married", "Divorced", "Widowed"].includes(biodata.marital)) {
-    errors.push("Marital status must be one of: Single, Married, Divorced, Widowed");
+    errors.push("Please select a valid marital status (Single, Married, Divorced, or Widowed)");
   }
   if (!biodata.birthDate || typeof biodata.birthDate !== "string") {
-    errors.push("Birth date is required and must be a string");
+    errors.push("Please provide a valid birth date");
   }
   if (!biodata.families || typeof biodata.families !== "string") {
-    errors.push("Families is required and must be a string");
+    errors.push("Please provide the number of family members");
   }
   if (!biodata.disease || typeof biodata.disease !== "string") {
-    errors.push("Disease information is required and must be a string");
+    errors.push("Please provide disease information (enter 'None' if no diseases)");
   }
 
   return errors;
@@ -59,16 +87,27 @@ const validateContact = (contact: any): string[] => {
   const errors: string[] = [];
 
   if (!contact.phone1 || typeof contact.phone1 !== "string") {
-    errors.push("Phone1 is required and must be a string");
+    errors.push("Please provide a valid primary phone number");
+  } else if (!isValidPhone(contact.phone1)) {
+    errors.push("Please provide a valid Nigerian phone number (e.g., 08012345678 or +2348012345678)");
   }
+
   if (!contact.email || typeof contact.email !== "string") {
-    errors.push("Email is required and must be a string");
+    errors.push("Please provide a valid email address");
+  } else if (!isValidEmail(contact.email)) {
+    errors.push("Please provide a valid email address format (e.g., user@example.com)");
   }
+
   if (!contact.promoMeans1 || typeof contact.promoMeans1 !== "string") {
-    errors.push("PromoMeans1 is required and must be a string");
+    errors.push("Please specify your primary promotional preference");
   }
   if (!contact.promoMeans2 || typeof contact.promoMeans2 !== "string") {
-    errors.push("PromoMeans2 is required and must be a string");
+    errors.push("Please specify your secondary promotional preference");
+  }
+
+  // Validate secondary phone if provided
+  if (contact.phone2 && contact.phone2.trim() !== "" && !isValidPhone(contact.phone2)) {
+    errors.push("Please provide a valid secondary phone number or leave it empty");
   }
 
   return errors;
@@ -77,16 +116,32 @@ const validateContact = (contact: any): string[] => {
 const validateAddress = (address: any): string[] => {
   const errors: string[] = [];
 
-  const requiredFields = [
-    "resState", "resLga", "resTown", "resDistrict", "resStreet",
-    "resLandmark", "resHouseNumber", "resHouseName", "resFloorNumber", "resFlatRoom",
-    "permState", "permLga", "permTown", "permDistrict", "permStreet",
-    "permLandmark", "permHouseNumber", "permHouseName", "permFloorNumber", "permFlatRoom",
-  ];
+  const fieldLabels = {
+    resState: "residential state",
+    resLga: "residential local government area",
+    resTown: "residential town",
+    resDistrict: "residential district",
+    resStreet: "residential street",
+    resLandmark: "residential landmark",
+    resHouseNumber: "residential house number",
+    resHouseName: "residential house name",
+    resFloorNumber: "residential floor number",
+    resFlatRoom: "residential flat/room number",
+    permState: "permanent state",
+    permLga: "permanent local government area",
+    permTown: "permanent town",
+    permDistrict: "permanent district",
+    permStreet: "permanent street",
+    permLandmark: "permanent landmark",
+    permHouseNumber: "permanent house number",
+    permHouseName: "permanent house name",
+    permFloorNumber: "permanent floor number",
+    permFlatRoom: "permanent flat/room number",
+  };
 
-  for (const field of requiredFields) {
+  for (const [field, label] of Object.entries(fieldLabels)) {
     if (!address[field] || typeof address[field] !== "string") {
-      errors.push(`${field} is required and must be a string`);
+      errors.push(`Please provide a valid ${label}`);
     }
   }
 
@@ -97,10 +152,10 @@ const validateWorkforce = (workforce: any): string[] => {
   const errors: string[] = [];
 
   if (typeof workforce.staffSize !== "number" || workforce.staffSize < 0) {
-    errors.push("Staff size must be a non-negative number");
+    errors.push("Please provide a valid staff size (must be 0 or greater)");
   }
   if (!["Permanent", "Temporary", "Seasonal"].includes(workforce.labourType)) {
-    errors.push("Labour type must be one of: Permanent, Temporary, Seasonal");
+    errors.push("Please select a valid labour type (Permanent, Temporary, or Seasonal)");
   }
 
   return errors;
@@ -110,13 +165,15 @@ const validateBank = (bank: any): string[] => {
   const errors: string[] = [];
 
   if (!bank.bank || typeof bank.bank !== "string") {
-    errors.push("Bank name is required and must be a string");
+    errors.push("Please provide a valid bank name");
   }
   if (!bank.accountName || typeof bank.accountName !== "string") {
-    errors.push("Account name is required and must be a string");
+    errors.push("Please provide a valid account holder name");
   }
   if (!bank.accountNumber || typeof bank.accountNumber !== "string") {
-    errors.push("Account number is required and must be a string");
+    errors.push("Please provide a valid account number");
+  } else if (!isValidAccountNumber(bank.accountNumber)) {
+    errors.push("Please provide a valid 10-digit account number");
   }
 
   return errors;
@@ -126,16 +183,22 @@ const validateVerification = (verification: any): string[] => {
   const errors: string[] = [];
 
   if (!verification.bvn || typeof verification.bvn !== "string") {
-    errors.push("BVN is required and must be a string");
+    errors.push("Please provide a valid Bank Verification Number (BVN)");
+  } else if (!isValidBVN(verification.bvn)) {
+    errors.push("Please provide a valid 11-digit BVN");
   }
+
   if (!verification.nin || typeof verification.nin !== "string") {
-    errors.push("NIN is required and must be a string");
+    errors.push("Please provide a valid National Identification Number (NIN)");
+  } else if (!isValidNIN(verification.nin)) {
+    errors.push("Please provide a valid 11-digit NIN");
   }
+
   if (!verification.businessName || typeof verification.businessName !== "string") {
-    errors.push("Business name is required and must be a string");
+    errors.push("Please provide a valid business name");
   }
   if (!verification.businessNumber || typeof verification.businessNumber !== "string") {
-    errors.push("Business number is required and must be a string");
+    errors.push("Please provide a valid business registration number");
   }
 
   return errors;
@@ -145,10 +208,10 @@ const validateOccupation = (occupation: any): string[] => {
   const errors: string[] = [];
 
   if (!occupation.primaryOccupation || typeof occupation.primaryOccupation !== "string") {
-    errors.push("Primary occupation is required and must be a string");
+    errors.push("Please provide your primary occupation");
   }
   if (!occupation.yearsExperience || typeof occupation.yearsExperience !== "string") {
-    errors.push("Years of experience is required and must be a string");
+    errors.push("Please provide your years of experience");
   }
 
   return errors;
@@ -158,16 +221,16 @@ const validateOtherFarmInfo = (otherFarmInfo: any): string[] => {
   const errors: string[] = [];
 
   if (typeof otherFarmInfo.numCrops !== "number" || otherFarmInfo.numCrops < 0) {
-    errors.push("Number of crops must be a non-negative number");
+    errors.push("Please provide a valid number of crops (must be 0 or greater)");
   }
   if (typeof otherFarmInfo.numLivestock !== "number" || otherFarmInfo.numLivestock < 0) {
-    errors.push("Number of livestock must be a non-negative number");
+    errors.push("Please provide a valid number of livestock (must be 0 or greater)");
   }
   if (!otherFarmInfo.annualHarvest || typeof otherFarmInfo.annualHarvest !== "string") {
-    errors.push("Annual harvest is required and must be a string");
+    errors.push("Please provide information about your annual harvest");
   }
   if (typeof otherFarmInfo.yearsExperience !== "number" || otherFarmInfo.yearsExperience < 0) {
-    errors.push("Years of experience must be a non-negative number");
+    errors.push("Please provide valid years of farming experience (must be 0 or greater)");
   }
 
   return errors;
@@ -177,10 +240,10 @@ const validateBusinessType = (businessType: any): string[] => {
   const errors: string[] = [];
 
   if (typeof businessType.isFarmer !== "boolean") {
-    errors.push("isFarmer must be a boolean");
+    errors.push("Please specify if you are a farmer (Yes or No)");
   }
   if (typeof businessType.isSeller !== "boolean") {
-    errors.push("isSeller must be a boolean");
+    errors.push("Please specify if you are a seller (Yes or No)");
   }
 
   return errors;
@@ -189,16 +252,123 @@ const validateBusinessType = (businessType: any): string[] => {
 const validateSubmissionStatus = (submissionStatus: any): string[] => {
   const errors: string[] = [];
 
-  const booleanFields = ["isUpdated", "isConsent", "isImage", "isSubmitted"];
-  for (const field of booleanFields) {
+  const fieldLabels = {
+    isUpdated: "update status",
+    isConsent: "consent status",
+    isImage: "image upload status",
+    isSubmitted: "submission status",
+  };
+
+  for (const [field, label] of Object.entries(fieldLabels)) {
     const value = submissionStatus[field];
     // Convert 1/0 to true/false and validate
     if (value === 1 || value === 0 || typeof value === "boolean") {
       // Valid - we'll convert this later
       submissionStatus[field] = value === 1 ? true : value === 0 ? false : value;
     } else {
-      errors.push(`${field} must be a boolean, 1, or 0`);
+      errors.push(`Please provide a valid ${label}`);
     }
+  }
+
+  return errors;
+};
+
+// Additional validation for array data
+const validateArrayData = (data: IUploadData): string[] => {
+  const errors: string[] = [];
+
+  // Validate animal info if provided
+  if (data.animalInfo && Array.isArray(data.animalInfo)) {
+    data.animalInfo.forEach((animal, index) => {
+      if (!animal.animal || typeof animal.animal !== "string") {
+        errors.push(`Animal ${index + 1}: Please provide a valid animal type`);
+      }
+      if (typeof animal.quantity !== "number" || animal.quantity < 0) {
+        errors.push(`Animal ${index + 1}: Please provide a valid quantity (must be 0 or greater)`);
+      }
+    });
+  }
+
+  // Validate crop info if provided
+  if (data.cropInfo && Array.isArray(data.cropInfo)) {
+    data.cropInfo.forEach((crop, index) => {
+      if (!crop.crop || typeof crop.crop !== "string") {
+        errors.push(`Crop ${index + 1}: Please provide a valid crop type`);
+      }
+      if (typeof crop.quantity !== "number" || crop.quantity < 0) {
+        errors.push(`Crop ${index + 1}: Please provide a valid quantity (must be 0 or greater)`);
+      }
+      if (!crop.unit || typeof crop.unit !== "string") {
+        errors.push(`Crop ${index + 1}: Please provide a valid unit of measurement`);
+      }
+    });
+  }
+
+  // Validate farm info if provided
+  if (data.farmInfo && Array.isArray(data.farmInfo)) {
+    data.farmInfo.forEach((farm, index) => {
+      if (!farm.state || typeof farm.state !== "string") {
+        errors.push(`Farm ${index + 1}: Please provide a valid state`);
+      }
+      if (!farm.lga || typeof farm.lga !== "string") {
+        errors.push(`Farm ${index + 1}: Please provide a valid lga`);
+      }
+      if (!farm.town || typeof farm.town !== "string") {
+        errors.push(`Farm ${index + 1}: Please provide a valid town`);
+      }
+      if (!farm.district || typeof farm.district !== "string") {
+        errors.push(`Farm ${index + 1}: Please provide a valid district`);
+      }
+      if (!farm.landmark || typeof farm.landmark !== "string") {
+        errors.push(`Farm ${index + 1}: Please provide a valid landmark`);
+      }
+
+      if (typeof farm.numCrops !== "number" || farm.numCrops < 0) {
+        errors.push(`Farm ${index + 1}: Please provide a valid number of crops`);
+      }
+      if (typeof farm.farmSize !== "number" || farm.farmSize <= 0) {
+        errors.push(`Farm ${index + 1}: Please provide a valid farm size (must be greater than 0)`);
+      }
+      if (!farm.unit || typeof farm.unit !== "string") {
+        errors.push(`Farm ${index + 1}: Please provide a valid unit for farm size`);
+      }
+    });
+  }
+
+  // Validate shop location if provided
+  if (data.shopLocation && Array.isArray(data.shopLocation)) {
+    data.shopLocation.forEach((shop, index) => {
+      if (!shop.state || typeof shop.state !== "string") {
+        errors.push(`Shop ${index + 1}: Please provide a valid state`);
+      }
+      if (!shop.lga || typeof shop.lga !== "string") {
+        errors.push(`Shop ${index + 1}: Please provide a valid lga`);
+      }
+      if (!shop.town || typeof shop.town !== "string") {
+        errors.push(`Shop ${index + 1}: Please provide a valid town`);
+      }
+      if (!shop.district || typeof shop.district !== "string") {
+        errors.push(`Shop ${index + 1}: Please provide a valid district`);
+      }
+      if (!shop.landmark || typeof shop.landmark !== "string") {
+        errors.push(`Shop ${index + 1}: Please provide a valid landmark`);
+      }
+    });
+  }
+
+  // Validate shop items if provided
+  if (data.shopItems && Array.isArray(data.shopItems)) {
+    data.shopItems.forEach((item, index) => {
+      if (!item.item || typeof item.item !== "string") {
+        errors.push(`Shop Item ${index + 1}: Please provide a valid item name`);
+      }
+      if (typeof item.quantity !== "number" || item.quantity < 0) {
+        errors.push(`Shop Item ${index + 1}: Please provide a valid quantity`);
+      }
+      if (!item.category || typeof item.category !== "string") {
+        errors.push(`Shop Item ${index + 1}: Please provide a valid category`);
+      }
+    });
   }
 
   return errors;
@@ -242,6 +412,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           const otherFarmInfoErrors = validateOtherFarmInfo(data.otherFarmInfo);
           const businessTypeErrors = validateBusinessType(data.business_type);
           const submissionStatusErrors = validateSubmissionStatus(data.submissionStatus);
+          const arrayDataErrors = validateArrayData(data);
 
           const allErrors = [
             ...userDataErrors,
@@ -254,10 +425,11 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             ...otherFarmInfoErrors,
             ...businessTypeErrors,
             ...submissionStatusErrors,
+            ...arrayDataErrors,
           ];
 
           if (allErrors.length > 0) {
-            throw new Error(allErrors.join("; "));
+            throw new Error(JSON.stringify(allErrors));
           }
 
           // Generate UUID for user record (this becomes the recordID for all other records)
@@ -487,9 +659,19 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
       } catch (error: any) {
         response.failed++;
         response.failedOfflineIDs.push(data.offlineID);
+
+        let errorMessages: string[] = [];
+        try {
+          // Try to parse as JSON array (validation errors)
+          errorMessages = JSON.parse(error.message);
+        } catch {
+          // If not JSON, treat as single error message
+          errorMessages = [error.message || "An unexpected error occurred while processing your data"];
+        }
+
         response.errors.push({
           offlineID: data.offlineID,
-          error: error.message || "Unknown error occurred",
+          errors: errorMessages,
         });
       } finally {
         await session.endSession();
