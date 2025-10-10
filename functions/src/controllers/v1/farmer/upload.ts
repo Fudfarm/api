@@ -83,8 +83,8 @@ const validateUserData = (biodata: any): string[] => {
   if (!biodata.othernames || typeof biodata.othernames !== "string") {
     errors.push("Please provide a valid other name");
   }
-  if (!["M", "F"].includes(biodata.gender)) {
-    errors.push("Please select a valid gender (Male or Female)");
+  if (!["M", "F", "O"].includes(biodata.gender)) {
+    errors.push("Please select a valid gender (M, F, or O)");
   }
   if (!["Single", "Married", "Divorced", "Widowed"].includes(biodata.marital)) {
     errors.push("Please select a valid marital status (Single, Married, Divorced, or Widowed)");
