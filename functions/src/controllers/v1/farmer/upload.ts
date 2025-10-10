@@ -95,8 +95,9 @@ const validateUserData = (biodata: any): string[] => {
   if (!biodata.families || typeof biodata.families !== "string") {
     errors.push("Please provide the number of family members");
   }
-  if (!biodata.disease || typeof biodata.disease !== "string") {
-    errors.push("Please provide disease information (enter 'None' if no diseases)");
+  // Disease is now optional
+  if (biodata.disease && typeof biodata.disease !== "string") {
+    errors.push("Please provide valid disease information");
   }
 
   return errors;
@@ -135,31 +136,42 @@ const validateContact = (contact: any): string[] => {
 const validateAddress = (address: any): string[] => {
   const errors: string[] = [];
 
-  const fieldLabels = {
+  const requiredFieldLabels = {
     resState: "residential state",
     resLga: "residential local government area",
     resTown: "residential town",
     resDistrict: "residential district",
-    resStreet: "residential street",
     resLandmark: "residential landmark",
-    resHouseNumber: "residential house number",
-    resHouseName: "residential house name",
-    resFloorNumber: "residential floor number",
-    resFlatRoom: "residential flat/room number",
     permState: "permanent state",
     permLga: "permanent local government area",
     permTown: "permanent town",
     permDistrict: "permanent district",
-    permStreet: "permanent street",
     permLandmark: "permanent landmark",
+  };
+
+  const optionalFieldLabels = {
+    resStreet: "residential street",
+    resHouseNumber: "residential house number",
+    resHouseName: "residential house name",
+    resFloorNumber: "residential floor number",
+    resFlatRoom: "residential flat/room number",
+    permStreet: "permanent street",
     permHouseNumber: "permanent house number",
     permHouseName: "permanent house name",
     permFloorNumber: "permanent floor number",
     permFlatRoom: "permanent flat/room number",
   };
 
-  for (const [field, label] of Object.entries(fieldLabels)) {
+  // Validate required fields
+  for (const [field, label] of Object.entries(requiredFieldLabels)) {
     if (!address[field] || typeof address[field] !== "string") {
+      errors.push(`Please provide a valid ${label}`);
+    }
+  }
+
+  // Validate optional fields only if provided
+  for (const [field, label] of Object.entries(optionalFieldLabels)) {
+    if (address[field] && typeof address[field] !== "string") {
       errors.push(`Please provide a valid ${label}`);
     }
   }
@@ -173,7 +185,8 @@ const validateWorkforce = (workforce: any): string[] => {
   if (typeof workforce.staffSize !== "number" || workforce.staffSize < 0) {
     errors.push("Please provide a valid staff size (must be 0 or greater)");
   }
-  if (!["Permanent", "Temporary", "Seasonal"].includes(workforce.labourType)) {
+  // Labour type is now optional
+  if (workforce.labourType && !["Permanent", "Temporary", "Seasonal"].includes(workforce.labourType)) {
     errors.push("Please select a valid labour type (Permanent, Temporary, or Seasonal)");
   }
 
@@ -207,16 +220,18 @@ const validateVerification = (verification: any): string[] => {
     errors.push("Please provide a valid 11-digit BVN");
   }
 
-  if (!verification.nin || typeof verification.nin !== "string") {
+  // NIN is now optional
+  if (verification.nin && typeof verification.nin !== "string") {
     errors.push("Please provide a valid National Identification Number (NIN)");
-  } else if (!isValidNIN(verification.nin)) {
+  } else if (verification.nin && !isValidNIN(verification.nin)) {
     errors.push("Please provide a valid 11-digit NIN");
   }
 
-  if (!verification.businessName || typeof verification.businessName !== "string") {
+  // Business name and number are now optional
+  if (verification.businessName && typeof verification.businessName !== "string") {
     errors.push("Please provide a valid business name");
   }
-  if (!verification.businessNumber || typeof verification.businessNumber !== "string") {
+  if (verification.businessNumber && typeof verification.businessNumber !== "string") {
     errors.push("Please provide a valid business registration number");
   }
 
@@ -245,8 +260,9 @@ const validateOtherFarmInfo = (otherFarmInfo: any): string[] => {
   if (typeof otherFarmInfo.numLivestock !== "number" || otherFarmInfo.numLivestock < 0) {
     errors.push("Please provide a valid number of livestock (must be 0 or greater)");
   }
-  if (!otherFarmInfo.annualHarvest || typeof otherFarmInfo.annualHarvest !== "string") {
-    errors.push("Please provide information about your annual harvest");
+  // Annual harvest is now optional
+  if (otherFarmInfo.annualHarvest && typeof otherFarmInfo.annualHarvest !== "string") {
+    errors.push("Please provide valid information about your annual harvest");
   }
   if (typeof otherFarmInfo.yearsExperience !== "number" || otherFarmInfo.yearsExperience < 0) {
     errors.push("Please provide valid years of farming experience (must be 0 or greater)");
@@ -468,7 +484,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             maritalStatus: data.biodata.marital,
             birthdate: new Date(data.biodata.birthDate),
             noOfFamily: parseInt(data.biodata.families) || 0,
-            disease: data.biodata.disease,
+            disease: data.biodata.disease || "",
             role: "Farmer",
             status: "Disabled",
             password,
@@ -516,7 +532,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           const workforce = new Workforce({
             recordID,
             staffSize: data.workforce.staffSize,
-            labourType: data.workforce.labourType,
+            labourType: data.workforce.labourType || "",
           });
 
           // Create bank record
@@ -531,9 +547,9 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           const verification = new Verification({
             recordID,
             bvn: data.verification.bvn,
-            nin: data.verification.nin,
-            businessName: data.verification.businessName,
-            businessNumber: data.verification.businessNumber,
+            nin: data.verification.nin || "",
+            businessName: data.verification.businessName || "",
+            businessNumber: data.verification.businessNumber || "",
             otherType: data.verification.otherType || "",
             otherNumber: data.verification.otherNumber || "",
             others: data.verification.others || "",
@@ -552,7 +568,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             recordID,
             numCrops: data.otherFarmInfo.numCrops,
             numLivestock: data.otherFarmInfo.numLivestock,
-            annualHarvest: data.otherFarmInfo.annualHarvest,
+            annualHarvest: data.otherFarmInfo.annualHarvest || "",
             yearsExperience: data.otherFarmInfo.yearsExperience,
             challenges: data.otherFarmInfo.challenges || "",
           });
