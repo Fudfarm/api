@@ -255,23 +255,23 @@ const validateOccupation = (occupation: any): string[] => {
 const validateOtherFarmInfo = (otherFarmInfo: any): string[] => {
   const errors: string[] = [];
 
-  if (otherFarmInfo.numCrops.trim()) {
+  if (otherFarmInfo.numCrops && otherFarmInfo.numCrops.trim()) {
     if (typeof otherFarmInfo.numCrops !== "number" || otherFarmInfo.numCrops < 0) {
       errors.push("Please provide a valid number of crops (must be 0 or greater)");
     }
   }
-  if (otherFarmInfo.numCrops.trim()) {
+  if (otherFarmInfo.numCrops && otherFarmInfo.numCrops.trim()) {
     if (typeof otherFarmInfo.numLivestock !== "number" || otherFarmInfo.numLivestock < 0) {
       errors.push("Please provide a valid number of livestock (must be 0 or greater)");
     }
   }
   // Annual harvest is now optional
-  if (otherFarmInfo.annualHarvest.trim()) {
+  if (otherFarmInfo.annualHarvest && otherFarmInfo.annualHarvest.trim()) {
     if (otherFarmInfo.annualHarvest && typeof otherFarmInfo.annualHarvest !== "string") {
       errors.push("Please provide valid information about your annual harvest");
     }
   }
-  if (otherFarmInfo.yearsExperience.trim()) {
+  if (otherFarmInfo.yearsExperience && otherFarmInfo.yearsExperience.trim()) {
     if (typeof otherFarmInfo.yearsExperience !== "number" || otherFarmInfo.yearsExperience < 0) {
       errors.push("Please provide valid years of farming experience (must be 0 or greater)");
     }
