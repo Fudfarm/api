@@ -205,8 +205,6 @@ const validateSubmissionStatus = (submissionStatus: any): string[] => {
 };
 
 export const farmersUpload = async (req: AuthenticatedRequest, res: Response) => {
-  const session = await mongoose.startSession();
-
   try {
     const uploadData: IUploadData[] = req.body;
     const uploadedBy = req.user?.id;
@@ -227,9 +225,12 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
       errors: [],
     };
 
-    await session.withTransaction(async () => {
-      for (const data of uploadData) {
-        try {
+    // Process each record individually to avoid timeout
+    for (const data of uploadData) {
+      const session = await mongoose.startSession();
+
+      try {
+        await session.withTransaction(async () => {
           // Validate all required sections
           const userDataErrors = validateUserData(data.biodata);
           const contactErrors = validateContact(data.contact);
@@ -256,13 +257,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           ];
 
           if (allErrors.length > 0) {
-            response.failed++;
-            response.failedOfflineIDs.push(data.offlineID);
-            response.errors.push({
-              offlineID: data.offlineID,
-              error: allErrors.join("; "),
-            });
-            continue;
+            throw new Error(allErrors.join("; "));
           }
 
           // Generate UUID for user record (this becomes the recordID for all other records)
@@ -288,12 +283,12 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             otherInfo: data.biodata.others || "",
           });
 
-          // Create contact record (excluding email and phone1 since they're in User)
+          // Create contact record
           const contact = new Contact({
             recordID,
-            phone1: data.contact.phone1, // Keep for reference
+            phone1: data.contact.phone1,
             phone2: data.contact.phone2 || "",
-            email: data.contact.email, // Keep for reference
+            email: data.contact.email,
             website: data.contact.website || "",
             promoMeans1: data.contact.promoMeans1,
             promoMeans2: data.contact.promoMeans2,
@@ -380,23 +375,28 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           // Create submission status record
           const submissionStatus = new SubmissionStatus({
             recordID,
-            isUpdated: data.submissionStatus.isUpdated ? true : false,
-            isConsent: data.submissionStatus.isConsent ? true : false,
-            isImage: data.submissionStatus.isImage ? true : false,
-            isSubmitted: data.submissionStatus.isSubmitted ? true : false,
+            isUpdated: data.submissionStatus.isUpdated,
+            isConsent: data.submissionStatus.isConsent,
+            isImage: data.submissionStatus.isImage,
+            isSubmitted: data.submissionStatus.isSubmitted,
           });
 
-          // Save all main records
-          await user.save({ session });
-          await contact.save({ session });
-          await address.save({ session });
-          await workforce.save({ session });
-          await bank.save({ session });
-          await verification.save({ session });
-          await occupation.save({ session });
-          await otherFarmInfo.save({ session });
-          await businessType.save({ session });
-          await submissionStatus.save({ session });
+          // Save main records in parallel for better performance
+          await Promise.all([
+            user.save({ session }),
+            contact.save({ session }),
+            address.save({ session }),
+            workforce.save({ session }),
+            bank.save({ session }),
+            verification.save({ session }),
+            occupation.save({ session }),
+            otherFarmInfo.save({ session }),
+            businessType.save({ session }),
+            submissionStatus.save({ session }),
+          ]);
+
+          // Create array records
+          const arrayPromises = [];
 
           // Create animal info records
           if (data.animalInfo && Array.isArray(data.animalInfo)) {
@@ -406,7 +406,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 animal: animal.animal,
                 quantity: animal.quantity,
               });
-              await animalInfo.save({ session });
+              arrayPromises.push(animalInfo.save({ session }));
             }
           }
 
@@ -419,7 +419,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 quantity: crop.quantity,
                 unit: crop.unit,
               });
-              await cropInfo.save({ session });
+              arrayPromises.push(cropInfo.save({ session }));
             }
           }
 
@@ -438,7 +438,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 unit: farm.unit,
                 verified: farm.verified || false,
               });
-              await farmInfo.save({ session });
+              arrayPromises.push(farmInfo.save({ session }));
             }
           }
 
@@ -455,7 +455,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 goodsCount: shop.goodsCount || 0,
                 verified: shop.verified || false,
               });
-              await shopLocationRecord.save({ session });
+              arrayPromises.push(shopLocationRecord.save({ session }));
 
               // Create shop items for this location
               if (data.shopItems && Array.isArray(data.shopItems)) {
@@ -469,24 +469,32 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                     category: item.category,
                     verified: item.verified || false,
                   });
-                  await shopItemRecord.save({ session });
+                  arrayPromises.push(shopItemRecord.save({ session }));
                 }
               }
             }
           }
 
-          response.success++;
-          response.successfulOfflineIDs.push(data.offlineID);
-        } catch (error: any) {
-          response.failed++;
-          response.failedOfflineIDs.push(data.offlineID);
-          response.errors.push({
-            offlineID: data.offlineID,
-            error: error.message || "Unknown error occurred",
-          });
-        }
+          // Save all array records in parallel
+          if (arrayPromises.length > 0) {
+            await Promise.all(arrayPromises);
+          }
+        });
+
+        // If we get here, the transaction was successful
+        response.success++;
+        response.successfulOfflineIDs.push(data.offlineID);
+      } catch (error: any) {
+        response.failed++;
+        response.failedOfflineIDs.push(data.offlineID);
+        response.errors.push({
+          offlineID: data.offlineID,
+          error: error.message || "Unknown error occurred",
+        });
+      } finally {
+        await session.endSession();
       }
-    });
+    }
 
     let msg = "";
     if (response.success === 0) {
@@ -507,7 +515,5 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
     });
   } catch (error: any) {
     return handleError(error, res, "Error uploading farmer data");
-  } finally {
-    await session.endSession();
   }
 };
