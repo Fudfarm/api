@@ -191,8 +191,13 @@ const validateSubmissionStatus = (submissionStatus: any): string[] => {
 
   const booleanFields = ["isUpdated", "isConsent", "isImage", "isSubmitted"];
   for (const field of booleanFields) {
-    if (typeof submissionStatus[field] !== "boolean") {
-      errors.push(`${field} must be a boolean`);
+    const value = submissionStatus[field];
+    // Convert 1/0 to true/false and validate
+    if (value === 1 || value === 0 || typeof value === "boolean") {
+      // Valid - we'll convert this later
+      submissionStatus[field] = value === 1 ? true : value === 0 ? false : value;
+    } else {
+      errors.push(`${field} must be a boolean, 1, or 0`);
     }
   }
 
@@ -375,10 +380,10 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           // Create submission status record
           const submissionStatus = new SubmissionStatus({
             recordID,
-            isUpdated: Boolean(data.submissionStatus.isUpdated),
-            isConsent: Boolean(data.submissionStatus.isConsent),
-            isImage: Boolean(data.submissionStatus.isImage),
-            isSubmitted: Boolean(data.submissionStatus.isSubmitted),
+            isUpdated: data.submissionStatus.isUpdated ? true : false,
+            isConsent: data.submissionStatus.isConsent ? true : false,
+            isImage: data.submissionStatus.isImage ? true : false,
+            isSubmitted: data.submissionStatus.isSubmitted ? true : false,
           });
 
           // Save all main records
