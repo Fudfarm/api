@@ -23,6 +23,25 @@ import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import { randomPassword } from "../../../function/function3";
 
+// Security: Sanitize any database-related error messages
+const sanitizeDatabaseError = (errorMessage: string): string => {
+  return errorMessage
+    // Remove collection/database names
+    .replace(/collection:\s*[\w.-]+/gi, "")
+    .replace(/database\s+[\w.-]+/gi, "")
+    .replace(/index:\s*[\w.-]+\.\$[\w_]+/gi, "")
+    .replace(/dup\s+key:\s*\{[^}]+\}/gi, "")
+    // Remove model names and paths
+    .replace(/model\s+[`"']?[\w-]+[`"']?/gi, "[REDACTED]")
+    .replace(/Model\s+[`"']?[\w-]+[`"']?/gi, "[REDACTED]")
+    // Remove MongoDB/Mongoose references
+    .replace(/mongodb[^\s]*/gi, "")
+    .replace(/mongoose[^\s]*/gi, "")
+    // Clean up multiple spaces
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
 // Helper function to validate email format
 const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -665,8 +684,37 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           // Try to parse as JSON array (validation errors)
           errorMessages = JSON.parse(error.message);
         } catch {
-          // If not JSON, treat as single error message
-          errorMessages = [error.message || "An unexpected error occurred while processing your data"];
+          // If not JSON, sanitize database-related errors
+          let sanitizedMessage = error.message || "An unexpected error occurred while processing your data";
+
+          // Sanitize MongoDB/Mongoose specific error information
+          if (sanitizedMessage.includes("E11000") || sanitizedMessage.includes("duplicate key")) {
+            if (sanitizedMessage.includes("email")) {
+              sanitizedMessage = "This email address is already registered in the system";
+            } else if (sanitizedMessage.includes("phone") || sanitizedMessage.includes("phone1")) {
+              sanitizedMessage = "This phone number is already registered in the system";
+            } else if (sanitizedMessage.includes("bvn")) {
+              sanitizedMessage = "This BVN is already registered in the system";
+            } else if (sanitizedMessage.includes("nin")) {
+              sanitizedMessage = "This NIN is already registered in the system";
+            } else {
+              sanitizedMessage = "This farmer record already exists in the system";
+            }
+          } else if (sanitizedMessage.includes("ValidationError")) {
+            sanitizedMessage = "The farmer data provided does not meet the required format";
+          } else if (sanitizedMessage.includes("CastError")) {
+            sanitizedMessage = "Invalid data format provided for farmer information";
+          } else if (sanitizedMessage.includes("timeout") || sanitizedMessage.includes("MongoTimeoutError")) {
+            sanitizedMessage = "Request timed out while saving farmer data. Please try again";
+          } else if (sanitizedMessage.includes("connection") ||
+                     sanitizedMessage.includes("MongoNetworkError")) {
+            sanitizedMessage = "Database connection error. Please try again later";
+          }
+
+          // Remove any database/collection names or technical details
+          sanitizedMessage = sanitizeDatabaseError(sanitizedMessage);
+
+          errorMessages = [sanitizedMessage];
         }
 
         response.errors.push({
