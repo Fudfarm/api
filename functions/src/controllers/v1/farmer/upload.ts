@@ -83,7 +83,7 @@ const validateUserData = (biodata: any): string[] => {
   if (!biodata.othernames || typeof biodata.othernames !== "string") {
     errors.push("Please provide a valid other name");
   }
-  if (!["Male", "Female"].includes(biodata.gender)) {
+  if (!["M", "F"].includes(biodata.gender)) {
     errors.push("Please select a valid gender (Male or Female)");
   }
   if (!["Single", "Married", "Divorced", "Widowed"].includes(biodata.marital)) {
@@ -186,8 +186,10 @@ const validateWorkforce = (workforce: any): string[] => {
     errors.push("Please provide a valid staff size (must be 0 or greater)");
   }
   // Labour type is now optional
-  if (workforce.labourType && !["Permanent", "Temporary", "Seasonal"].includes(workforce.labourType)) {
-    errors.push("Please select a valid labour type (Permanent, Temporary, or Seasonal)");
+  if (workforce.labourType &&
+    !["Permanent", "Seasonal", "Contract", "Family", "Mixed", "Other"]
+      .includes(workforce.labourType)) {
+    errors.push("Please select a valid labour type (Permanent, Seasonal, Contract, Family, Mixed, Other)");
   }
 
   return errors;
