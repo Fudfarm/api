@@ -25,7 +25,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const accessToken = generateAccessToken({
       _id: user.id as string,
-      email: user.email,
+      email: email.toLowerCase().trim(),
     });
     const refreshToken = generateRefreshToken({ _id: String(user.id) });
     const tokenHash = hashToken(refreshToken);

@@ -40,7 +40,7 @@ export const refresh = async (req: Request, res: Response) => {
 
     const newAccessToken = generateAccessToken({
       _id: user._id as string,
-      email: user.email,
+      email: user.email || "",
     });
 
     if (user.status !== "Active") {

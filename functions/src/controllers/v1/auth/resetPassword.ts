@@ -48,7 +48,7 @@ export const resetPassword = async (req: Request, res: Response) => {
   if (!user) return res.status(404).json({ message: "Record not found" });
 
   await sendEmail({
-    to: user.email,
+    to: user.email || "",
     subject: `Password Reset Successfully | ${config.appName}`,
     title: "Password Reset Successfully",
     body: passwordResetSuccessfulBody({

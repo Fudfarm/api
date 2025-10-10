@@ -60,7 +60,7 @@ export const AuthGuard = (allowedRoles: string[] = []): RequestHandler => {
       }
 
       // 7. Attach user to request
-      req.user = { id: decoded.id, role: user.role, email: user.email };
+      req.user = { id: decoded.id, role: user.role, email: user.email || "" };
 
       next();
       return;
