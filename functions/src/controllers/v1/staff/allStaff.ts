@@ -53,7 +53,8 @@ export const staffList = async (req: AuthenticatedRequest, res: Response) => {
     // Fetch users with filter
     const [users, total] = await Promise.all([
       User.find(filter)
-        .select("firstname othernames surname phone role status createdAt")
+        .select("firstname othernames surname phone role status email gender " +
+          " maritalStatus birthdate createdAt")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limitNum),
@@ -66,6 +67,12 @@ export const staffList = async (req: AuthenticatedRequest, res: Response) => {
       othernames: user.othernames,
       surname: user.surname,
       phone: user.phone,
+      email: user.email,
+      gender: user.gender,
+      maritalStatus: user.maritalStatus,
+      birthdate: user.birthdate
+        ? formatDateToShort(user.birthdate.toISOString())
+        : undefined,
       role: user.role,
       status: user.status,
       createdAt: user.createdAt
