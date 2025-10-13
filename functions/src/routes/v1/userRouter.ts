@@ -7,6 +7,7 @@ import { contactUs } from "../../controllers/v1/contactUs";
 import { contactUsSchema } from "../../validators/contactUs";
 import { validateM } from "../../middleware/validate";
 import { feedbackBotContact } from "../../controllers/v1/feedback";
+import { getProfile } from "../../controllers/v1/user/getProfile";
 
 const userRouter = express.Router();
 
@@ -15,6 +16,7 @@ userRouter.use(AuthGuard([...USER_ROLES]));
 
 userRouter.put("/update-password", AuthGuard([...USER_ROLES]), updatePassword);
 userRouter.put("/update-notification", AuthGuard([...USER_ROLES]), updateNotification);
+userRouter.get("/profile", AuthGuard([...USER_ROLES]), getProfile);
 
 userRouter.post("/contact-us", AuthGuard([...USER_ROLES]), validateM(contactUsSchema), contactUs);
 userRouter.post("/feedback", AuthGuard([...USER_ROLES]), feedbackBotContact);
