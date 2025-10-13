@@ -16,6 +16,11 @@ export const staffList = async (req: AuthenticatedRequest, res: Response) => {
       role = "All",
       createdAtStart,
       createdAtEnd,
+      birthdateFrom,
+      birthdateTo,
+      maritalStatus,
+      gender,
+      email,
       page = "1",
       limit = "50",
     } = req.query;
@@ -44,6 +49,26 @@ export const staffList = async (req: AuthenticatedRequest, res: Response) => {
         endDate.setHours(23, 59, 59, 999);
         filter.createdAt.$lte = endDate;
       }
+    }
+    if (birthdateFrom || birthdateTo) {
+      filter.birthdate = {};
+      if (birthdateFrom)
+        filter.birthdate.$gte = new Date(cleanStr(String(birthdateFrom)));
+      if (birthdateTo) {
+        // Set end date to 23:59:59.999 to include all records from that day
+        const endDate = new Date(cleanStr(String(birthdateTo)));
+        endDate.setHours(23, 59, 59, 999);
+        filter.birthdate.$lte = endDate;
+      }
+    }
+    if (gender && gender !== "All") {
+      filter.gender = cleanStr(String(gender));
+    }
+    if (maritalStatus && maritalStatus !== "All") {
+      filter.maritalStatus = cleanStr(String(maritalStatus));
+    }
+    if (email) {
+      filter.email = { $regex: cleanStr(String(email)), $options: "i" };
     }
 
     const pageNum = Math.max(parseInt(String(page)), 1);
