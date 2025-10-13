@@ -8,6 +8,7 @@ import { contactUsSchema } from "../../validators/contactUs";
 import { validateM } from "../../middleware/validate";
 import { feedbackBotContact } from "../../controllers/v1/feedback";
 import { getProfile } from "../../controllers/v1/user/getProfile";
+import { getDevices } from "../../controllers/v1/auth/devices";
 
 const userRouter = express.Router();
 
@@ -20,5 +21,6 @@ userRouter.get("/profile", AuthGuard([...USER_ROLES]), getProfile);
 
 userRouter.post("/contact-us", AuthGuard([...USER_ROLES]), validateM(contactUsSchema), contactUs);
 userRouter.post("/feedback", AuthGuard([...USER_ROLES]), feedbackBotContact);
+userRouter.post("/devices", AuthGuard([...USER_ROLES]), getDevices);
 
 export default userRouter;
