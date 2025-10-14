@@ -12,7 +12,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
       othernames,
       surname,
       id,
-      status = "Active",
+      status = "All",
       createdAtStart,
       createdAtEnd,
       birthdateFrom,
