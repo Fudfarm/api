@@ -29,7 +29,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
 
     // Default status = Active
     if (status && status !== "All") filter.status = cleanStr(String(status));
-    // filter.role = cleanStr(String("Farmer")); // Only farmers
+    filter.role = cleanStr(String("Farmer")); // Only farmers
 
     if (firstname)
       filter.firstname = { $regex: cleanStr(String(firstname)), $options: "i" };
