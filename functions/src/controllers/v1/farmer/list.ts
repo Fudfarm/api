@@ -79,7 +79,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
     const pipeline: any[] = [];
 
     // Initial match from user filters
-    // pipeline.push({ $match: filter });
+    pipeline.push({ $match: filter });
 
     // Lookup business type document by recordID (user._id)
     pipeline.push({
