@@ -27,8 +27,12 @@ export const getFarmerBiodata = async (req: AuthenticatedRequest, res: Response)
         role: biodata.role,
         status: biodata.status,
         createdBy: await getCreatedBy({ createdBy: biodata.createdBy }),
-        createdAt: biodata.createdAt ? formatDateToShort(biodata.createdAt.toISOString()) : undefined,
-        updatedAt: biodata.updatedAt ? formatDateToShort(biodata.updatedAt.toISOString()) : undefined,
+        createdAt: biodata.createdAt
+          ? formatDateToShort(biodata.createdAt.toISOString(), { includeTime: true })
+          : undefined,
+        updatedAt: biodata.updatedAt
+          ? formatDateToShort(biodata.updatedAt.toISOString(), { includeTime: true })
+          : undefined,
       },
     });
   } catch (error) {
