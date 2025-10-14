@@ -79,7 +79,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
     const pipeline: any[] = [];
 
     // Initial match from user filters
-    pipeline.push({ $match: filter });
+    // pipeline.push({ $match: filter });
 
     // Lookup business type document by recordID (user._id)
     pipeline.push({
@@ -173,7 +173,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
     };
 
     return res.status(200).json({
-      message: "Users retrieved successfully",
+      message: "Farmers retrieved successfully",
       total,
       currentPage: pageNum,
       totalPages: Math.ceil(total / limitNum),
