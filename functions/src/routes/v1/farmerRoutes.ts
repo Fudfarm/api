@@ -38,6 +38,7 @@ details.get("/crop-list/:id", getFarmerHarvestPerCropList);
 details.get("/animal-list/:id", getFarmerAnimalList);
 details.get("/other-farm-info/:id", getFarmerOtherFarmInfo);
 details.get("/work-force/:id", getFarmerWorkForce);
+details.get("/submission/:id", getFarmerWorkForce);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 

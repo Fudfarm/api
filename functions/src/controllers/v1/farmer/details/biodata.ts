@@ -27,7 +27,7 @@ export const getFarmerBiodata = async (req: AuthenticatedRequest, res: Response)
         disease: biodata.disease || undefined,
         role: biodata.role,
         status: biodata.status,
-        createdBy: await getCreatedBy({ createdBy: biodata.createdBy }),
+        createdBy: await miniUserInfo({ userId: biodata.createdBy }),
         createdAt: biodata.createdAt
           ? formatDateToShort(biodata.createdAt.toISOString(), { includeTime: true })
           : undefined,
@@ -43,48 +43,34 @@ export const getFarmerBiodata = async (req: AuthenticatedRequest, res: Response)
 };
 
 /**
- * Get the user who created a given user (createdBy lookup).
- * @param {string} userId - The ID of the user whose creator is to be fetched
- * @param {string} createdBy - (Optional) Directly provide the createdBy ID to fetch the creator
- * @return {object} The createdBy information of the user
+ * Get a mini user information.
+ * @param {string} userId - The ID of the user whose information is to be fetched
+ * @return {object} The mini user information
  */
-export const getCreatedBy = async ({
+export const miniUserInfo = async ({
   userId,
-  createdBy,
 }: {
   userId?: string;
-  createdBy?: string;
 }) => {
   try {
-    if (!userId && !createdBy)
+    if (!userId)
       return null;
 
-    let creator;
+    const user = await User.findById(userId)
+      .select("id surname firstname othernames email phone status")
+      .lean();
 
-    if (createdBy) {
-      creator = await User.findById(createdBy)
-        .select("id surname firstname othernames email phone status")
-        .lean();
-    } else {
-      const user = await User.findById(userId).select("createdBy").lean();
-      if (!user) return null;
-
-      creator = await User.findById(user.createdBy)
-        .select("id surname firstname othernames email phone status")
-        .lean();
-    }
-
-    if (!creator)
+    if (!user)
       return null;
 
     return {
-      id: creator._id,
-      surname: creator.surname,
-      firstname: creator.firstname,
-      othernames: creator.othernames,
-      email: creator.email,
-      phone: creator.phone,
-      status: creator.status,
+      id: user._id,
+      surname: user.surname,
+      firstname: user.firstname,
+      othernames: user.othernames,
+      email: user.email,
+      phone: user.phone,
+      status: user.status,
     };
   } catch (error) {
     return null;
