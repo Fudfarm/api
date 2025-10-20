@@ -4,6 +4,7 @@ import { getFarmerBiodata } from "../../controllers/v1/farmer/details/biodata";
 import { getFarmerBusinessType } from "../../controllers/v1/farmer/details/business_type";
 import { getFarmerContact } from "../../controllers/v1/farmer/details/contact";
 import { getFarmerFarmInfoList } from "../../controllers/v1/farmer/details/farm_info_list";
+import { getFarmerHarvestPerCropList } from "../../controllers/v1/farmer/details/harvest_per_crop";
 import { getFarmerOccupation } from "../../controllers/v1/farmer/details/occupation";
 import { getFarmerShopItemList } from "../../controllers/v1/farmer/details/shop_items";
 import { getFarmerShopLocationList } from "../../controllers/v1/farmer/details/shop_location";
@@ -30,6 +31,7 @@ details.use("/business-type/:id", getFarmerBusinessType);
 details.use("/shop-location/:id", getFarmerShopLocationList);
 details.use("/shop-items/:shopId", getFarmerShopItemList);
 details.use("/farm-info-list/:id", getFarmerFarmInfoList);
+details.use("/harvest-per-crop/:id", getFarmerHarvestPerCropList);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 
