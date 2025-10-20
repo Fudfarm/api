@@ -35,7 +35,7 @@ export const getFarmerFarmInfoList = async (req: AuthenticatedRequest, res: Resp
             ? formatDateToShort(farm.updatedAt.toISOString(), { includeTime: true })
             : undefined,
         })),
-        businessType: await farmerBusinessType(id), // determin buttons shown in frontend
+        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
       },
     });
   } catch (error) {

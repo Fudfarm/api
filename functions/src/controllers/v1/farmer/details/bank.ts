@@ -1,7 +1,7 @@
 import { Response } from "express";
-import { AuthenticatedRequest } from "../../../../middleware/auth";
-import { formatDateToShort } from "../../../../function/function3";
 import { handleError } from "../../../../function/error";
+import { formatDateToShort } from "../../../../function/function3";
+import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { Bank } from "../../../../models/v1/farmer";
 import { farmerBusinessType } from "./business_type";
 
@@ -26,7 +26,7 @@ export const getFarmerBank = async (req: AuthenticatedRequest, res: Response) =>
         updatedAt: bank.updatedAt
           ? formatDateToShort(bank.updatedAt.toISOString(), { includeTime: true })
           : undefined,
-        businessType: await farmerBusinessType(id), // determin buttons shown in frontend
+        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
       },
     });
   } catch (error) {

@@ -1,8 +1,8 @@
 import { Response } from "express";
+import { handleError } from "../../../../function/error";
+import { formatDateToShort } from "../../../../function/function3";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import User from "../../../../models/v1/User";
-import { formatDateToShort } from "../../../../function/function3";
-import { handleError } from "../../../../function/error";
 import { farmerBusinessType } from "./business_type";
 
 export const getFarmerBiodata = async (req: AuthenticatedRequest, res: Response) => {
@@ -34,7 +34,7 @@ export const getFarmerBiodata = async (req: AuthenticatedRequest, res: Response)
         updatedAt: biodata.updatedAt
           ? formatDateToShort(biodata.updatedAt.toISOString(), { includeTime: true })
           : undefined,
-        businessType: await farmerBusinessType(id), // determin buttons shown in frontend
+        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
       },
     });
   } catch (error) {

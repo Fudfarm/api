@@ -1,5 +1,6 @@
 import express from "express";
 import { getFarmerAddress } from "../../controllers/v1/farmer/details/address";
+import { getFarmerAnimalList } from "../../controllers/v1/farmer/details/animal_list";
 import { getFarmerBiodata } from "../../controllers/v1/farmer/details/biodata";
 import { getFarmerBusinessType } from "../../controllers/v1/farmer/details/business_type";
 import { getFarmerContact } from "../../controllers/v1/farmer/details/contact";
@@ -32,6 +33,7 @@ details.use("/shop-list/:id", getFarmerShopLocationList);
 details.use("/shop-items/:shopId", getFarmerShopItemList);
 details.use("/farm-list/:id", getFarmerFarmInfoList);
 details.use("/crop-list/:id", getFarmerHarvestPerCropList);
+details.use("/animal-list/:id", getFarmerAnimalList);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 

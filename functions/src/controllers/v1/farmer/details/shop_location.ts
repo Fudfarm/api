@@ -33,7 +33,7 @@ export const getFarmerShopLocationList = async (req: AuthenticatedRequest, res: 
             ? formatDateToShort(location.updatedAt.toISOString(), { includeTime: true })
             : undefined,
         })),
-        businessType: await farmerBusinessType(id), // determin buttons shown in frontend
+        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
       },
     });
   } catch (error) {

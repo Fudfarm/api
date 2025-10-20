@@ -29,7 +29,7 @@ export const getFarmerHarvestPerCropList = async (req: AuthenticatedRequest, res
             ? formatDateToShort(crop.updatedAt.toISOString(), { includeTime: true })
             : undefined,
         })),
-        businessType: await farmerBusinessType(id), // determin buttons shown in frontend
+        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
       },
     });
   } catch (error) {
