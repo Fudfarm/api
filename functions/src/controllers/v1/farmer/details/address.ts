@@ -45,6 +45,6 @@ export const getFarmerAddress = async (req: AuthenticatedRequest, res: Response)
       },
     });
   } catch (error) {
-    return handleError(error, res, "Error retrieving verification");
+    return handleError(error, res, "Error retrieving address");
   }
 };

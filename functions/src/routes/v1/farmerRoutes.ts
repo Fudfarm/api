@@ -20,6 +20,7 @@ details.use("/contact/:id", getFarmerContact);
 details.use("/verification/:id", getFarmerVerification);
 details.use("/address/:id", getFarmerAddress);
 details.use("/bank/:id", getFarmerAddress);
+details.use("/occupation/:id", getFarmerAddress);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 
