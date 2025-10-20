@@ -9,6 +9,7 @@ import { getFarmerVerification } from "../../controllers/v1/farmer/details/verif
 import { getFarmerAddress } from "../../controllers/v1/farmer/details/address";
 import { getFarmerOccupation } from "../../controllers/v1/farmer/details/occupation";
 import { getFarmerBusinessType } from "../../controllers/v1/farmer/details/business_type";
+import { getFarmerShopLocation } from "../../controllers/v1/farmer/details/shop_location";
 
 const farmerRouter = express.Router();
 
@@ -24,6 +25,7 @@ details.use("/address/:id", getFarmerAddress);
 details.use("/bank/:id", getFarmerAddress);
 details.use("/occupation/:id", getFarmerOccupation);
 details.use("/business-type/:id", getFarmerBusinessType);
+details.use("/shop-location/:id", getFarmerShopLocation);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 
