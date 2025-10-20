@@ -19,6 +19,7 @@ details.use("/biodata/:id", getFarmerBiodata);
 details.use("/contact/:id", getFarmerContact);
 details.use("/verification/:id", getFarmerVerification);
 details.use("/address/:id", getFarmerAddress);
+details.use("/bank/:id", getFarmerAddress);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 
