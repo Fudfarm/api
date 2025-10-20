@@ -1,6 +1,7 @@
 import express from "express";
 import { getFarmerAddress } from "../../controllers/v1/farmer/details/address";
 import { getFarmerAnimalList } from "../../controllers/v1/farmer/details/animal_list";
+import { getFarmerBank } from "../../controllers/v1/farmer/details/bank";
 import { getFarmerBiodata } from "../../controllers/v1/farmer/details/biodata";
 import { getFarmerBusinessType } from "../../controllers/v1/farmer/details/business_type";
 import { getFarmerContact } from "../../controllers/v1/farmer/details/contact";
@@ -28,7 +29,7 @@ details.get("/biodata/:id", getFarmerBiodata);
 details.get("/contact/:id", getFarmerContact);
 details.get("/verification/:id", getFarmerVerification);
 details.get("/address/:id", getFarmerAddress);
-details.get("/bank/:id", getFarmerAddress);
+details.get("/bank/:id", getFarmerBank);
 details.get("/occupation/:id", getFarmerOccupation);
 details.get("/business-type/:id", getFarmerBusinessType);
 details.get("/shop-list/:id", getFarmerShopLocationList);
