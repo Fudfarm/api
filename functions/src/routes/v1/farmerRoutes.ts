@@ -7,6 +7,8 @@ import { getFarmerBiodata } from "../../controllers/v1/farmer/details/biodata";
 import { getFarmerContact } from "../../controllers/v1/farmer/details/contact";
 import { getFarmerVerification } from "../../controllers/v1/farmer/details/verification";
 import { getFarmerAddress } from "../../controllers/v1/farmer/details/address";
+import { getFarmerOccupation } from "../../controllers/v1/farmer/details/occupation";
+import { getFarmerBusinessType } from "../../controllers/v1/farmer/details/business_type";
 
 const farmerRouter = express.Router();
 
@@ -20,7 +22,8 @@ details.use("/contact/:id", getFarmerContact);
 details.use("/verification/:id", getFarmerVerification);
 details.use("/address/:id", getFarmerAddress);
 details.use("/bank/:id", getFarmerAddress);
-details.use("/occupation/:id", getFarmerAddress);
+details.use("/occupation/:id", getFarmerOccupation);
+details.use("/business-type/:id", getFarmerBusinessType);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 

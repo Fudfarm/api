@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { formatDateToShort } from "../../../../function/function3";
 import { handleError } from "../../../../function/error";
 import { Occupation } from "../../../../models/v1/farmer";
+import { farmerBusinessType } from "./business_type";
 
 export const getFarmerOccupation = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -25,6 +26,7 @@ export const getFarmerOccupation = async (req: AuthenticatedRequest, res: Respon
         updatedAt: occupation.updatedAt
           ? formatDateToShort(occupation.updatedAt.toISOString(), { includeTime: true })
           : undefined,
+        businessType: await farmerBusinessType(id), // determin buttons shown in frontend
       },
     });
   } catch (error) {
