@@ -23,7 +23,7 @@ const farmerRouter = express.Router();
 farmerRouter.post("/upload", AuthGuard(["Field Officer"]), farmersUpload);
 farmerRouter.get("/list", AuthGuard([...USER_ROLES]), farmersList);
 
-// route grouping with details as base path /api/v1/farmer
+// route grouping with details as base path /api/v1/ farmer
 const details = express.Router();
 details.get("/biodata/:id", getFarmerBiodata);
 details.get("/contact/:id", getFarmerContact);
