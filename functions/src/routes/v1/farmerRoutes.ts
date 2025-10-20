@@ -5,7 +5,7 @@ import { getFarmerBusinessType } from "../../controllers/v1/farmer/details/busin
 import { getFarmerContact } from "../../controllers/v1/farmer/details/contact";
 import { getFarmerFarmInfoList } from "../../controllers/v1/farmer/details/farm_info_list";
 import { getFarmerOccupation } from "../../controllers/v1/farmer/details/occupation";
-import { getFarmerShopLocation } from "../../controllers/v1/farmer/details/shop_location";
+import { getFarmerShopLocationList } from "../../controllers/v1/farmer/details/shop_location";
 import { getFarmerVerification } from "../../controllers/v1/farmer/details/verification";
 import { farmersList } from "../../controllers/v1/farmer/list";
 import { farmersUpload } from "../../controllers/v1/farmer/upload";
@@ -26,7 +26,7 @@ details.use("/address/:id", getFarmerAddress);
 details.use("/bank/:id", getFarmerAddress);
 details.use("/occupation/:id", getFarmerOccupation);
 details.use("/business-type/:id", getFarmerBusinessType);
-details.use("/shop-location/:id", getFarmerShopLocation);
+details.use("/shop-location/:id", getFarmerShopLocationList);
 details.use("/farm-info-list/:id", getFarmerFarmInfoList);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
