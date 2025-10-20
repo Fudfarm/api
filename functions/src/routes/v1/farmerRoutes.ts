@@ -1,15 +1,16 @@
 import express from "express";
-import { AuthGuard } from "../../middleware/auth";
+import { getFarmerAddress } from "../../controllers/v1/farmer/details/address";
+import { getFarmerBiodata } from "../../controllers/v1/farmer/details/biodata";
+import { getFarmerBusinessType } from "../../controllers/v1/farmer/details/business_type";
+import { getFarmerContact } from "../../controllers/v1/farmer/details/contact";
+import { getFarmerFarmInfoList } from "../../controllers/v1/farmer/details/farm_info_list";
+import { getFarmerOccupation } from "../../controllers/v1/farmer/details/occupation";
+import { getFarmerShopLocation } from "../../controllers/v1/farmer/details/shop_location";
+import { getFarmerVerification } from "../../controllers/v1/farmer/details/verification";
+import { farmersList } from "../../controllers/v1/farmer/list";
 import { farmersUpload } from "../../controllers/v1/farmer/upload";
 import { USER_ROLES } from "../../interface/user";
-import { farmersList } from "../../controllers/v1/farmer/list";
-import { getFarmerBiodata } from "../../controllers/v1/farmer/details/biodata";
-import { getFarmerContact } from "../../controllers/v1/farmer/details/contact";
-import { getFarmerVerification } from "../../controllers/v1/farmer/details/verification";
-import { getFarmerAddress } from "../../controllers/v1/farmer/details/address";
-import { getFarmerOccupation } from "../../controllers/v1/farmer/details/occupation";
-import { getFarmerBusinessType } from "../../controllers/v1/farmer/details/business_type";
-import { getFarmerShopLocation } from "../../controllers/v1/farmer/details/shop_location";
+import { AuthGuard } from "../../middleware/auth";
 
 const farmerRouter = express.Router();
 
@@ -26,6 +27,7 @@ details.use("/bank/:id", getFarmerAddress);
 details.use("/occupation/:id", getFarmerOccupation);
 details.use("/business-type/:id", getFarmerBusinessType);
 details.use("/shop-location/:id", getFarmerShopLocation);
+details.use("/farm-info-list/:id", getFarmerFarmInfoList);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 
