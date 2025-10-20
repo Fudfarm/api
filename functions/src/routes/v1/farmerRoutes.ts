@@ -11,6 +11,7 @@ import { getFarmerOtherFarmInfo } from "../../controllers/v1/farmer/details/othe
 import { getFarmerShopItemList } from "../../controllers/v1/farmer/details/shop_items";
 import { getFarmerShopLocationList } from "../../controllers/v1/farmer/details/shop_location";
 import { getFarmerVerification } from "../../controllers/v1/farmer/details/verification";
+import { getFarmerWorkForce } from "../../controllers/v1/farmer/details/work_force";
 import { farmersList } from "../../controllers/v1/farmer/list";
 import { farmersUpload } from "../../controllers/v1/farmer/upload";
 import { USER_ROLES } from "../../interface/user";
@@ -23,19 +24,20 @@ farmerRouter.get("/list", AuthGuard([...USER_ROLES]), farmersList);
 
 // route grouping with details as base path /api/v1/farmer
 const details = express.Router();
-details.use("/biodata/:id", getFarmerBiodata);
-details.use("/contact/:id", getFarmerContact);
-details.use("/verification/:id", getFarmerVerification);
-details.use("/address/:id", getFarmerAddress);
-details.use("/bank/:id", getFarmerAddress);
-details.use("/occupation/:id", getFarmerOccupation);
-details.use("/business-type/:id", getFarmerBusinessType);
-details.use("/shop-list/:id", getFarmerShopLocationList);
-details.use("/shop-items/:shopId", getFarmerShopItemList);
-details.use("/farm-list/:id", getFarmerFarmInfoList);
-details.use("/crop-list/:id", getFarmerHarvestPerCropList);
-details.use("/animal-list/:id", getFarmerAnimalList);
-details.use("/other-farm-info/:id", getFarmerOtherFarmInfo);
+details.get("/biodata/:id", getFarmerBiodata);
+details.get("/contact/:id", getFarmerContact);
+details.get("/verification/:id", getFarmerVerification);
+details.get("/address/:id", getFarmerAddress);
+details.get("/bank/:id", getFarmerAddress);
+details.get("/occupation/:id", getFarmerOccupation);
+details.get("/business-type/:id", getFarmerBusinessType);
+details.get("/shop-list/:id", getFarmerShopLocationList);
+details.get("/shop-items/:shopId", getFarmerShopItemList);
+details.get("/farm-list/:id", getFarmerFarmInfoList);
+details.get("/crop-list/:id", getFarmerHarvestPerCropList);
+details.get("/animal-list/:id", getFarmerAnimalList);
+details.get("/other-farm-info/:id", getFarmerOtherFarmInfo);
+details.get("/work-force/:id", getFarmerWorkForce);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 
