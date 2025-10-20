@@ -28,10 +28,10 @@ details.use("/address/:id", getFarmerAddress);
 details.use("/bank/:id", getFarmerAddress);
 details.use("/occupation/:id", getFarmerOccupation);
 details.use("/business-type/:id", getFarmerBusinessType);
-details.use("/shop-location/:id", getFarmerShopLocationList);
+details.use("/shop-list/:id", getFarmerShopLocationList);
 details.use("/shop-items/:shopId", getFarmerShopItemList);
-details.use("/farm-info-list/:id", getFarmerFarmInfoList);
-details.use("/harvest-per-crop/:id", getFarmerHarvestPerCropList);
+details.use("/farm-list/:id", getFarmerFarmInfoList);
+details.use("/crop-list/:id", getFarmerHarvestPerCropList);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 
