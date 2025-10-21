@@ -19,6 +19,7 @@ export const getFarmerHarvestPerCropList = async (req: AuthenticatedRequest, res
       data: {
         userId: id,
         crops: cropInfo.map((crop) => ({
+          id: crop._id,
           crop: crop.crop,
           quantity: crop.quantity,
           unit: crop.unit,
