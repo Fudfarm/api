@@ -16,6 +16,7 @@ export const getFarmerShopItemList = async (req: AuthenticatedRequest, res: Resp
     return res.status(200).json({
       message: "Shop items retrieved",
       data: {
+        recordId: shopItems[0].recordID,
         shopId,
         items: shopItems.map((item) => ({
           item: item.item,
