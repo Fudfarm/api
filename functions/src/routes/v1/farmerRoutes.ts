@@ -11,6 +11,7 @@ import { getFarmerOccupation } from "../../controllers/v1/farmer/details/occupat
 import { getFarmerOtherFarmInfo } from "../../controllers/v1/farmer/details/other_farm_info";
 import { getFarmerShopItemList } from "../../controllers/v1/farmer/details/shop_items";
 import { getFarmerShopLocationList } from "../../controllers/v1/farmer/details/shop_location";
+import { getFarmerSubmission } from "../../controllers/v1/farmer/details/submission";
 import { getFarmerVerification } from "../../controllers/v1/farmer/details/verification";
 import { getFarmerWorkForce } from "../../controllers/v1/farmer/details/work_force";
 import { farmersList } from "../../controllers/v1/farmer/list";
@@ -39,7 +40,7 @@ details.get("/crop-list/:id", getFarmerHarvestPerCropList);
 details.get("/animal-list/:id", getFarmerAnimalList);
 details.get("/other-farm-info/:id", getFarmerOtherFarmInfo);
 details.get("/work-force/:id", getFarmerWorkForce);
-details.get("/submission/:id", getFarmerWorkForce);
+details.get("/submission/:id", getFarmerSubmission);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 
