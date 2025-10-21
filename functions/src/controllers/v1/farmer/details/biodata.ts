@@ -16,7 +16,7 @@ export const getFarmerBiodata = async (req: AuthenticatedRequest, res: Response)
 
     return res.status(200).json({
       message: "Biodata retrieved",
-      data: await BiodataResponse(biodata),
+      data: await BiodataResponse(biodata, id),
       // {
       //   id: biodata._id,
       //   surname: biodata.surname,
@@ -82,12 +82,12 @@ export const miniUserInfo = async ({
 /**
  * Formats and returns the biodata details for a farmer.
  * @param {IUser} biodata - The full biodata object of the farmer, including all biodata fields.
+ * @param {string} userId - The ID of the user requesting the biodata.
  * @return {Promise<object>} Formatted biodata response object with all relevant fields for frontend display.
  */
-export async function BiodataResponse(biodata: IUser) {
+export async function BiodataResponse(biodata: IUser, userId: string) {
   return {
-    // I receive _id from User model
-    id: biodata.id,
+    id: userId,
     surname: biodata.surname,
     firstname: biodata.firstname,
     othernames: biodata.othernames,
@@ -105,6 +105,6 @@ export async function BiodataResponse(biodata: IUser) {
     updatedAt: biodata.updatedAt
       ? formatDateToShort(biodata.updatedAt.toISOString(), { includeTime: true })
       : undefined,
-    businessType: await farmerBusinessType(biodata.id), // determine buttons shown in frontend
+    businessType: await farmerBusinessType(userId), // determine buttons shown in frontend
   };
 }

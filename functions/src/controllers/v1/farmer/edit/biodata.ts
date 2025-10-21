@@ -25,7 +25,7 @@ export const editFarmerBiodata = async (req: AuthenticatedRequest, res: Response
 
     return res.status(200).json({
       message: "Biodata updated",
-      data: await BiodataResponse(user),
+      data: await BiodataResponse(user, id),
     });
   } catch (error) {
     return handleError(error, res, "Error updating biodata");
