@@ -87,7 +87,7 @@ export const miniUserInfo = async ({
 export async function BiodataResponse(biodata: IUser) {
   return {
     // I receive _id from User model
-    id: biodata._id,
+    id: biodata.id,
     surname: biodata.surname,
     firstname: biodata.firstname,
     othernames: biodata.othernames,
@@ -105,6 +105,6 @@ export async function BiodataResponse(biodata: IUser) {
     updatedAt: biodata.updatedAt
       ? formatDateToShort(biodata.updatedAt.toISOString(), { includeTime: true })
       : undefined,
-    businessType: await farmerBusinessType(biodata._id ?? ""), // determine buttons shown in frontend
+    businessType: await farmerBusinessType(biodata.id), // determine buttons shown in frontend
   };
 }
