@@ -2,13 +2,6 @@ import { z } from "zod";
 import { isAtLeastAge } from "../../function/function1";
 import { maritalStatuses } from "../../function/variables";
 
-// Mobile validation rules:
-// surname & firstname: non-empty, letters and hyphen, 2-30 chars
-// othernames: empty allowed or letters/spaces/hyphen 2-60 chars
-// gender, maritalStatus, birthdate: required non-empty strings
-// noOfFamily: numeric integer > 0
-// disease: optional string, max 300 chars
-
 const nameRegex = /^[ ]*[a-zA-Z-]{2,30}[ ]*$/;
 const noOfFamilyRegex = /^[0-9]{1,4}$/;
 const othernamesRegex = /^[ ]*[a-zA-Z- ]{2,60}[ ]*$/;

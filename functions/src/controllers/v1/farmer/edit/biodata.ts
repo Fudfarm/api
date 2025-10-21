@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import User from "../../../../models/v1/User";
+import { BiodataResponse } from "../details/biodata";
 
 export const editFarmerBiodata = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -22,17 +23,10 @@ export const editFarmerBiodata = async (req: AuthenticatedRequest, res: Response
     } }, { new: true }).lean();
     if (!user) return res.status(404).json({ message: "Farmer not found" });
 
-    return res.status(200).json({ message: "Biodata updated", data: {
-      id: user._id,
-      surname: user.surname,
-      firstname: user.firstname,
-      othernames: user.othernames,
-      gender: user.gender,
-      maritalStatus: user.maritalStatus,
-      birthdate: user.birthdate,
-      noOfFamily: user.noOfFamily,
-      disease: user.disease,
-    }});
+    return res.status(200).json({
+      message: "Biodata updated",
+      data: await BiodataResponse(user),
+    });
   } catch (error) {
     return handleError(error, res, "Error updating biodata");
   }

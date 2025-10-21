@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { formatDateToShort } from "../../../../function/function3";
+import { IUser } from "../../../../interface/user";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import User from "../../../../models/v1/User";
 import { farmerBusinessType } from "./business_type";
@@ -15,27 +16,28 @@ export const getFarmerBiodata = async (req: AuthenticatedRequest, res: Response)
 
     return res.status(200).json({
       message: "Biodata retrieved",
-      data: {
-        id: biodata._id,
-        surname: biodata.surname,
-        firstname: biodata.firstname,
-        othernames: biodata.othernames,
-        gender: biodata.gender,
-        maritalStatus: biodata.maritalStatus,
-        birthdate: biodata.birthdate,
-        noOfFamily: biodata.noOfFamily,
-        disease: biodata.disease || undefined,
-        role: biodata.role,
-        status: biodata.status,
-        createdBy: await miniUserInfo({ userId: biodata.createdBy }),
-        createdAt: biodata.createdAt
-          ? formatDateToShort(biodata.createdAt.toISOString(), { includeTime: true })
-          : undefined,
-        updatedAt: biodata.updatedAt
-          ? formatDateToShort(biodata.updatedAt.toISOString(), { includeTime: true })
-          : undefined,
-        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
-      },
+      data: await BiodataResponse(biodata),
+      // {
+      //   id: biodata._id,
+      //   surname: biodata.surname,
+      //   firstname: biodata.firstname,
+      //   othernames: biodata.othernames,
+      //   gender: biodata.gender,
+      //   maritalStatus: biodata.maritalStatus,
+      //   birthdate: biodata.birthdate,
+      //   noOfFamily: biodata.noOfFamily,
+      //   disease: biodata.disease || undefined,
+      //   role: biodata.role,
+      //   status: biodata.status,
+      //   createdBy: await miniUserInfo({ userId: biodata.createdBy }),
+      //   createdAt: biodata.createdAt
+      //     ? formatDateToShort(biodata.createdAt.toISOString(), { includeTime: true })
+      //     : undefined,
+      //   updatedAt: biodata.updatedAt
+      //     ? formatDateToShort(biodata.updatedAt.toISOString(), { includeTime: true })
+      //     : undefined,
+      //   businessType: await farmerBusinessType(id), // determine buttons shown in frontend
+      // },
     });
   } catch (error) {
     return handleError(error, res, "Error retrieving biodata");
@@ -77,4 +79,32 @@ export const miniUserInfo = async ({
   }
 };
 
-
+/**
+ * Formats and returns the biodata details for a farmer.
+ * @param {IUser} biodata - The full biodata object of the farmer, including all biodata fields.
+ * @return {Promise<object>} Formatted biodata response object with all relevant fields for frontend display.
+ */
+export async function BiodataResponse(biodata: IUser) {
+  return {
+    // I receive _id from User model
+    id: biodata._id,
+    surname: biodata.surname,
+    firstname: biodata.firstname,
+    othernames: biodata.othernames,
+    gender: biodata.gender,
+    maritalStatus: biodata.maritalStatus,
+    birthdate: biodata.birthdate,
+    noOfFamily: biodata.noOfFamily,
+    disease: biodata.disease || undefined,
+    role: biodata.role,
+    status: biodata.status,
+    createdBy: await miniUserInfo({ userId: biodata.createdBy }),
+    createdAt: biodata.createdAt
+      ? formatDateToShort(biodata.createdAt.toISOString(), { includeTime: true })
+      : undefined,
+    updatedAt: biodata.updatedAt
+      ? formatDateToShort(biodata.updatedAt.toISOString(), { includeTime: true })
+      : undefined,
+    businessType: await farmerBusinessType(biodata._id ?? ""), // determine buttons shown in frontend
+  };
+}
