@@ -19,6 +19,7 @@ export const getFarmerFarmInfoList = async (req: AuthenticatedRequest, res: Resp
       data: {
         userId: id,
         farms: farmInfo.map((farm) => ({
+          id: farm._id,
           state: farm.state,
           lga: farm.lga,
           town: farm.town,

@@ -19,6 +19,7 @@ export const getFarmerShopItemList = async (req: AuthenticatedRequest, res: Resp
         recordId: shopItems[0].recordID,
         shopId,
         items: shopItems.map((item) => ({
+          id: item._id,
           item: item.item,
           quantity: item.quantity,
           category: item.category,
