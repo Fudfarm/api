@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
-import { ISubmissionStatus } from "../../../interface/farmer/submissionStatus";
+import { ISubmissionStatus, STATUS_LIST } from "../../../interface/farmer/submissionStatus";
 
 interface ISubmissionStatusDoc extends Omit<ISubmissionStatus, "_id">, Document {
   _id: string;
@@ -44,6 +44,19 @@ const submissionStatusSchema = new Schema<ISubmissionStatusDoc>(
     approvedBy: {
       type: String,
       default: "",
+    },
+    rejectedBy: {
+      type: String,
+      default: "",
+    },
+    status: {
+      type: String,
+      enum: STATUS_LIST,
+      default: "Pending",
+    },
+    allowEdit: {
+      type: Boolean,
+      default: false,
     },
   },
   {

@@ -27,6 +27,7 @@ export const getFarmerSubmission = async (req: AuthenticatedRequest, res: Respon
         submittedBy: await miniUserInfo({ userId: submission.submittedBy }),
         comments: submission.comments,
         approvedBy: await miniUserInfo({ userId: submission.approvedBy }),
+        rejectedBy: await miniUserInfo({ userId: submission.rejectedBy }),
 
         createdAt: submission.createdAt
           ? formatDateToShort(submission.createdAt.toISOString(), { includeTime: true })

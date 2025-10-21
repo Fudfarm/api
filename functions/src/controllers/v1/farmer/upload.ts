@@ -1,27 +1,27 @@
 import { Response } from "express";
-import { handleError } from "../../../function/error";
-import { AuthenticatedRequest } from "../../../middleware/auth";
-import { IUploadData, IUploadResponse } from "../../../interface/farmer";
-import User from "../../../models/v1/User";
-import {
-  Contact,
-  Address,
-  Workforce,
-  Bank,
-  Verification,
-  Occupation,
-  OtherFarmInfo,
-  BusinessType,
-  AnimalInfo,
-  CropInfo,
-  FarmInfo,
-  ShopLocation,
-  ShopItems,
-  SubmissionStatus,
-} from "../../../models/v1/farmer";
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
+import { handleError } from "../../../function/error";
 import { randomPassword } from "../../../function/function3";
+import { IUploadData, IUploadResponse } from "../../../interface/farmer";
+import { AuthenticatedRequest } from "../../../middleware/auth";
+import User from "../../../models/v1/User";
+import {
+  Address,
+  AnimalInfo,
+  Bank,
+  BusinessType,
+  Contact,
+  CropInfo,
+  FarmInfo,
+  Occupation,
+  OtherFarmInfo,
+  ShopItems,
+  ShopLocation,
+  SubmissionStatus,
+  Verification,
+  Workforce,
+} from "../../../models/v1/farmer";
 import { labourTypes } from "../../../models/v1/farmer/Workforce";
 
 // Security: Sanitize any database-related error messages
@@ -597,6 +597,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             isImage: data.submissionStatus.isImage,
             isSubmitted: data.submissionStatus.isSubmitted,
             submittedBy: uploadedBy,
+            status: "Pending",
           });
 
           // Save main records in parallel for better performance
