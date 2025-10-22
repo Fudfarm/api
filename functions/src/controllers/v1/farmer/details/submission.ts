@@ -17,29 +17,38 @@ export const getFarmerSubmission = async (req: AuthenticatedRequest, res: Respon
 
     return res.status(200).json({
       message: "Submission info retrieved",
-      data: {
-        userId: id,
-
-        isUpdated: submission.isUpdated,
-        isConsent: submission.isConsent,
-        isImage: submission.isImage,
-        isSubmitted: submission.isSubmitted,
-        submittedBy: await miniUserInfo({ userId: submission.submittedBy }),
-        comments: submission.comments,
-        approvedBy: await miniUserInfo({ userId: submission.approvedBy }),
-        rejectedBy: await miniUserInfo({ userId: submission.rejectedBy }),
-
-        createdAt: submission.createdAt
-          ? formatDateToShort(submission.createdAt.toISOString(), { includeTime: true })
-          : undefined,
-        updatedAt: submission.updatedAt
-          ? formatDateToShort(submission.updatedAt.toISOString(), { includeTime: true })
-          : undefined,
-
-        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
-      },
+      data: await SubmissionStatusResponse(submission),
     });
   } catch (error) {
     return handleError(error, res, "Error retrieving submission info");
   }
 };
+
+/**
+ * Format submission status response
+ * @param {any} submission - submission data
+ * @return {Promise<any>} Formatted submission status response
+ */
+export async function SubmissionStatusResponse(submission: any): Promise<any> {
+  return {
+    userId: submission.recordID,
+
+    isUpdated: submission.isUpdated,
+    isConsent: submission.isConsent,
+    isImage: submission.isImage,
+    isSubmitted: submission.isSubmitted,
+    submittedBy: await miniUserInfo({ userId: submission.submittedBy }),
+    comments: submission.comments,
+    approvedBy: await miniUserInfo({ userId: submission.approvedBy }),
+    rejectedBy: await miniUserInfo({ userId: submission.rejectedBy }),
+
+    createdAt: submission.createdAt
+      ? formatDateToShort(submission.createdAt.toISOString(), { includeTime: true })
+      : undefined,
+    updatedAt: submission.updatedAt
+      ? formatDateToShort(submission.updatedAt.toISOString(), { includeTime: true })
+      : undefined,
+
+    businessType: await farmerBusinessType(submission.recordID), // determine buttons shown in frontend
+  };
+}

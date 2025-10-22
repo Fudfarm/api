@@ -16,26 +16,35 @@ export const getFarmerOtherFarmInfo = async (req: AuthenticatedRequest, res: Res
 
     return res.status(200).json({
       message: "Other farm info retrieved",
-      data: {
-        userId: id,
-
-        numCrops: otherFarmInfo.numCrops,
-        numLivestock: otherFarmInfo.numLivestock,
-        annualHarvest: otherFarmInfo.annualHarvest,
-        yearsExperience: otherFarmInfo.yearsExperience,
-        challenges: otherFarmInfo.challenges,
-
-        createdAt: otherFarmInfo.createdAt
-          ? formatDateToShort(otherFarmInfo.createdAt.toISOString(), { includeTime: true })
-          : undefined,
-        updatedAt: otherFarmInfo.updatedAt
-          ? formatDateToShort(otherFarmInfo.updatedAt.toISOString(), { includeTime: true })
-          : undefined,
-
-        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
-      },
+      data: await OtherFarmInfoResponse(otherFarmInfo),
     });
   } catch (error) {
     return handleError(error, res, "Error retrieving other farm info");
   }
 };
+
+/**
+ * Format other farm info response
+ * @param {any} otherFarmInfo - other farm info data
+ * @return {Promise<any>} Formatted other farm info response
+ */
+export async function OtherFarmInfoResponse(otherFarmInfo: any): Promise<any> {
+  return {
+    userId: otherFarmInfo.recordID,
+
+    numCrops: otherFarmInfo.numCrops,
+    numLivestock: otherFarmInfo.numLivestock,
+    annualHarvest: otherFarmInfo.annualHarvest,
+    yearsExperience: otherFarmInfo.yearsExperience,
+    challenges: otherFarmInfo.challenges,
+
+    createdAt: otherFarmInfo.createdAt
+      ? formatDateToShort(otherFarmInfo.createdAt.toISOString(), { includeTime: true })
+      : undefined,
+    updatedAt: otherFarmInfo.updatedAt
+      ? formatDateToShort(otherFarmInfo.updatedAt.toISOString(), { includeTime: true })
+      : undefined,
+
+    businessType: await farmerBusinessType(otherFarmInfo.recordID), // determine buttons shown in frontend
+  };
+}

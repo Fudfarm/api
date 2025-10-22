@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { Workforce } from "../../../../models/v1/farmer";
+import { WorkForceResponse } from "../details/work_force";
 
 export const editFarmerWorkForce = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -16,7 +17,10 @@ export const editFarmerWorkForce = async (req: AuthenticatedRequest, res: Respon
     } }, { new: true }).lean();
     if (!wf) return res.status(404).json({ message: "Workforce record not found" });
 
-    return res.status(200).json({ message: "Workforce updated", data: wf });
+    return res.status(200).json({
+      message: "Workforce updated",
+      data: await WorkForceResponse(wf),
+    });
   } catch (error) {
     return handleError(error, res, "Error updating workforce");
   }

@@ -16,23 +16,32 @@ export const getFarmerWorkForce = async (req: AuthenticatedRequest, res: Respons
 
     return res.status(200).json({
       message: "Work force info retrieved",
-      data: {
-        userId: id,
-
-        staffSize: workForce.staffSize,
-        labourType: workForce.labourType,
-
-        createdAt: workForce.createdAt
-          ? formatDateToShort(workForce.createdAt.toISOString(), { includeTime: true })
-          : undefined,
-        updatedAt: workForce.updatedAt
-          ? formatDateToShort(workForce.updatedAt.toISOString(), { includeTime: true })
-          : undefined,
-
-        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
-      },
+      data: await WorkForceResponse(workForce),
     });
   } catch (error) {
     return handleError(error, res, "Error retrieving work force info");
   }
 };
+
+/**
+ * Format work force response
+ * @param {any} workForce - work force data
+ * @return {Promise<any>} Formatted work force response
+ */
+export async function WorkForceResponse(workForce: any): Promise<any> {
+  return {
+    userId: workForce.recordID,
+
+    staffSize: workForce.staffSize,
+    labourType: workForce.labourType,
+
+    createdAt: workForce.createdAt
+      ? formatDateToShort(workForce.createdAt.toISOString(), { includeTime: true })
+      : undefined,
+    updatedAt: workForce.updatedAt
+      ? formatDateToShort(workForce.updatedAt.toISOString(), { includeTime: true })
+      : undefined,
+
+    businessType: await farmerBusinessType(workForce.recordID), // determine buttons shown in frontend
+  };
+}
