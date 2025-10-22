@@ -34,6 +34,7 @@ export const getFarmerAnimalList = async (req: AuthenticatedRequest, res: Respon
  */
 export async function AnimalInfoResponse(animal: any) {
   return {
+    id: animal._id,
     animal: animal.animal,
     quantity: animal.quantity,
     createdAt: animal.createdAt
