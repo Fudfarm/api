@@ -1,7 +1,6 @@
 import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { formatDateToShort } from "../../../../function/function3";
-import { IUser } from "../../../../interface/user";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import User from "../../../../models/v1/User";
 import { farmerBusinessType } from "./business_type";
@@ -16,7 +15,7 @@ export const getFarmerBiodata = async (req: AuthenticatedRequest, res: Response)
 
     return res.status(200).json({
       message: "Biodata retrieved",
-      data: await BiodataResponse(biodata, id),
+      data: await BiodataResponse(biodata),
     });
   } catch (error) {
     return handleError(error, res, "Error retrieving biodata");
@@ -64,9 +63,9 @@ export const miniUserInfo = async ({
  * @param {string} userId - The ID of the user requesting the biodata.
  * @return {Promise<object>} Formatted biodata response object with all relevant fields for frontend display.
  */
-export async function BiodataResponse(biodata: IUser, userId: string) {
+export async function BiodataResponse(biodata: any): Promise<object> {
   return {
-    id: userId,
+    id: biodata._id,
     surname: biodata.surname,
     firstname: biodata.firstname,
     othernames: biodata.othernames,
@@ -84,6 +83,6 @@ export async function BiodataResponse(biodata: IUser, userId: string) {
     updatedAt: biodata.updatedAt
       ? formatDateToShort(biodata.updatedAt.toISOString(), { includeTime: true })
       : undefined,
-    businessType: await farmerBusinessType(userId), // determine buttons shown in frontend
+    businessType: await farmerBusinessType(biodata._id), // determine buttons shown in frontend
   };
 }
