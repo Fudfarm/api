@@ -27,9 +27,10 @@ export const updateFarmerRecordStatus = async (req: AuthenticatedRequest, res: R
       updatedData.approvedBy = req.user?.id;
     }
 
-    const sub = await SubmissionStatus.updateOne(
+    const sub = await SubmissionStatus.findOneAndUpdate(
       { recordID: id },
       { $set: updatedData },
+      { new: true },
     ).lean();
 
     if (!sub) return res.status(404).json({ message: "Submission record not found" });
