@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { ShopLocation } from "../../../../models/v1/farmer";
+import { ShopLocationResponse } from "../details/shop_location";
 
 export const editFarmerShopLocation = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -19,7 +20,10 @@ export const editFarmerShopLocation = async (req: AuthenticatedRequest, res: Res
     } }, { new: true }).lean();
     if (!shop) return res.status(404).json({ message: "Shop not found" });
 
-    return res.status(200).json({ message: "Shop updated", data: shop });
+    return res.status(200).json({
+      message: "Shop updated",
+      data: await ShopLocationResponse(shop),
+    });
   } catch (error) {
     return handleError(error, res, "Error updating shop");
   }

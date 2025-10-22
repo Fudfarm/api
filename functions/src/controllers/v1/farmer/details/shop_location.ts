@@ -18,22 +18,7 @@ export const getFarmerShopLocationList = async (req: AuthenticatedRequest, res: 
       message: "Shop location retrieved",
       data: {
         userId: id,
-        shops: shopLocation.map((location) => ({
-          shopId: location._id,
-          state: location.state,
-          lga: location.lga,
-          town: location.town,
-          district: location.district,
-          landmark: location.landmark,
-          goodsCount: location.goodsCount,
-          verified: location.verified,
-          createdAt: location.createdAt
-            ? formatDateToShort(location.createdAt.toISOString(), { includeTime: true })
-            : undefined,
-          updatedAt: location.updatedAt
-            ? formatDateToShort(location.updatedAt.toISOString(), { includeTime: true })
-            : undefined,
-        })),
+        shops: await Promise.all(shopLocation.map((location) => ShopLocationResponse(location))),
         businessType: await farmerBusinessType(id), // determine buttons shown in frontend
       },
     });
@@ -41,3 +26,27 @@ export const getFarmerShopLocationList = async (req: AuthenticatedRequest, res: 
     return handleError(error, res, "Error retrieving shop location");
   }
 };
+
+/**
+ * Maps a shop location document to a response object.
+ * @param {any} location - The shop location document from the database.
+ * @return {Promise<object>} A promise that resolves to the mapped response object.
+ */
+export async function ShopLocationResponse(location: any): Promise<object> {
+  return {
+    shopId: location._id,
+    state: location.state,
+    lga: location.lga,
+    town: location.town,
+    district: location.district,
+    landmark: location.landmark,
+    goodsCount: location.goodsCount,
+    verified: location.verified,
+    createdAt: location.createdAt
+      ? formatDateToShort(location.createdAt.toISOString(), { includeTime: true })
+      : undefined,
+    updatedAt: location.updatedAt
+      ? formatDateToShort(location.updatedAt.toISOString(), { includeTime: true })
+      : undefined,
+  };
+}
