@@ -17,6 +17,7 @@ export const editFarmerShopLocation = async (req: AuthenticatedRequest, res: Res
       town: data.town,
       district: data.district,
       landmark: data.landmark,
+      verified: data.verified,
     } }, { new: true }).lean();
     if (!shop) return res.status(404).json({ message: "Shop not found" });
 

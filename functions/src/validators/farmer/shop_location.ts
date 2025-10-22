@@ -9,4 +9,5 @@ export const shopLocationSchema = z.object({
   town: nonEmpty("town"),
   district: nonEmpty("district"),
   landmark: nonEmpty("landmark"),
+  verified: z.boolean().optional(),
 });
