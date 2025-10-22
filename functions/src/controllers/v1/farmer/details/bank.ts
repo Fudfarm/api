@@ -15,21 +15,30 @@ export const getFarmerBank = async (req: AuthenticatedRequest, res: Response) =>
 
     return res.status(200).json({
       message: "Bank details retrieved",
-      data: {
-        userId: bank.recordID,
-        accountName: bank.accountName,
-        accountNumber: bank.accountNumber,
-        bank: bank.bank,
-        createdAt: bank.createdAt
-          ? formatDateToShort(bank.createdAt.toISOString(), { includeTime: true })
-          : undefined,
-        updatedAt: bank.updatedAt
-          ? formatDateToShort(bank.updatedAt.toISOString(), { includeTime: true })
-          : undefined,
-        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
-      },
+      data: await BankResponse(bank),
     });
   } catch (error) {
     return handleError(error, res, "Error retrieving bank details");
   }
 };
+
+/**
+ * Format bank response for frontend consumption.
+ * @param {any} bank - The bank document from the database.
+ * @return {Promise<object>} Formatted bank response object.
+ */
+export async function BankResponse(bank: any): Promise<object> {
+  return {
+    userId: bank.recordID,
+    accountName: bank.accountName,
+    accountNumber: bank.accountNumber,
+    bank: bank.bank,
+    createdAt: bank.createdAt
+      ? formatDateToShort(bank.createdAt.toISOString(), { includeTime: true })
+      : undefined,
+    updatedAt: bank.updatedAt
+      ? formatDateToShort(bank.updatedAt.toISOString(), { includeTime: true })
+      : undefined,
+    businessType: await farmerBusinessType(bank.recordID), // determine buttons shown in frontend
+  };
+}

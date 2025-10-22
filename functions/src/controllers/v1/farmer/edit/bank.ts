@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { Bank } from "../../../../models/v1/farmer";
+import { BankResponse } from "../details/bank";
 
 export const editFarmerBank = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -17,7 +18,10 @@ export const editFarmerBank = async (req: AuthenticatedRequest, res: Response) =
     } }, { new: true }).lean();
     if (!bank) return res.status(404).json({ message: "Bank record not found" });
 
-    return res.status(200).json({ message: "Bank updated", data: bank });
+    return res.status(200).json({
+      message: "Bank updated",
+      data: await BankResponse(bank),
+    });
   } catch (error) {
     return handleError(error, res, "Error updating bank");
   }
