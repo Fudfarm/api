@@ -82,7 +82,7 @@ details.get("/business-type/:id", getFarmerBusinessType);
 edit.put("/business-type/:id", validateM(businessTypeSchema), editFarmerBusinessType);
 
 details.get("/shop-list/:id", getFarmerShopLocationList);
-edit.put("/shop-location/:id", validateM(shopLocationSchema), editFarmerShopLocation);
+edit.put("/shop-location/:shopId", validateM(shopLocationSchema), editFarmerShopLocation);
 
 details.get("/shop-items/:shopId", getFarmerShopItemList);
 edit.put("/shop-items/:itemId", validateM(shopItemSchema), editFarmerShopItem);
