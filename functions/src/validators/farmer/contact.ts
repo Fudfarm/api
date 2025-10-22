@@ -24,9 +24,11 @@ const optionalEmail = z
   .optional();
 
 const optionalWebsite = z
-  .string()
-  .trim()
-  .url({ message: "Invalid website URL" })
+  .union([
+    z.string().trim().url({ message: "Invalid website URL" }),
+    z.literal(""),
+    z.null(),
+  ])
   .optional();
 
 export const contactSchema = z.object({
