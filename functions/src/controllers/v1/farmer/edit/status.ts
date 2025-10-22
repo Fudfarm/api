@@ -18,9 +18,9 @@ export const updateFarmerRecordStatus = async (req: AuthenticatedRequest, res: R
       return res.status(400).json({ message: `Status is already set to ${data.status}` });
     }
 
-    const updatedData: { status: any; comment: any; approvedBy?: any } = {
+    const updatedData: { status: any; comments: any; approvedBy?: any } = {
       status: data.status,
-      comment: data.comment,
+      comments: data.comments,
     };
 
     if (data.status === "Approved") {
