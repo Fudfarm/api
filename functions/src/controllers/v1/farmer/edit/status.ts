@@ -18,13 +18,17 @@ export const updateFarmerRecordStatus = async (req: AuthenticatedRequest, res: R
       return res.status(400).json({ message: `Status is already set to ${data.status}` });
     }
 
-    const updatedData: { status: any; comments: any; approvedBy?: any } = {
+    const updatedData: { status: any; comments: any; approvedBy?: any; rejectedBy?: any } = {
       status: data.status,
       comments: data.comments,
     };
 
     if (data.status === "Approved") {
       updatedData.approvedBy = req.user?.id;
+      updatedData.rejectedBy = ""; // clear rejectedBy if approved
+    } else if (data.status === "Rejected") {
+      updatedData.approvedBy = ""; // clear approvedBy if rejected
+      updatedData.rejectedBy = req.user?.id;
     }
 
     const sub = await SubmissionStatus.findOneAndUpdate(
