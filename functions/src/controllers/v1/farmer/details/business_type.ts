@@ -1,7 +1,7 @@
 import { Response } from "express";
-import { AuthenticatedRequest } from "../../../../middleware/auth";
-import { formatDateToShort } from "../../../../function/function3";
 import { handleError } from "../../../../function/error";
+import { formatDateToShort } from "../../../../function/function3";
+import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { BusinessType } from "../../../../models/v1/farmer";
 
 export const getFarmerBusinessType = async (req: AuthenticatedRequest, res: Response) => {
@@ -14,18 +14,31 @@ export const getFarmerBusinessType = async (req: AuthenticatedRequest, res: Resp
 
     return res.status(200).json({
       message: "Business type details retrieved",
-      data: {
-        userId: id,
-        isFarmer: businessType.isFarmer,
-        isSeller: businessType.isSeller,
-        createdAt: businessType.createdAt,
-        updatedAt: businessType.updatedAt,
-      },
+      data: await BusinessTypeResponse(businessType),
     });
   } catch (error) {
     return handleError(error, res, "Error retrieving business type");
   }
 };
+
+/**
+ * Format business type response for frontend consumption.
+ * @param {any} businessType - The business type document from the database.
+ * @return {Promise<object>} Formatted business type response object.
+ */
+export async function BusinessTypeResponse(businessType: any): Promise<object> {
+  return {
+    userId: businessType.recordID,
+    isFarmer: businessType.isFarmer,
+    isSeller: businessType.isSeller,
+    createdAt: businessType.createdAt
+      ? formatDateToShort(businessType.createdAt.toISOString(), { includeTime: true })
+      : undefined,
+    updatedAt: businessType.updatedAt
+      ? formatDateToShort(businessType.updatedAt.toISOString(), { includeTime: true })
+      : undefined,
+  };
+}
 
 
 /**
