@@ -15,21 +15,30 @@ export const getFarmerOccupation = async (req: AuthenticatedRequest, res: Respon
 
     return res.status(200).json({
       message: "Occupation details retrieved",
-      data: {
-        userId: occupation.recordID,
-        primaryOccupation: occupation.primaryOccupation,
-        secondaryOccupation: occupation.secondaryOccupation,
-        yearsExperience: occupation.yearsExperience,
-        createdAt: occupation.createdAt
-          ? formatDateToShort(occupation.createdAt.toISOString(), { includeTime: true })
-          : undefined,
-        updatedAt: occupation.updatedAt
-          ? formatDateToShort(occupation.updatedAt.toISOString(), { includeTime: true })
-          : undefined,
-        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
-      },
+      data: await OccupationResponse(occupation),
     });
   } catch (error) {
     return handleError(error, res, "Error retrieving occupation");
   }
 };
+
+/**
+ * Format occupation response for frontend consumption.
+ * @param {any} occupation - The occupation document from the database.
+ * @return {Promise<object>} Formatted occupation response object.
+ */
+export async function OccupationResponse(occupation: any): Promise<object> {
+  return {
+    userId: occupation.recordID,
+    primaryOccupation: occupation.primaryOccupation,
+    secondaryOccupation: occupation.secondaryOccupation,
+    yearsExperience: occupation.yearsExperience,
+    createdAt: occupation.createdAt
+      ? formatDateToShort(occupation.createdAt.toISOString(), { includeTime: true })
+      : undefined,
+    updatedAt: occupation.updatedAt
+      ? formatDateToShort(occupation.updatedAt.toISOString(), { includeTime: true })
+      : undefined,
+    businessType: await farmerBusinessType(occupation.recordID), // determine buttons shown in frontend
+  };
+}
