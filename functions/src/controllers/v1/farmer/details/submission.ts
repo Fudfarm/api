@@ -41,6 +41,7 @@ export async function SubmissionStatusResponse(submission: any): Promise<any> {
     comments: submission.comments,
     approvedBy: await miniUserInfo({ userId: submission.approvedBy }),
     rejectedBy: await miniUserInfo({ userId: submission.rejectedBy }),
+    status: submission.status,
 
     createdAt: submission.createdAt
       ? formatDateToShort(submission.createdAt.toISOString(), { includeTime: true })
