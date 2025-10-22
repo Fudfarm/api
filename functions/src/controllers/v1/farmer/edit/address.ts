@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { Address } from "../../../../models/v1/farmer";
+import { AddressResponse } from "../details/address";
 
 export const editFarmerAddress = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -35,7 +36,10 @@ export const editFarmerAddress = async (req: AuthenticatedRequest, res: Response
     } }, { new: true }).lean();
     if (!address) return res.status(404).json({ message: "Address not found" });
 
-    return res.status(200).json({ message: "Address updated", data: address });
+    return res.status(200).json({
+      message: "Address updated",
+      data: await AddressResponse(address),
+    });
   } catch (error) {
     return handleError(error, res, "Error updating address");
   }
