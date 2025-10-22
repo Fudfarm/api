@@ -22,6 +22,7 @@ import { editFarmerBusinessType } from "../../controllers/v1/farmer/edit/busines
 import { editFarmerContact } from "../../controllers/v1/farmer/edit/contact";
 import { editFarmerCrop } from "../../controllers/v1/farmer/edit/crop";
 import { editFarmerFarm } from "../../controllers/v1/farmer/edit/farm_info";
+import { updateImageStatus } from "../../controllers/v1/farmer/edit/image";
 import { editFarmerOccupation } from "../../controllers/v1/farmer/edit/occupation";
 import { editFarmerOtherFarmInfo } from "../../controllers/v1/farmer/edit/other_farm_info";
 import { editFarmerShopItem } from "../../controllers/v1/farmer/edit/shop_items";
@@ -42,13 +43,16 @@ import { businessTypeSchema } from "../../validators/farmer/business_type";
 import { contactSchema } from "../../validators/farmer/contact";
 import { cropSchema } from "../../validators/farmer/crop";
 import { farmSchema } from "../../validators/farmer/farm";
+import { imageSchema } from "../../validators/farmer/image";
 import { occupationSchema } from "../../validators/farmer/occupation";
 import { otherFarmInfoSchema } from "../../validators/farmer/other_farm_info";
 import { shopItemSchema } from "../../validators/farmer/shop_items";
 import { shopLocationSchema } from "../../validators/farmer/shop_location";
 import { submissionSchema } from "../../validators/farmer/submission";
 import { verificationSchema } from "../../validators/farmer/verification";
+import { videoSchema } from "../../validators/farmer/video";
 import { workForceSchema } from "../../validators/farmer/work_force";
+import { updateConsentStatus } from "../../controllers/v1/farmer/edit/consent";
 
 const farmerRouter = express.Router();
 
@@ -108,6 +112,8 @@ farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 farmerRouter.use("/edit", AuthGuard([...USER_ROLES]), edit);
 
 // management
+edit.put("/image-status/:id", validateM(imageSchema), updateImageStatus);
+edit.put("/consent-status/:id", validateM(videoSchema), updateConsentStatus);
 validate.put("/update-record-status/:id", validateM(submissionSchema), updateFarmerRecordStatus);
 farmerRouter.use("/validate", AuthGuard(["Admin"]), validate);
 
