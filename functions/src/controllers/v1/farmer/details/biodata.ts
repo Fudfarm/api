@@ -17,27 +17,6 @@ export const getFarmerBiodata = async (req: AuthenticatedRequest, res: Response)
     return res.status(200).json({
       message: "Biodata retrieved",
       data: await BiodataResponse(biodata, id),
-      // {
-      //   id: biodata._id,
-      //   surname: biodata.surname,
-      //   firstname: biodata.firstname,
-      //   othernames: biodata.othernames,
-      //   gender: biodata.gender,
-      //   maritalStatus: biodata.maritalStatus,
-      //   birthdate: biodata.birthdate,
-      //   noOfFamily: biodata.noOfFamily,
-      //   disease: biodata.disease || undefined,
-      //   role: biodata.role,
-      //   status: biodata.status,
-      //   createdBy: await miniUserInfo({ userId: biodata.createdBy }),
-      //   createdAt: biodata.createdAt
-      //     ? formatDateToShort(biodata.createdAt.toISOString(), { includeTime: true })
-      //     : undefined,
-      //   updatedAt: biodata.updatedAt
-      //     ? formatDateToShort(biodata.updatedAt.toISOString(), { includeTime: true })
-      //     : undefined,
-      //   businessType: await farmerBusinessType(id), // determine buttons shown in frontend
-      // },
     });
   } catch (error) {
     return handleError(error, res, "Error retrieving biodata");

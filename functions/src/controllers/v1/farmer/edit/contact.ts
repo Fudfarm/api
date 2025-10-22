@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { Contact } from "../../../../models/v1/farmer";
+import { ContactResponse } from "../details/contact";
 
 export const editFarmerContact = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -22,7 +23,10 @@ export const editFarmerContact = async (req: AuthenticatedRequest, res: Response
 
     if (!contact) return res.status(404).json({ message: "Contact not found" });
 
-    return res.status(200).json({ message: "Contact updated", data: contact });
+    return res.status(200).json({
+      message: "Contact updated",
+      data: await ContactResponse(contact),
+    },);
   } catch (error) {
     return handleError(error, res, "Error updating contact");
   }
