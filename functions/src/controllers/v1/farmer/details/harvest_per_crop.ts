@@ -18,18 +18,7 @@ export const getFarmerHarvestPerCropList = async (req: AuthenticatedRequest, res
       message: "Crop info retrieved",
       data: {
         userId: id,
-        crops: cropInfo.map((crop) => ({
-          id: crop._id,
-          crop: crop.crop,
-          quantity: crop.quantity,
-          unit: crop.unit,
-          createdAt: crop.createdAt
-            ? formatDateToShort(crop.createdAt.toISOString(), { includeTime: true })
-            : undefined,
-          updatedAt: crop.updatedAt
-            ? formatDateToShort(crop.updatedAt.toISOString(), { includeTime: true })
-            : undefined,
-        })),
+        crops: await Promise.all(cropInfo.map((crop) => harvestPerCropResponse(crop))),
         businessType: await farmerBusinessType(id), // determine buttons shown in frontend
       },
     });
@@ -37,3 +26,23 @@ export const getFarmerHarvestPerCropList = async (req: AuthenticatedRequest, res
     return handleError(error, res, "Error retrieving crop info");
   }
 };
+
+/**
+ * Format harvest per crop response
+ * @param {any} crop - crop data
+ * @return {Promise<object>} Formatted harvest per crop response
+ */
+export async function harvestPerCropResponse(crop: any) {
+  return {
+    id: crop._id,
+    crop: crop.crop,
+    quantity: crop.quantity,
+    unit: crop.unit,
+    createdAt: crop.createdAt
+      ? formatDateToShort(crop.createdAt.toISOString(), { includeTime: true })
+      : undefined,
+    updatedAt: crop.updatedAt
+      ? formatDateToShort(crop.updatedAt.toISOString(), { includeTime: true })
+      : undefined,
+  };
+}
