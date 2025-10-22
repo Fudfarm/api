@@ -18,24 +18,7 @@ export const getFarmerFarmInfoList = async (req: AuthenticatedRequest, res: Resp
       message: "Farm info retrieved",
       data: {
         userId: id,
-        farms: farmInfo.map((farm) => ({
-          id: farm._id,
-          state: farm.state,
-          lga: farm.lga,
-          town: farm.town,
-          district: farm.district,
-          landmark: farm.landmark,
-          numCrops: farm.numCrops,
-          farmSize: farm.farmSize,
-          unit: farm.unit,
-          verified: farm.verified,
-          createdAt: farm.createdAt
-            ? formatDateToShort(farm.createdAt.toISOString(), { includeTime: true })
-            : undefined,
-          updatedAt: farm.updatedAt
-            ? formatDateToShort(farm.updatedAt.toISOString(), { includeTime: true })
-            : undefined,
-        })),
+        farms: await Promise.all(farmInfo.map((farm) => farmInfoResponse(farm))),
         businessType: await farmerBusinessType(id), // determine buttons shown in frontend
       },
     });
@@ -43,3 +26,29 @@ export const getFarmerFarmInfoList = async (req: AuthenticatedRequest, res: Resp
     return handleError(error, res, "Error retrieving farm info");
   }
 };
+
+/**
+ * Format farm info response
+ * @param {any} farm
+ * @return {Promise<object>} Formatted farm info response
+ */
+export async function farmInfoResponse(farm: any) {
+  return {
+    id: farm._id,
+    state: farm.state,
+    lga: farm.lga,
+    town: farm.town,
+    district: farm.district,
+    landmark: farm.landmark,
+    numCrops: farm.numCrops,
+    farmSize: farm.farmSize,
+    unit: farm.unit,
+    verified: farm.verified,
+    createdAt: farm.createdAt
+      ? formatDateToShort(farm.createdAt.toISOString(), { includeTime: true })
+      : undefined,
+    updatedAt: farm.updatedAt
+      ? formatDateToShort(farm.updatedAt.toISOString(), { includeTime: true })
+      : undefined,
+  };
+}
