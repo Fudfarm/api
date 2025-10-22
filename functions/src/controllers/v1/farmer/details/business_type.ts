@@ -53,11 +53,7 @@ export async function farmerBusinessType(recordId: string) {
   return {
     isFarmer: businessType.isFarmer,
     isSeller: businessType.isSeller,
-    createdAt: businessType.createdAt
-      ? formatDateToShort(businessType.createdAt.toISOString(), { includeTime: true })
-      : undefined,
-    updatedAt: businessType.updatedAt
-      ? formatDateToShort(businessType.updatedAt.toISOString(), { includeTime: true })
-      : undefined,
+    createdAt: businessType.createdAt,
+    updatedAt: businessType.updatedAt,
   };
 }
