@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { Verification } from "../../../../models/v1/farmer";
+import { VerificationResponse } from "../details/verification";
 
 export const editFarmerVerification = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -24,7 +25,10 @@ export const editFarmerVerification = async (req: AuthenticatedRequest, res: Res
     ).lean();
     if (!verification) return res.status(404).json({ message: "Verification record not found" });
 
-    return res.status(200).json({ message: "Verification updated", data: verification });
+    return res.status(200).json({
+      message: "Verification updated",
+      data: await VerificationResponse(verification),
+    });
   } catch (error) {
     return handleError(error, res, "Error updating verification");
   }

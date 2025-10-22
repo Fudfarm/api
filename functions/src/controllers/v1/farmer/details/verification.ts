@@ -15,24 +15,33 @@ export const getFarmerVerification = async (req: AuthenticatedRequest, res: Resp
 
     return res.status(200).json({
       message: "Verification retrieved",
-      data: {
-        userId: verification.recordID,
-        bvn: verification.bvn,
-        nin: verification.nin,
-        businessName: verification.businessName,
-        businessNumber: verification.businessNumber,
-        otherType: verification.otherType,
-        otherNumber: verification.otherNumber,
-        createdAt: verification.createdAt
-          ? formatDateToShort(verification.createdAt.toISOString(), { includeTime: true })
-          : undefined,
-        updatedAt: verification.updatedAt
-          ? formatDateToShort(verification.updatedAt.toISOString(), { includeTime: true })
-          : undefined,
-        businessType: await farmerBusinessType(id), // determine buttons shown in frontend
-      },
+      data: await VerificationResponse(verification),
     });
   } catch (error) {
     return handleError(error, res, "Error retrieving verification");
   }
 };
+
+/**
+ * Format verification response for frontend consumption.
+ * @param {any} verification - The verification document from the database.
+ * @return {Promise<object>} Formatted verification response object.
+ */
+export async function VerificationResponse(verification: any): Promise<object> {
+  return {
+    userId: verification.recordID,
+    bvn: verification.bvn,
+    nin: verification.nin,
+    businessName: verification.businessName,
+    businessNumber: verification.businessNumber,
+    otherType: verification.otherType,
+    otherNumber: verification.otherNumber,
+    createdAt: verification.createdAt
+      ? formatDateToShort(verification.createdAt.toISOString(), { includeTime: true })
+      : undefined,
+    updatedAt: verification.updatedAt
+      ? formatDateToShort(verification.updatedAt.toISOString(), { includeTime: true })
+      : undefined,
+    businessType: await farmerBusinessType(verification.recordID), // determine buttons shown in frontend
+  };
+}
