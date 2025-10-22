@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { AnimalInfo } from "../../../../models/v1/farmer";
+import { AnimalInfoResponse } from "../details/animal_list";
 
 export const editFarmerAnimal = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -16,7 +17,10 @@ export const editFarmerAnimal = async (req: AuthenticatedRequest, res: Response)
     } }, { new: true }).lean();
     if (!animal) return res.status(404).json({ message: "Animal not found" });
 
-    return res.status(200).json({ message: "Animal updated", data: animal });
+    return res.status(200).json({
+      message: "Animal updated",
+      data: await AnimalInfoResponse(animal),
+    });
   } catch (error) {
     return handleError(error, res, "Error updating animal");
   }
