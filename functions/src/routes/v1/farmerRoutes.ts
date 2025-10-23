@@ -103,7 +103,7 @@ add.post("/shop-location/:userId", validateM(shopLocationSchema), addFarmerShopL
 destroy.delete("/shop-location/:shopId", destroyFarmerShopLocation);
 
 details.get("/shop-items/:shopId", getFarmerShopItemList);
-edit.put("/shop-items/:itemId", validateM(shopItemSchema), editFarmerShopItem);
+edit.put("/shop-item/:itemId", validateM(shopItemSchema), editFarmerShopItem);
 add.post("/shop-item/:shopId", validateM(shopItemSchema), addFarmerShopItem);
 destroy.delete("/shop-item/:itemId", destroyFarmerShopItem);
 
