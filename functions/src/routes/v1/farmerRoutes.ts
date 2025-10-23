@@ -105,7 +105,7 @@ destroy.delete("/shop-location/:shopId", destroyFarmerShopLocation);
 details.get("/shop-items/:shopId", getFarmerShopItemList);
 edit.put("/shop-items/:itemId", validateM(shopItemSchema), editFarmerShopItem);
 add.post("/shop-items/:shopId", validateM(shopItemSchema), addFarmerShopItem);
-destroy.delete("/shop-items/:itemId", destroyFarmerShopItem);
+destroy.delete("/shop-item/:itemId", destroyFarmerShopItem);
 
 details.get("/farm-list/:id", getFarmerFarmInfoList);
 edit.put("/farm/:farmId", validateM(farmSchema), editFarmerFarm);
