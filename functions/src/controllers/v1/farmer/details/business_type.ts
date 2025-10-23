@@ -33,6 +33,7 @@ export async function BusinessTypeResponse(businessType: any): Promise<object> {
     isSeller: businessType.isSeller,
     createdAt: businessType.createdAt,
     updatedAt: businessType.updatedAt,
+    businessType: await farmerBusinessType(businessType.recordID), // determine buttons shown in frontend
   };
 }
 
