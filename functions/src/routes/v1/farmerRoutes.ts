@@ -28,8 +28,16 @@ import { editFarmerFarm } from "../../controllers/v1/farmer/edit/farm_info";
 import { updateImageStatus } from "../../controllers/v1/farmer/edit/image";
 import { editFarmerOccupation } from "../../controllers/v1/farmer/edit/occupation";
 import { editFarmerOtherFarmInfo } from "../../controllers/v1/farmer/edit/other_farm_info";
-import { editFarmerShopItem } from "../../controllers/v1/farmer/edit/shop_items";
-import { addFarmerShopLocation, editFarmerShopLocation } from "../../controllers/v1/farmer/edit/shop_location";
+import {
+  addFarmerShopItem,
+  destroyFarmerShopItem,
+  editFarmerShopItem,
+} from "../../controllers/v1/farmer/edit/shop_items";
+import {
+  addFarmerShopLocation,
+  destroyFarmerShopLocation,
+  editFarmerShopLocation,
+} from "../../controllers/v1/farmer/edit/shop_location";
 import { updateFarmerRecordStatus } from "../../controllers/v1/farmer/edit/status";
 import { editFarmerVerification } from "../../controllers/v1/farmer/edit/verification";
 import { editFarmerWorkForce } from "../../controllers/v1/farmer/edit/work_force";
@@ -65,6 +73,7 @@ farmerRouter.get("/list", AuthGuard([...USER_ROLES]), farmersList);
 const details = express.Router();
 const edit = express.Router();
 const add = express.Router();
+const destroy = express.Router();
 const validate = express.Router();
 
 details.get("/biodata/:id", getFarmerBiodata);
@@ -91,9 +100,12 @@ edit.put("/business-type/:id", validateM(businessTypeSchema), editFarmerBusiness
 details.get("/shop-list/:id", getFarmerShopLocationList);
 edit.put("/shop-location/:shopId", validateM(shopLocationSchema), editFarmerShopLocation);
 add.post("/shop-location/:userId", validateM(shopLocationSchema), addFarmerShopLocation);
+destroy.delete("/shop-location/:shopId", destroyFarmerShopLocation);
 
 details.get("/shop-items/:shopId", getFarmerShopItemList);
 edit.put("/shop-items/:itemId", validateM(shopItemSchema), editFarmerShopItem);
+add.post("/shop-items/:shopId", validateM(shopItemSchema), addFarmerShopItem);
+destroy.delete("/shop-items/:itemId", destroyFarmerShopItem);
 
 details.get("/farm-list/:id", getFarmerFarmInfoList);
 edit.put("/farm/:farmId", validateM(farmSchema), editFarmerFarm);
@@ -125,5 +137,6 @@ farmerRouter.use("/validate", AuthGuard(["Admin"]), validate);
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 farmerRouter.use("/edit", AuthGuard([...USER_ROLES]), edit);
 farmerRouter.use("/add", AuthGuard([...USER_ROLES]), add);
+farmerRouter.use("/destroy", AuthGuard([...USER_ROLES]), destroy);
 
 export default farmerRouter;

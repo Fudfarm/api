@@ -57,3 +57,20 @@ export const editFarmerShopLocation = async (req: AuthenticatedRequest, res: Res
     return handleError(error, res, "Error updating shop");
   }
 };
+
+export const destroyFarmerShopLocation = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { shopId } = req.params;
+    if (!shopId) return res.status(400).json({ message: "Shop id is required" });
+
+    const shop = await ShopLocation.findByIdAndDelete(shopId).lean();
+    if (!shop) return res.status(404).json({ message: "Shop not found" });
+
+    return res.status(200).json({
+      message: "Shop deleted",
+      data: await ShopLocationResponse(shop),
+    });
+  } catch (error) {
+    return handleError(error, res, "Error deleting shop");
+  }
+};
