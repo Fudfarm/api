@@ -17,14 +17,14 @@ import { getFarmerSubmission } from "../../controllers/v1/farmer/details/submiss
 import { getFarmerVerification } from "../../controllers/v1/farmer/details/verification";
 import { getFarmerWorkForce } from "../../controllers/v1/farmer/details/work_force";
 import { editFarmerAddress } from "../../controllers/v1/farmer/edit/address";
-import { editFarmerAnimal } from "../../controllers/v1/farmer/edit/animal";
+import { addFarmerAnimal, destroyFarmerAnimal, editFarmerAnimal } from "../../controllers/v1/farmer/edit/animal";
 import { editFarmerBank } from "../../controllers/v1/farmer/edit/bank";
 import { editFarmerBiodata } from "../../controllers/v1/farmer/edit/biodata";
 import { editFarmerBusinessType } from "../../controllers/v1/farmer/edit/business_type";
 import { updateConsentStatus } from "../../controllers/v1/farmer/edit/consent";
 import { editFarmerContact } from "../../controllers/v1/farmer/edit/contact";
-import { editFarmerCrop } from "../../controllers/v1/farmer/edit/crop";
-import { editFarmerFarm } from "../../controllers/v1/farmer/edit/farm_info";
+import { addFarmerCrop, destroyFarmerCrop, editFarmerCrop } from "../../controllers/v1/farmer/edit/crop";
+import { addFarmerFarm, destroyFarmerFarm, editFarmerFarm } from "../../controllers/v1/farmer/edit/farm_info";
 import { updateImageStatus } from "../../controllers/v1/farmer/edit/image";
 import { editFarmerOccupation } from "../../controllers/v1/farmer/edit/occupation";
 import { editFarmerOtherFarmInfo } from "../../controllers/v1/farmer/edit/other_farm_info";
@@ -109,12 +109,18 @@ destroy.delete("/shop-item/:itemId", destroyFarmerShopItem);
 
 details.get("/farm-list/:id", getFarmerFarmInfoList);
 edit.put("/farm/:farmId", validateM(farmSchema), editFarmerFarm);
+add.post("/farm/:userId", validateM(farmSchema), addFarmerFarm);
+destroy.delete("/farm/:farmId", destroyFarmerFarm);
 
 details.get("/crop-list/:id", getFarmerHarvestPerCropList);
 edit.put("/crop/:cropId", validateM(cropSchema), editFarmerCrop);
+add.post("/crop/:farmId", validateM(cropSchema), addFarmerCrop);
+destroy.delete("/crop/:cropId", destroyFarmerCrop);
 
 details.get("/animal-list/:id", getFarmerAnimalList);
 edit.put("/animal/:animalId", validateM(animalSchema), editFarmerAnimal);
+add.post("/animal/:userId", validateM(animalSchema), addFarmerAnimal);
+destroy.delete("/animal/:animalId", destroyFarmerAnimal);
 
 details.get("/other-farm-info/:id", getFarmerOtherFarmInfo);
 edit.put("/other-farm-info/:id", validateM(otherFarmInfoSchema), editFarmerOtherFarmInfo);
