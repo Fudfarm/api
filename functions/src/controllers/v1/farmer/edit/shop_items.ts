@@ -37,6 +37,7 @@ export const addFarmerShopItem = async (req: AuthenticatedRequest, res: Response
 
     const itemDoc = new ShopItems({
       shopLocationID: shopId,
+      recordID: data.recordID,
       item: data.item,
       quantity: data.quantity,
       category: data.category,
