@@ -11,13 +11,6 @@ export const updateFarmerRecordStatus = async (req: AuthenticatedRequest, res: R
 
     const data = req.body;
 
-    const prev = await SubmissionStatus.findOne({ recordID: id }).lean();
-    if (!prev) return res.status(404).json({ message: "Submission record not found" });
-
-    if (prev.status === data.status) {
-      return res.status(400).json({ message: `Status is already set to ${data.status}` });
-    }
-
     const updatedData: { status: any; comments: any; approvedBy?: any; rejectedBy?: any } = {
       status: data.status,
       comments: data.comments,
