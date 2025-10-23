@@ -74,6 +74,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
     if (createdBy) {
       filter.createdBy = cleanStr(String(createdBy));
     }
+    console.log("Filter::: ", filter);
 
     const pageNum = Math.max(parseInt(String(page)), 1);
     const limitNum = Math.min(parseInt(String(limit)) || 50, 200);
