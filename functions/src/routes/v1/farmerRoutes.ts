@@ -114,7 +114,7 @@ destroy.delete("/farm/:farmId", destroyFarmerFarm);
 
 details.get("/crop-list/:id", getFarmerHarvestPerCropList);
 edit.put("/crop/:cropId", validateM(cropSchema), editFarmerCrop);
-add.post("/crop/:farmId", validateM(cropSchema), addFarmerCrop);
+add.post("/crop/:userId", validateM(cropSchema), addFarmerCrop);
 destroy.delete("/crop/:cropId", destroyFarmerCrop);
 
 details.get("/animal-list/:id", getFarmerAnimalList);

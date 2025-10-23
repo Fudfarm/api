@@ -1,9 +1,6 @@
 import { z } from "zod";
 
 export const cropSchema = z.object({
-  // recordID is optional
-  recordID: z.string().uuid().optional(),
-
   crop: z.string().trim().min(1, "Crop is required"),
   quantity: z.preprocess((val) => {
     if (typeof val === "string") return val.trim() === "" ? undefined : Number(val);

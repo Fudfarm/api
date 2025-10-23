@@ -29,14 +29,13 @@ export const editFarmerCrop = async (req: AuthenticatedRequest, res: Response) =
 
 export const addFarmerCrop = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { farmId } = req.params;
-    if (!farmId) return res.status(400).json({ message: "Farm id is required" });
+    const { userId } = req.params;
+    if (!userId) return res.status(400).json({ message: "User id is required" });
 
     const data = req.body;
 
     const cropDoc = new CropInfo({
-      farmID: farmId,
-      recordID: data.recordID,
+      recordID: userId,
       crop: data.crop,
       quantity: data.quantity,
       unit: data.unit,
