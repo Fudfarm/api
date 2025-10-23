@@ -1,10 +1,10 @@
 import { Response } from "express";
-import { AuthenticatedRequest } from "../../../middleware/auth";
-import { cleanStr } from "../../../function/function1";
 import { handleError } from "../../../function/error";
-import User from "../../../models/v1/User";
-import { IUserStatus } from "../../../interface/user";
+import { cleanStr } from "../../../function/function1";
 import { formatDateToShort } from "../../../function/function3";
+import { IUserStatus } from "../../../interface/user";
+import { AuthenticatedRequest } from "../../../middleware/auth";
+import User from "../../../models/v1/User";
 
 export const updateUserStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -18,6 +18,21 @@ export const updateUserStatus = async (req: AuthenticatedRequest, res: Response)
 
     const cleanId = cleanStr(String(id));
     const cleanStatus = cleanStr(String(status));
+
+    if (id == req.user?.id) {
+      return res.status(400).json({ message: "You cannot update your own status to avoid locking yourself out." });
+    }
+
+    // count the account with admin role and active status
+    const activeAdminCount = await User.countDocuments({ role: "Admin", status: "Active" });
+
+    // If the user is trying to deactivate an admin account, ensure at least one active admin remains
+    const userToUpdate = await User.findById(cleanId);
+    if (userToUpdate?.role === "Admin" && userToUpdate.status === "Active" && cleanStatus !== "Active") {
+      if (activeAdminCount <= 1) {
+        return res.status(400).json({ message: "At least one active admin account must be maintained." });
+      }
+    }
 
     // 2. Find user
     const user = await User.findById(cleanId);
