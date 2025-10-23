@@ -118,6 +118,7 @@ farmerRouter.use("/edit", AuthGuard([...USER_ROLES]), edit);
 // management
 edit.put("/image-status/:id", validateM(imageSchema), updateImageStatus);
 edit.put("/consent-status/:id", validateM(videoSchema), updateConsentStatus);
+
 validate.put("/update-record-status/:id", validateM(submissionSchema), updateFarmerRecordStatus);
 farmerRouter.use("/validate", AuthGuard(["Admin"]), validate);
 

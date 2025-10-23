@@ -494,6 +494,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             birthdate: new Date(data.biodata.birthDate),
             noOfFamily: parseInt(data.biodata.families) || 0,
             disease: data.biodata.disease || "",
+            createdBy: uploadedBy,
             role: "Farmer",
             status: "Disabled",
             password,

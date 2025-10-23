@@ -1,9 +1,9 @@
 import { Response } from "express";
-import { AuthenticatedRequest } from "../../../middleware/auth";
-import { cleanStr } from "../../../function/function1";
 import { handleError } from "../../../function/error";
-import User from "../../../models/v1/User";
+import { cleanStr } from "../../../function/function1";
 import { formatDateToShort } from "../../../function/function3";
+import { AuthenticatedRequest } from "../../../middleware/auth";
+import User from "../../../models/v1/User";
 
 export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -18,6 +18,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
       birthdateFrom,
       birthdateTo,
       maritalStatus,
+      createdBy,
       gender,
       email,
       businessType = "All",
@@ -69,6 +70,9 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
     }
     if (email) {
       filter.email = { $regex: cleanStr(String(email)), $options: "i" };
+    }
+    if (createdBy) {
+      filter.createdBy = cleanStr(String(createdBy));
     }
 
     const pageNum = Math.max(parseInt(String(page)), 1);
