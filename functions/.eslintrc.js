@@ -38,7 +38,7 @@ module.exports = {
       rules: {
         "object-curly-spacing": "off",
         "new-cap": "off", // Ignore functions starting with cap
-        "max-len": ["error", {"code": 110, "ignoreComments": true}],
+        "max-len": ["error", {"code": 130, "ignoreComments": true}],
         "indent": ["error", 2, {"SwitchCase": 1}],
         "no-invalid-this": "off",
         "@typescript-eslint/no-invalid-this": "off",

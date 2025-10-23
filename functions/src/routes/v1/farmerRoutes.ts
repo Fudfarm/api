@@ -29,7 +29,7 @@ import { updateImageStatus } from "../../controllers/v1/farmer/edit/image";
 import { editFarmerOccupation } from "../../controllers/v1/farmer/edit/occupation";
 import { editFarmerOtherFarmInfo } from "../../controllers/v1/farmer/edit/other_farm_info";
 import { editFarmerShopItem } from "../../controllers/v1/farmer/edit/shop_items";
-import { editFarmerShopLocation } from "../../controllers/v1/farmer/edit/shop_location";
+import { addFarmerShopLocation, editFarmerShopLocation } from "../../controllers/v1/farmer/edit/shop_location";
 import { updateFarmerRecordStatus } from "../../controllers/v1/farmer/edit/status";
 import { editFarmerVerification } from "../../controllers/v1/farmer/edit/verification";
 import { editFarmerWorkForce } from "../../controllers/v1/farmer/edit/work_force";
@@ -64,6 +64,7 @@ farmerRouter.get("/list", AuthGuard([...USER_ROLES]), farmersList);
 // details sub-router mounted at /details
 const details = express.Router();
 const edit = express.Router();
+const add = express.Router();
 const validate = express.Router();
 
 details.get("/biodata/:id", getFarmerBiodata);
@@ -89,6 +90,7 @@ edit.put("/business-type/:id", validateM(businessTypeSchema), editFarmerBusiness
 
 details.get("/shop-list/:id", getFarmerShopLocationList);
 edit.put("/shop-location/:shopId", validateM(shopLocationSchema), editFarmerShopLocation);
+add.post("/shop-location/:userId", validateM(shopLocationSchema), addFarmerShopLocation);
 
 details.get("/shop-items/:shopId", getFarmerShopItemList);
 edit.put("/shop-items/:itemId", validateM(shopItemSchema), editFarmerShopItem);
@@ -112,14 +114,16 @@ details.get("/submission/:id", getFarmerSubmission);
 details.get("/image/:id", getFarmerImage);
 details.get("/consent/:id", getFarmerConsent);
 
-farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
-farmerRouter.use("/edit", AuthGuard([...USER_ROLES]), edit);
-
 // management
 edit.put("/image-status/:id", validateM(imageSchema), updateImageStatus);
 edit.put("/consent-status/:id", validateM(videoSchema), updateConsentStatus);
 
 validate.put("/update-record-status/:id", validateM(submissionSchema), updateFarmerRecordStatus);
 farmerRouter.use("/validate", AuthGuard(["Admin"]), validate);
+
+
+farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
+farmerRouter.use("/edit", AuthGuard([...USER_ROLES]), edit);
+farmerRouter.use("/add", AuthGuard([...USER_ROLES]), add);
 
 export default farmerRouter;

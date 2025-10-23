@@ -4,6 +4,34 @@ import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { ShopLocation } from "../../../../models/v1/farmer";
 import { ShopLocationResponse } from "../details/shop_location";
 
+export const addFarmerShopLocation = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) return res.status(400).json({ message: "User id is required" });
+
+    const data = req.body;
+
+    const shopDoc = new ShopLocation({
+      recordID: userId,
+      state: data.state,
+      lga: data.lga,
+      town: data.town,
+      district: data.district,
+      landmark: data.landmark,
+      verified: data.verified ?? false,
+    });
+
+    const saved = await shopDoc.save();
+
+    return res.status(201).json({
+      message: "Shop created",
+      data: await ShopLocationResponse(saved),
+    });
+  } catch (error) {
+    return handleError(error, res, "Error creating shop");
+  }
+};
+
 export const editFarmerShopLocation = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { shopId } = req.params;
