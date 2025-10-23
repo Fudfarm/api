@@ -4,9 +4,11 @@ import { getFarmerAnimalList } from "../../controllers/v1/farmer/details/animal_
 import { getFarmerBank } from "../../controllers/v1/farmer/details/bank";
 import { getFarmerBiodata } from "../../controllers/v1/farmer/details/biodata";
 import { getFarmerBusinessType } from "../../controllers/v1/farmer/details/business_type";
+import { getFarmerConsent } from "../../controllers/v1/farmer/details/consent";
 import { getFarmerContact } from "../../controllers/v1/farmer/details/contact";
 import { getFarmerFarmInfoList } from "../../controllers/v1/farmer/details/farm_info_list";
 import { getFarmerHarvestPerCropList } from "../../controllers/v1/farmer/details/harvest_per_crop";
+import { getFarmerImage } from "../../controllers/v1/farmer/details/image";
 import { getFarmerOccupation } from "../../controllers/v1/farmer/details/occupation";
 import { getFarmerOtherFarmInfo } from "../../controllers/v1/farmer/details/other_farm_info";
 import { getFarmerShopItemList } from "../../controllers/v1/farmer/details/shop_items";
@@ -19,6 +21,7 @@ import { editFarmerAnimal } from "../../controllers/v1/farmer/edit/animal";
 import { editFarmerBank } from "../../controllers/v1/farmer/edit/bank";
 import { editFarmerBiodata } from "../../controllers/v1/farmer/edit/biodata";
 import { editFarmerBusinessType } from "../../controllers/v1/farmer/edit/business_type";
+import { updateConsentStatus } from "../../controllers/v1/farmer/edit/consent";
 import { editFarmerContact } from "../../controllers/v1/farmer/edit/contact";
 import { editFarmerCrop } from "../../controllers/v1/farmer/edit/crop";
 import { editFarmerFarm } from "../../controllers/v1/farmer/edit/farm_info";
@@ -52,7 +55,6 @@ import { submissionSchema } from "../../validators/farmer/submission";
 import { verificationSchema } from "../../validators/farmer/verification";
 import { videoSchema } from "../../validators/farmer/video";
 import { workForceSchema } from "../../validators/farmer/work_force";
-import { updateConsentStatus } from "../../controllers/v1/farmer/edit/consent";
 
 const farmerRouter = express.Router();
 
@@ -107,6 +109,8 @@ details.get("/work-force/:id", getFarmerWorkForce);
 edit.put("/work-force/:id", validateM(workForceSchema), editFarmerWorkForce);
 
 details.get("/submission/:id", getFarmerSubmission);
+details.get("/image/:id", getFarmerImage);
+details.get("/consent/:id", getFarmerConsent);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 farmerRouter.use("/edit", AuthGuard([...USER_ROLES]), edit);
