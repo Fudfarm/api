@@ -70,8 +70,12 @@ export const getFarmerEnrollmentStats = async (req: AuthenticatedRequest, res: R
         });
       }
 
-      startDate = fromDate;
-      endDate = toDate;
+      // Normalize range: include entire 'from' day and entire 'to' day.
+      const fromStart = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), 0, 0, 0, 0);
+      const toEnd = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate(), 23, 59, 59, 999);
+
+      startDate = fromStart;
+      endDate = toEnd;
       periodType = "custom_range";
     } else {
       // Use period parameter
@@ -206,9 +210,6 @@ export const getFarmerEnrollmentStats = async (req: AuthenticatedRequest, res: R
         rejectedBy: submission?.rejectedBy
           ? userMap.get(submission.rejectedBy.toString())
           : null,
-
-        // Link to farmer profile
-        profileLink: `/admin/farmer/${farmer._id}`,
       };
     });
 
@@ -267,8 +268,8 @@ export const getRecentlyUpdatedFarmerRecords = async (req: AuthenticatedRequest,
       });
     }
 
-    const fromDate = new Date(updatedFrom as string);
-    const toDate = new Date(updatedTo as string);
+    let fromDate = new Date(updatedFrom as string);
+    let toDate = new Date(updatedTo as string);
 
     if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
       return res.status(400).json({
@@ -281,6 +282,12 @@ export const getRecentlyUpdatedFarmerRecords = async (req: AuthenticatedRequest,
         message: "'updatedFrom' date must be before or equal to 'updatedTo' date",
       });
     }
+
+    // Normalize to include whole days: from 00:00:00.000 to 23:59:59.999
+    const normalizedFrom = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), 0, 0, 0, 0);
+    const normalizedTo = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate(), 23, 59, 59, 999);
+    fromDate = normalizedFrom;
+    toDate = normalizedTo;
 
     // Define all farmer-related tables to check
     const farmerTables = [
