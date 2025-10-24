@@ -230,27 +230,53 @@ const generatePDFReport = (res: Response, users: any[], filter: any) => {
 
   // Table rows
   users.forEach((user, index) => {
-    // Check if we need a new page
-    if (doc.y > 530) {
-      doc.addPage();
-      doc.y = margins;
-    }
-
     const rowY = doc.y;
     const currentRowHeight = 18; // Good padding top and bottom
+
+    // Check if we need a new page BEFORE drawing (including header if new page)
+    if (rowY + currentRowHeight > doc.page.height - 50) {
+      doc.addPage();
+      doc.y = margins;
+
+      // Redraw table header on new page
+      const newStartY = doc.y;
+      doc.strokeColor("#CCCCCC").lineWidth(0.5);
+      doc.fillColor("#F5F5F5")
+        .rect(margins, newStartY, tableWidth, rowHeight)
+        .fillAndStroke();
+
+      doc.fillColor("#000000").font("Helvetica-Bold").fontSize(8);
+      let headerXPos = margins;
+      headers.forEach((header, i) => {
+        const textY = newStartY + (rowHeight / 2) - 4;
+        doc.text(header, headerXPos + 4, textY, { width: columnWidths[i] - 8, ellipsis: true });
+        if (i < headers.length - 1) {
+          doc.strokeColor("#CCCCCC").lineWidth(0.5);
+          doc.moveTo(headerXPos + columnWidths[i], newStartY)
+            .lineTo(headerXPos + columnWidths[i], newStartY + rowHeight)
+            .stroke();
+        }
+        headerXPos += columnWidths[i];
+      });
+
+      doc.y = newStartY + rowHeight;
+      doc.font("Helvetica");
+    }
+
+    const finalRowY = doc.y;
 
     // Draw row background (alternating colors) with faint border
     doc.strokeColor("#CCCCCC").lineWidth(0.5);
     if (index % 2 === 0) {
-      doc.fillColor("#FAFAFA").rect(margins, rowY, tableWidth, currentRowHeight).fillAndStroke();
+      doc.fillColor("#FAFAFA").rect(margins, finalRowY, tableWidth, currentRowHeight).fillAndStroke();
     } else {
-      doc.fillColor("#FFFFFF").rect(margins, rowY, tableWidth, currentRowHeight).fillAndStroke();
+      doc.fillColor("#FFFFFF").rect(margins, finalRowY, tableWidth, currentRowHeight).fillAndStroke();
     }
 
     // Draw cell content with vertical centering
     doc.fillColor("#000000").fontSize(7);
     let colPos = margins;
-    const textY = rowY + (currentRowHeight / 2) - 3; // Vertically center text
+    const textY = finalRowY + (currentRowHeight / 2) - 3; // Vertically center text
 
     doc.text(user.Surname || "", colPos + 4, textY, { width: columnWidths[0] - 8, ellipsis: true });
     colPos += columnWidths[0];
@@ -275,21 +301,22 @@ const generatePDFReport = (res: Response, users: any[], filter: any) => {
     for (let i = 1; i < headers.length; i++) {
       linePos += columnWidths[i - 1];
       doc.strokeColor("#CCCCCC").lineWidth(0.5);
-      doc.moveTo(linePos, rowY)
-        .lineTo(linePos, rowY + currentRowHeight)
+      doc.moveTo(linePos, finalRowY)
+        .lineTo(linePos, finalRowY + currentRowHeight)
         .stroke();
     }
 
     // Move to next row (no gap)
-    doc.y = rowY + currentRowHeight;
+    doc.y = finalRowY + currentRowHeight;
   });
 
-  // Footer
+  // Footer - stays on current page at bottom
+  const footerY = doc.page.height - 30;
   doc.fontSize(7).text(
     "Report generated from FudFarm System",
     margins,
-    doc.page.height - 30,
-    { align: "center" },
+    footerY,
+    { align: "center", width: pageWidth },
   );
 
   doc.end();
