@@ -6,23 +6,7 @@ import PDFDocument from "pdfkit";
 import { handleError } from "../../../function/error";
 import { formatDateToShort } from "../../../function/function3";
 import { AuthenticatedRequest } from "../../../middleware/auth";
-import User from "../../../models/v1/User";
-import {
-  Address,
-  AnimalInfo,
-  Bank,
-  BusinessType,
-  Contact,
-  CropInfo,
-  FarmInfo,
-  Occupation,
-  OtherFarmInfo,
-  ShopItems,
-  ShopLocation,
-  SubmissionStatus,
-  Verification,
-  Workforce,
-} from "../../../models/v1/farmer";
+import { fetchRecentlyUpdatedFarmerData } from "../../v1/auth/userJobStat";
 
 /**
  * Download farmer updates report in various formats (PDF, CSV, XLSX)
@@ -41,173 +25,15 @@ export const downloadFarmerUpdatesReport = async (req: AuthenticatedRequest, res
       });
     }
 
-    let fromDate = new Date(updatedFrom as string);
-    let toDate = new Date(updatedTo as string);
+    // Fetch data using the shared function from userJobStat
+    const result = await fetchRecentlyUpdatedFarmerData(updatedFrom as string, updatedTo as string);
 
-    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
-      return res.status(400).json({
-        message: "Invalid date format. Use ISO 8601 format (e.g., 2024-01-01 or 2024-01-01T00:00:00Z)",
-      });
-    }
-
-    if (fromDate > toDate) {
-      return res.status(400).json({
-        message: "'updatedFrom' date must be before or equal to 'updatedTo' date",
-      });
-    }
-
-    // Normalize to include whole days: from 00:00:00.000 to 23:59:59.999
-    const normalizedFrom = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), 0, 0, 0, 0);
-    const normalizedTo = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate(), 23, 59, 59, 999);
-    fromDate = normalizedFrom;
-    toDate = normalizedTo;
-
-    // Define all farmer-related tables to check
-    const farmerTables = [
-      { name: "Address", model: Address },
-      { name: "AnimalInfo", model: AnimalInfo },
-      { name: "Bank", model: Bank },
-      { name: "BusinessType", model: BusinessType },
-      { name: "Contact", model: Contact },
-      { name: "CropInfo", model: CropInfo },
-      { name: "FarmInfo", model: FarmInfo },
-      { name: "Occupation", model: Occupation },
-      { name: "OtherFarmInfo", model: OtherFarmInfo },
-      { name: "ShopItems", model: ShopItems },
-      { name: "ShopLocation", model: ShopLocation },
-      { name: "SubmissionStatus", model: SubmissionStatus },
-      { name: "Verification", model: Verification },
-      { name: "Workforce", model: Workforce },
-    ];
-
-    // Define interface for record data
-    interface RecordData {
-      recordId: string;
-      userId: string;
-      updatedAt: string;
-      parentId: string;
-    }
-
-    interface TableUpdate {
-      tableName: string;
-      updatedCount: number;
-      records: RecordData[];
-    }
-
-    // Query each table for updates within the date range
-    const updatePromises = farmerTables.map(async (table): Promise<TableUpdate> => {
-      try {
-        // For ShopItems, we need to also select shopLocationID
-        const selectFields = table.name === "ShopItems"
-          ? "_id recordID updatedAt shopLocationID"
-          : "_id recordID updatedAt";
-
-        const records = await (table.model as any)
-          .find({
-            updatedAt: { $gte: fromDate, $lte: toDate },
-          })
-          .select(selectFields)
-          .lean()
-          .exec();
-
-        return {
-          tableName: table.name,
-          updatedCount: records.length,
-          records: records.map((record: any) => ({
-            recordId: record._id,
-            userId: record.recordID,
-            updatedAt: formatDateToShort(record.updatedAt.toISOString(), { includeTime: true }),
-            parentId: table.name === "ShopItems" ? (record.shopLocationID || "") : "",
-          })),
-        };
-      } catch (error) {
-        // If table doesn't have updatedAt field, return empty
-        return {
-          tableName: table.name,
-          updatedCount: 0,
-          records: [],
-        };
-      }
-    });
-
-    const tableUpdates = await Promise.all(updatePromises);
-
-    // Filter out tables with no updates
-    const tablesWithUpdates = tableUpdates.filter((table) => table.updatedCount > 0);
-
-    // Collect all unique user IDs
-    const allUserIds = new Set<string>();
-    tablesWithUpdates.forEach((table) => {
-      table.records.forEach((record: RecordData) => {
-        if (record.userId) allUserIds.add(record.userId);
-      });
-    });
-
-    // Fetch user information
-    const users = await User.find({ _id: { $in: Array.from(allUserIds) } })
-      .select("_id surname firstname othernames email phone")
-      .lean();
-
-    const userMap = new Map();
-    users.forEach((u) => {
-      userMap.set(u._id.toString(), {
-        id: u._id,
-        surname: u.surname,
-        firstname: u.firstname,
-        othernames: u.othernames,
-        email: u.email,
-        phone: u.phone,
-      });
-    });
-
-    // Group updates by user with table details
-    const updatesByUser = new Map<string, any>();
-    tablesWithUpdates.forEach((table) => {
-      table.records.forEach((record: RecordData) => {
-        if (record.userId) {
-          if (!updatesByUser.has(record.userId)) {
-            updatesByUser.set(record.userId, {
-              userId: record.userId,
-              user: userMap.get(record.userId),
-              affectedTables: [],
-              totalUpdates: 0,
-              profileLink: `/admin/farmer/${record.userId}`,
-            });
-          }
-          const userUpdate = updatesByUser.get(record.userId);
-          if (userUpdate) {
-            userUpdate.affectedTables.push({
-              tableName: table.tableName,
-              recordId: record.recordId,
-              parentId: record.parentId,
-              updatedAt: record.updatedAt,
-            });
-            userUpdate.totalUpdates += 1;
-          }
-        }
-      });
-    });
-
-    const farmerUpdates = Array.from(updatesByUser.values());
-
-    // Calculate summary
-    const totalUpdates = tablesWithUpdates.reduce((sum, table) => sum + table.updatedCount, 0);
-    const totalFarmersAffected = allUserIds.size;
-
-    const summary = {
-      totalUpdates,
-      totalFarmersAffected,
-      tablesAffected: tablesWithUpdates.length,
-      dateRange: {
-        from: formatDateToShort(fromDate.toISOString(), { includeTime: true }),
-        to: formatDateToShort(toDate.toISOString(), { includeTime: true }),
-      },
-    };
+    const { summary, farmers } = result;
 
     // Flatten data for export - one row per table update per farmer
     // Only include farmers with valid user data
     const exportData: any[] = [];
-    farmerUpdates.forEach((farmer) => {
+    farmers.forEach((farmer: any) => {
       // Skip farmers whose user data wasn't found
       if (!farmer.user) {
         return;
