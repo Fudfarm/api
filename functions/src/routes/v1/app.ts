@@ -5,8 +5,8 @@ import generalRouter from "../generalRoutes";
 import staffRouter from "./admin/staffRoutes";
 import authRouter from "./authRoutes";
 import farmerRouter from "./farmerRoutes";
+import systemLogRouter from "./printLogRouter";
 import systemInfoRouter from "./systeminfo";
-import systemLogRouter from "./systemLogs";
 import userRouter from "./userRouter";
 
 const app = express();
