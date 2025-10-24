@@ -35,9 +35,9 @@ export const downloadFarmerUpdatesReport = async (req: AuthenticatedRequest, res
     const exportData: any[] = [];
     farmers.forEach((farmer: any) => {
       // Skip farmers whose user data wasn't found
-      if (!farmer.user) {
-        return;
-      }
+      // if (!farmer.user) {
+      //   return;
+      // }
 
       const user = farmer.user;
       farmer.affectedTables.forEach((table: any) => {
