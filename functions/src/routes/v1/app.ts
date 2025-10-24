@@ -44,7 +44,7 @@ apiRouter.use("/staff", staffRouter);
 apiRouter.use("/", systemInfoRouter);
 apiRouter.use("/", userRouter);
 apiRouter.use("/farmer", farmerRouter);
-app.use("/log", systemLogRouter);
+apiRouter.use("/log", systemLogRouter);
 app.use("/api/v1", apiRouter);
 
 
