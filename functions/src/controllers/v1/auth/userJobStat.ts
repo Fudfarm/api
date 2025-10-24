@@ -126,8 +126,8 @@ export const fetchRecentlyUpdatedFarmerData = async (updatedFrom: string, update
     });
   });
 
-  // Fetch user information
-  const users = await User.find({ _id: { $in: Array.from(allUserIds) } })
+  // Fetch user information - only for users with role=Farmer
+  const users = await User.find({ _id: { $in: Array.from(allUserIds) }, role: "Farmer" })
     .select("_id surname firstname othernames email phone")
     .lean();
 
