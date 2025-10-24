@@ -5,7 +5,7 @@ import { AuthGuard } from "../../middleware/auth";
 const systemLogRouter = express.Router();
 
 
-systemLogRouter.put("/download-system-user", AuthGuard(["Admin"]), downloadSystemUsersReport);
+systemLogRouter.get("/download-system-user", AuthGuard(["Admin"]), downloadSystemUsersReport);
 
 
 export default systemLogRouter;
