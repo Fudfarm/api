@@ -136,7 +136,7 @@ export const downloadSystemUsersReport = async (req: AuthenticatedRequest, res: 
  * @param {any} filter - Applied filter object
  */
 const generatePDFReport = (res: Response, users: any[], filter: any) => {
-  const doc = new PDFDocument({ margin: 50, size: "A4", layout: "landscape" });
+  const doc = new PDFDocument({ margin: 25, size: "A4", layout: "landscape" });
 
   // Set response headers
   res.setHeader("Content-Type", "application/pdf");
@@ -144,18 +144,26 @@ const generatePDFReport = (res: Response, users: any[], filter: any) => {
 
   doc.pipe(res);
 
+  // Logo
+  const logoUrl = "https://habideenibrahim.com.ng/images/logo/logo.png";
+  try {
+    doc.image(logoUrl, 30, 20, { width: 60, height: 60 });
+  } catch (error) {
+    // If logo fails to load, continue without it
+  }
+
   // Header
-  doc.fontSize(20).text("System Users Report", { align: "center" });
-  doc.moveDown();
+  doc.fontSize(18).text("System Users Report", { align: "center" });
+  doc.moveDown(0.5);
   const generatedOn = formatDateToShort(new Date().toISOString(), { includeTime: true });
-  doc.fontSize(10).text(`Generated on: ${generatedOn}`, { align: "center" });
+  doc.fontSize(9).text(`Generated on: ${generatedOn}`, { align: "center" });
   doc.text(`Total Records: ${users.length}`, { align: "center" });
-  doc.moveDown();
+  doc.moveDown(0.5);
 
   // Filter summary
   if (Object.keys(filter).length > 0) {
-    doc.fontSize(12).text("Filters Applied:", { underline: true });
-    doc.fontSize(10);
+    doc.fontSize(10).text("Filters Applied:", { underline: true });
+    doc.fontSize(8);
     Object.entries(filter).forEach(([key, value]: [string, any]) => {
       if (typeof value === "object" && !value.$regex) {
         doc.text(`${key}: ${JSON.stringify(value)}`);
@@ -165,47 +173,98 @@ const generatePDFReport = (res: Response, users: any[], filter: any) => {
         doc.text(`${key}: ${value}`);
       }
     });
-    doc.moveDown();
+    doc.moveDown(0.5);
   }
 
-  // Table header
-  doc.fontSize(10).font("Helvetica-Bold");
+  // Table header - adjusted column widths for 9 columns
+  doc.fontSize(9).font("Helvetica-Bold");
   const startY = doc.y;
-  const colWidth = 85;
-  const headers = ["Surname", "Firstname", "Email", "Phone", "Role", "Status", "Gender", "Created At"];
+  const margins = 25;
+  const headers = ["Surname", "Firstname", "Othernames", "Email", "Phone", "Role", "Status", "Gender", "Created"];
+  const columnWidths = [70, 70, 70, 120, 70, 60, 55, 50, 80]; // Custom widths for each column
+  const tableWidth = columnWidths.reduce((sum, w) => sum + w, 0);
+  const rowHeight = 18;
 
+  // Draw header background with faint border
+  doc.strokeColor("#CCCCCC").lineWidth(0.5);
+  doc.fillColor("#F5F5F5")
+    .rect(margins, startY - 5, tableWidth, rowHeight)
+    .fillAndStroke();
+
+  // Draw header text
+  doc.fillColor("#000000");
+  let xPos = margins;
   headers.forEach((header, i) => {
-    doc.text(header, 50 + i * colWidth, startY, { width: colWidth - 5, ellipsis: true });
+    doc.text(header, xPos + 3, startY, { width: columnWidths[i] - 6, ellipsis: true });
+    // Draw vertical lines between columns
+    if (i < headers.length - 1) {
+      doc.strokeColor("#CCCCCC").lineWidth(0.5);
+      doc.moveTo(xPos + columnWidths[i], startY - 5)
+        .lineTo(xPos + columnWidths[i], startY + rowHeight - 5)
+        .stroke();
+    }
+    xPos += columnWidths[i];
   });
 
   doc.moveDown();
   doc.font("Helvetica");
 
   // Table rows
-  users.forEach((user) => {
-    if (doc.y > 500) {
+  users.forEach((user, index) => {
+    if (doc.y > 545) {
       doc.addPage();
     }
 
     const rowY = doc.y;
-    doc.fontSize(8);
-    doc.text(user.Surname, 50, rowY, { width: colWidth - 5, ellipsis: true });
-    doc.text(user.Firstname, 50 + colWidth, rowY, { width: colWidth - 5, ellipsis: true });
-    doc.text(user.Email, 50 + colWidth * 2, rowY, { width: colWidth - 5, ellipsis: true });
-    doc.text(user.Phone, 50 + colWidth * 3, rowY, { width: colWidth - 5, ellipsis: true });
-    doc.text(user.Role, 50 + colWidth * 4, rowY, { width: colWidth - 5, ellipsis: true });
-    doc.text(user.Status, 50 + colWidth * 5, rowY, { width: colWidth - 5, ellipsis: true });
-    doc.text(user.Gender, 50 + colWidth * 6, rowY, { width: colWidth - 5, ellipsis: true });
-    doc.text(user["Created At"], 50 + colWidth * 7, rowY, { width: colWidth - 5, ellipsis: true });
+    const currentRowHeight = 16;
 
-    doc.moveDown(0.5);
+    // Draw row background (alternating colors) with faint border
+    doc.strokeColor("#CCCCCC").lineWidth(0.5);
+    if (index % 2 === 0) {
+      doc.fillColor("#FAFAFA").rect(margins, rowY, tableWidth, currentRowHeight).fillAndStroke();
+    } else {
+      doc.fillColor("#FFFFFF").rect(margins, rowY, tableWidth, currentRowHeight).fillAndStroke();
+    }
+
+    // Draw cell content with adjusted positions
+    doc.fillColor("#000000").fontSize(7);
+    let colPos = margins;
+    doc.text(user.Surname || "", colPos + 3, rowY + 4, { width: columnWidths[0] - 6, ellipsis: true });
+    colPos += columnWidths[0];
+    doc.text(user.Firstname || "", colPos + 3, rowY + 4, { width: columnWidths[1] - 6, ellipsis: true });
+    colPos += columnWidths[1];
+    doc.text(user.Othernames || "", colPos + 3, rowY + 4, { width: columnWidths[2] - 6, ellipsis: true });
+    colPos += columnWidths[2];
+    doc.text(user.Email || "", colPos + 3, rowY + 4, { width: columnWidths[3] - 6, ellipsis: true });
+    colPos += columnWidths[3];
+    doc.text(user.Phone || "", colPos + 3, rowY + 4, { width: columnWidths[4] - 6, ellipsis: true });
+    colPos += columnWidths[4];
+    doc.text(user.Role || "", colPos + 3, rowY + 4, { width: columnWidths[5] - 6, ellipsis: true });
+    colPos += columnWidths[5];
+    doc.text(user.Status || "", colPos + 3, rowY + 4, { width: columnWidths[6] - 6, ellipsis: true });
+    colPos += columnWidths[6];
+    doc.text(user.Gender || "", colPos + 3, rowY + 4, { width: columnWidths[7] - 6, ellipsis: true });
+    colPos += columnWidths[7];
+    doc.text(user["Created At"] || "", colPos + 3, rowY + 4, { width: columnWidths[8] - 6, ellipsis: true });
+
+    // Draw vertical lines between columns
+    let linePos = margins;
+    for (let i = 1; i < headers.length; i++) {
+      linePos += columnWidths[i - 1];
+      doc.strokeColor("#CCCCCC").lineWidth(0.5);
+      doc.moveTo(linePos, rowY)
+        .lineTo(linePos, rowY + currentRowHeight)
+        .stroke();
+    }
+
+    doc.y = rowY + currentRowHeight;
   });
 
   // Footer
-  doc.fontSize(8).text(
+  doc.fontSize(7).text(
     "Report generated from FudFarm System",
-    50,
-    doc.page.height - 50,
+    margins,
+    doc.page.height - 30,
     { align: "center" },
   );
 
