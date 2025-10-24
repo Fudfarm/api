@@ -295,18 +295,19 @@ const generatePDFReport = (res: Response, data: any[], summary: any) => {
   // Table header - full width table
   doc.fontSize(8).font("Helvetica-Bold");
   const startY = doc.y;
-  const headers = ["Surname", "Firstname", "Email", "Phone", "Total Updates", "Table", "Record ID", "Updated At"];
+  const headers = ["#", "Surname", "Firstname", "Othernames", "Email", "Phone", "Total Updates", "Table", "Updated At"];
 
   // Calculate proportional column widths
-  const totalParts = 75 + 75 + 105 + 75 + 55 + 85 + 90 + 95;
+  const totalParts = 30 + 70 + 70 + 70 + 105 + 75 + 55 + 85 + 95;
   const columnWidths = [
-    (75 / totalParts) * pageWidth,
-    (75 / totalParts) * pageWidth,
+    (30 / totalParts) * pageWidth,
+    (70 / totalParts) * pageWidth,
+    (70 / totalParts) * pageWidth,
+    (70 / totalParts) * pageWidth,
     (105 / totalParts) * pageWidth,
     (75 / totalParts) * pageWidth,
     (55 / totalParts) * pageWidth,
     (85 / totalParts) * pageWidth,
-    (90 / totalParts) * pageWidth,
     (95 / totalParts) * pageWidth,
   ];
   const tableWidth = pageWidth;
@@ -386,21 +387,23 @@ const generatePDFReport = (res: Response, data: any[], summary: any) => {
     let colPos = margins;
     const textY = finalRowY + (currentRowHeight / 2) - 3;
 
-    doc.text(item.Surname || "", colPos + 4, textY, { width: columnWidths[0] - 8, ellipsis: true });
+    doc.text(String(index + 1), colPos + 4, textY, { width: columnWidths[0] - 8, ellipsis: true });
     colPos += columnWidths[0];
-    doc.text(item.Firstname || "", colPos + 4, textY, { width: columnWidths[1] - 8, ellipsis: true });
+    doc.text(item.Surname || "", colPos + 4, textY, { width: columnWidths[1] - 8, ellipsis: true });
     colPos += columnWidths[1];
-    doc.text(item.Email || "", colPos + 4, textY, { width: columnWidths[2] - 8, ellipsis: true });
+    doc.text(item.Firstname || "", colPos + 4, textY, { width: columnWidths[2] - 8, ellipsis: true });
     colPos += columnWidths[2];
-    doc.text(item.Phone || "", colPos + 4, textY, { width: columnWidths[3] - 8, ellipsis: true });
+    doc.text(item.Othernames || "", colPos + 4, textY, { width: columnWidths[3] - 8, ellipsis: true });
     colPos += columnWidths[3];
-    doc.text(String(item["Farmer Total Updates"] || ""), colPos + 4, textY, { width: columnWidths[4] - 8, ellipsis: true });
+    doc.text(item.Email || "", colPos + 4, textY, { width: columnWidths[4] - 8, ellipsis: true });
     colPos += columnWidths[4];
-    doc.text(item["Table Updated"] || "", colPos + 4, textY, { width: columnWidths[5] - 8, ellipsis: true });
+    doc.text(item.Phone || "", colPos + 4, textY, { width: columnWidths[5] - 8, ellipsis: true });
     colPos += columnWidths[5];
-    doc.text(item["Record ID"] || "", colPos + 4, textY, { width: columnWidths[6] - 8, ellipsis: true });
+    doc.text(String(item["Farmer Total Updates"] || ""), colPos + 4, textY, { width: columnWidths[6] - 8, ellipsis: true });
     colPos += columnWidths[6];
-    doc.text(item["Updated At"] || "", colPos + 4, textY, { width: columnWidths[7] - 8, ellipsis: true });
+    doc.text(item["Table Updated"] || "", colPos + 4, textY, { width: columnWidths[7] - 8, ellipsis: true });
+    colPos += columnWidths[7];
+    doc.text(item["Updated At"] || "", colPos + 4, textY, { width: columnWidths[8] - 8, ellipsis: true });
 
     // Draw vertical lines between columns
     let linePos = margins;
@@ -434,7 +437,14 @@ const generatePDFReport = (res: Response, data: any[], summary: any) => {
  * @return {Response} CSV file response
  */
 const generateCSVReport = (res: Response, data: any[]) => {
+  // Add serial numbers to data
+  const dataWithSerial = data.map((item, index) => ({
+    "#": index + 1,
+    ...item,
+  }));
+
   const fields = [
+    "#",
     "Farmer ID",
     "Surname",
     "Firstname",
@@ -443,13 +453,12 @@ const generateCSVReport = (res: Response, data: any[]) => {
     "Phone",
     "Farmer Total Updates",
     "Table Updated",
-    "Record ID",
     "Parent ID",
     "Updated At",
   ];
 
   const json2csvParser = new Parser({ fields });
-  const csv = json2csvParser.parse(data);
+  const csv = json2csvParser.parse(dataWithSerial);
 
   res.setHeader("Content-Type", "text/csv");
   res.setHeader("Content-Disposition", `attachment; filename=farmer-updates-report-${Date.now()}.csv`);
@@ -480,6 +489,7 @@ const generateXLSXReport = async (res: Response, data: any[], summary: any) => {
 
   // Define columns for data table
   const headerRow = worksheet.addRow([
+    "#",
     "Farmer ID",
     "Surname",
     "Firstname",
@@ -488,7 +498,6 @@ const generateXLSXReport = async (res: Response, data: any[], summary: any) => {
     "Phone",
     "Farmer Total Updates",
     "Table Updated",
-    "Record ID",
     "Parent ID",
     "Updated At",
   ]);
@@ -503,6 +512,7 @@ const generateXLSXReport = async (res: Response, data: any[], summary: any) => {
 
   // Set column widths
   worksheet.columns = [
+    { width: 8 }, // #
     { width: 25 }, // Farmer ID
     { width: 20 }, // Surname
     { width: 20 }, // Firstname
@@ -511,14 +521,14 @@ const generateXLSXReport = async (res: Response, data: any[], summary: any) => {
     { width: 15 }, // Phone
     { width: 18 }, // Farmer Total Updates
     { width: 20 }, // Table Updated
-    { width: 25 }, // Record ID
     { width: 20 }, // Parent ID
     { width: 20 }, // Updated At
   ];
 
-  // Add data rows
-  data.forEach((item) => {
+  // Add data rows with serial numbers
+  data.forEach((item, index) => {
     worksheet.addRow([
+      index + 1,
       item["Farmer ID"],
       item.Surname,
       item.Firstname,
@@ -527,7 +537,6 @@ const generateXLSXReport = async (res: Response, data: any[], summary: any) => {
       item.Phone,
       item["Farmer Total Updates"],
       item["Table Updated"],
-      item["Record ID"],
       item["Parent ID"],
       item["Updated At"],
     ]);
