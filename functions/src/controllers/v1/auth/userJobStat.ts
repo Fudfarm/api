@@ -29,7 +29,16 @@ import {
  */
 export const getFarmerEnrollmentStats = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { period = "this_month", from, to, createdBy } = req.query;
+    const { period = "this_month", from, to } = req.query;
+    const rawCreatedBy = req.query.createdBy;
+    let createdBy: string | undefined;
+    if (typeof rawCreatedBy === "string") {
+      createdBy = rawCreatedBy;
+    } else if (Array.isArray(rawCreatedBy)) {
+      createdBy = rawCreatedBy[0] as string;
+    } else {
+      createdBy = undefined;
+    }
 
     // 1. Calculate date range based on custom range or period
     const now = new Date();
@@ -113,12 +122,24 @@ export const getFarmerEnrollmentStats = async (req: AuthenticatedRequest, res: R
       }
     }
 
-    // 2. Query Users table for farmers created in date range
-    const farmers = await User.find({
+    let createdFilter: { role: string; createdAt?: { $gte: Date; $lte: Date }; createdBy?: string } = {
       role: "Farmer",
-      createdAt: { $gte: startDate, $lte: endDate },
-      createdBy: createdBy,
-    })
+    };
+    if (from && to) {
+      createdFilter = {
+        ...createdFilter,
+        createdAt: { $gte: startDate, $lte: endDate },
+      };
+    }
+    if (createdBy) {
+      createdFilter = {
+        ...createdFilter,
+        createdBy: createdBy,
+      };
+    }
+
+    // 2. Query Users table for farmers created in date range
+    const farmers = await User.find(createdFilter)
       .select("_id surname firstname othernames email phone createdAt")
       .lean();
 

@@ -28,7 +28,7 @@ userRouter.put("/profile", AuthGuard(["Admin"]), validateM(profileSchema), updat
 userRouter.post("/contact-us", AuthGuard([...USER_ROLES]), validateM(contactUsSchema), contactUs);
 userRouter.post("/feedback", AuthGuard([...USER_ROLES]), feedbackBotContact);
 userRouter.post("/devices", AuthGuard([...USER_ROLES]), getDevices);
-userRouter.get("/user/statistics/enrollments/:userId", AuthGuard(["Admin"]), getFarmerEnrollmentStats);
+userRouter.get("/user/statistics/enrollments", AuthGuard(["Admin"]), getFarmerEnrollmentStats);
 userRouter.get("/user/statistics/updates", AuthGuard(["Admin"]), getRecentlyUpdatedFarmerRecords);
 
 
