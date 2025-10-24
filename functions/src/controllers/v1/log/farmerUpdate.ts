@@ -205,9 +205,15 @@ export const downloadFarmerUpdatesReport = async (req: AuthenticatedRequest, res
     };
 
     // Flatten data for export - one row per table update per farmer
+    // Only include farmers with valid user data
     const exportData: any[] = [];
     farmerUpdates.forEach((farmer) => {
-      const user = farmer.user || {};
+      // Skip farmers whose user data wasn't found
+      if (!farmer.user) {
+        return;
+      }
+
+      const user = farmer.user;
       farmer.affectedTables.forEach((table: any) => {
         exportData.push({
           "Farmer ID": farmer.userId,
