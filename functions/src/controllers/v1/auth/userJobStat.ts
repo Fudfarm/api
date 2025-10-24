@@ -312,6 +312,7 @@ export const getRecentlyUpdatedFarmerRecords = async (req: AuthenticatedRequest,
       recordId: string;
       userId: string;
       updatedAt: string;
+      parentId: string;
     }
 
     interface TableUpdate {
@@ -323,11 +324,16 @@ export const getRecentlyUpdatedFarmerRecords = async (req: AuthenticatedRequest,
     // Query each table for updates within the date range
     const updatePromises = farmerTables.map(async (table): Promise<TableUpdate> => {
       try {
+        // For ShopItems, we need to also select shopLocationID
+        const selectFields = table.name === "ShopItems"
+          ? "_id recordID updatedAt shopLocationID"
+          : "_id recordID updatedAt";
+
         const records = await (table.model as any)
           .find({
             updatedAt: { $gte: fromDate, $lte: toDate },
           })
-          .select("_id recordID updatedAt")
+          .select(selectFields)
           .lean()
           .exec();
 
@@ -338,6 +344,7 @@ export const getRecentlyUpdatedFarmerRecords = async (req: AuthenticatedRequest,
             recordId: record._id,
             userId: record.recordID, // recordID is the userId reference
             updatedAt: formatDateToShort(record.updatedAt.toISOString(), { includeTime: true }),
+            parentId: table.name === "ShopItems" ? (record.shopLocationID || "") : "",
           })),
         };
       } catch (error) {
@@ -399,6 +406,7 @@ export const getRecentlyUpdatedFarmerRecords = async (req: AuthenticatedRequest,
             userUpdate.affectedTables.push({
               tableName: table.tableName,
               recordId: record.recordId,
+              parentId: record.parentId,
               updatedAt: record.updatedAt,
             });
             userUpdate.totalUpdates += 1;

@@ -1,12 +1,13 @@
-import express from "express";
-import cors from "cors";
 import cookieParser from "cookie-parser";
-import authRouter from "./authRoutes";
+import cors from "cors";
+import express from "express";
 import generalRouter from "../generalRoutes";
 import staffRouter from "./admin/staffRoutes";
-import systemInfoRouter from "./systeminfo";
-import userRouter from "./userRouter";
+import authRouter from "./authRoutes";
 import farmerRouter from "./farmerRoutes";
+import systemInfoRouter from "./systeminfo";
+import systemLogRouter from "./systemLogs";
+import userRouter from "./userRouter";
 
 const app = express();
 const apiRouter = express.Router();
@@ -43,6 +44,7 @@ apiRouter.use("/staff", staffRouter);
 apiRouter.use("/", systemInfoRouter);
 apiRouter.use("/", userRouter);
 apiRouter.use("/farmer", farmerRouter);
+app.use("/log", systemLogRouter);
 app.use("/api/v1", apiRouter);
 
 
