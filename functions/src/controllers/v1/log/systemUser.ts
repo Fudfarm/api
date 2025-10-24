@@ -144,26 +144,31 @@ const generatePDFReport = (res: Response, users: any[], filter: any) => {
 
   doc.pipe(res);
 
-  // Logo
+  const margins = 25;
+  const pageWidth = doc.page.width - (margins * 2);
+
+  // Logo - positioned at top left
   const logoUrl = "https://habideenibrahim.com.ng/images/logo/logo.png";
   try {
-    doc.image(logoUrl, 30, 20, { width: 60, height: 60 });
+    doc.image(logoUrl, margins, margins, { width: 50, height: 50 });
   } catch (error) {
     // If logo fails to load, continue without it
   }
 
-  // Header
-  doc.fontSize(18).text("System Users Report", { align: "center" });
-  doc.moveDown(0.5);
+  // Header - account for logo space
+  doc.fontSize(18).text("System Users Report", margins + 60, margins + 10, { align: "left" });
+  doc.fontSize(9);
   const generatedOn = formatDateToShort(new Date().toISOString(), { includeTime: true });
-  doc.fontSize(9).text(`Generated on: ${generatedOn}`, { align: "center" });
-  doc.text(`Total Records: ${users.length}`, { align: "center" });
-  doc.moveDown(0.5);
+  doc.text(`Generated on: ${generatedOn}`, margins + 60, margins + 32);
+  doc.text(`Total Records: ${users.length}`, margins + 60, margins + 44);
+
+  // Move down after header
+  doc.y = margins + 65;
 
   // Filter summary
   if (Object.keys(filter).length > 0) {
-    doc.fontSize(10).text("Filters Applied:", { underline: true });
-    doc.fontSize(8);
+    doc.fontSize(9).text("Filters Applied:", { underline: true });
+    doc.fontSize(7);
     Object.entries(filter).forEach(([key, value]: [string, any]) => {
       if (typeof value === "object" && !value.$regex) {
         doc.text(`${key}: ${JSON.stringify(value)}`);
@@ -173,50 +178,66 @@ const generatePDFReport = (res: Response, users: any[], filter: any) => {
         doc.text(`${key}: ${value}`);
       }
     });
-    doc.moveDown(0.5);
+    doc.y += 5; // Small gap after filters
   }
 
-  // Table header - adjusted column widths for 9 columns
-  doc.fontSize(9).font("Helvetica-Bold");
+  // Table header - full width table
+  doc.fontSize(8).font("Helvetica-Bold");
   const startY = doc.y;
-  const margins = 25;
   const headers = ["Surname", "Firstname", "Othernames", "Email", "Phone", "Role", "Status", "Gender", "Created"];
-  const columnWidths = [70, 70, 70, 120, 70, 60, 55, 50, 80]; // Custom widths for each column
-  const tableWidth = columnWidths.reduce((sum, w) => sum + w, 0);
-  const rowHeight = 18;
+
+  // Calculate proportional column widths to span full page width
+  const totalParts = 70 + 70 + 70 + 120 + 70 + 60 + 55 + 50 + 80; // Sum of proportions
+  const columnWidths = [
+    (70 / totalParts) * pageWidth,
+    (70 / totalParts) * pageWidth,
+    (70 / totalParts) * pageWidth,
+    (120 / totalParts) * pageWidth,
+    (70 / totalParts) * pageWidth,
+    (60 / totalParts) * pageWidth,
+    (55 / totalParts) * pageWidth,
+    (50 / totalParts) * pageWidth,
+    (80 / totalParts) * pageWidth,
+  ];
+  const tableWidth = pageWidth;
+  const rowHeight = 20; // Increased for better padding
 
   // Draw header background with faint border
   doc.strokeColor("#CCCCCC").lineWidth(0.5);
   doc.fillColor("#F5F5F5")
-    .rect(margins, startY - 5, tableWidth, rowHeight)
+    .rect(margins, startY, tableWidth, rowHeight)
     .fillAndStroke();
 
-  // Draw header text
+  // Draw header text with vertical centering
   doc.fillColor("#000000");
   let xPos = margins;
   headers.forEach((header, i) => {
-    doc.text(header, xPos + 3, startY, { width: columnWidths[i] - 6, ellipsis: true });
+    const textY = startY + (rowHeight / 2) - 4; // Vertically center text
+    doc.text(header, xPos + 4, textY, { width: columnWidths[i] - 8, ellipsis: true });
     // Draw vertical lines between columns
     if (i < headers.length - 1) {
       doc.strokeColor("#CCCCCC").lineWidth(0.5);
-      doc.moveTo(xPos + columnWidths[i], startY - 5)
-        .lineTo(xPos + columnWidths[i], startY + rowHeight - 5)
+      doc.moveTo(xPos + columnWidths[i], startY)
+        .lineTo(xPos + columnWidths[i], startY + rowHeight)
         .stroke();
     }
     xPos += columnWidths[i];
   });
 
-  doc.moveDown();
+  // Set position for first row (no gap)
+  doc.y = startY + rowHeight;
   doc.font("Helvetica");
 
   // Table rows
   users.forEach((user, index) => {
-    if (doc.y > 545) {
+    // Check if we need a new page
+    if (doc.y > 530) {
       doc.addPage();
+      doc.y = margins;
     }
 
     const rowY = doc.y;
-    const currentRowHeight = 16;
+    const currentRowHeight = 18; // Good padding top and bottom
 
     // Draw row background (alternating colors) with faint border
     doc.strokeColor("#CCCCCC").lineWidth(0.5);
@@ -226,26 +247,28 @@ const generatePDFReport = (res: Response, users: any[], filter: any) => {
       doc.fillColor("#FFFFFF").rect(margins, rowY, tableWidth, currentRowHeight).fillAndStroke();
     }
 
-    // Draw cell content with adjusted positions
+    // Draw cell content with vertical centering
     doc.fillColor("#000000").fontSize(7);
     let colPos = margins;
-    doc.text(user.Surname || "", colPos + 3, rowY + 4, { width: columnWidths[0] - 6, ellipsis: true });
+    const textY = rowY + (currentRowHeight / 2) - 3; // Vertically center text
+
+    doc.text(user.Surname || "", colPos + 4, textY, { width: columnWidths[0] - 8, ellipsis: true });
     colPos += columnWidths[0];
-    doc.text(user.Firstname || "", colPos + 3, rowY + 4, { width: columnWidths[1] - 6, ellipsis: true });
+    doc.text(user.Firstname || "", colPos + 4, textY, { width: columnWidths[1] - 8, ellipsis: true });
     colPos += columnWidths[1];
-    doc.text(user.Othernames || "", colPos + 3, rowY + 4, { width: columnWidths[2] - 6, ellipsis: true });
+    doc.text(user.Othernames || "", colPos + 4, textY, { width: columnWidths[2] - 8, ellipsis: true });
     colPos += columnWidths[2];
-    doc.text(user.Email || "", colPos + 3, rowY + 4, { width: columnWidths[3] - 6, ellipsis: true });
+    doc.text(user.Email || "", colPos + 4, textY, { width: columnWidths[3] - 8, ellipsis: true });
     colPos += columnWidths[3];
-    doc.text(user.Phone || "", colPos + 3, rowY + 4, { width: columnWidths[4] - 6, ellipsis: true });
+    doc.text(user.Phone || "", colPos + 4, textY, { width: columnWidths[4] - 8, ellipsis: true });
     colPos += columnWidths[4];
-    doc.text(user.Role || "", colPos + 3, rowY + 4, { width: columnWidths[5] - 6, ellipsis: true });
+    doc.text(user.Role || "", colPos + 4, textY, { width: columnWidths[5] - 8, ellipsis: true });
     colPos += columnWidths[5];
-    doc.text(user.Status || "", colPos + 3, rowY + 4, { width: columnWidths[6] - 6, ellipsis: true });
+    doc.text(user.Status || "", colPos + 4, textY, { width: columnWidths[6] - 8, ellipsis: true });
     colPos += columnWidths[6];
-    doc.text(user.Gender || "", colPos + 3, rowY + 4, { width: columnWidths[7] - 6, ellipsis: true });
+    doc.text(user.Gender || "", colPos + 4, textY, { width: columnWidths[7] - 8, ellipsis: true });
     colPos += columnWidths[7];
-    doc.text(user["Created At"] || "", colPos + 3, rowY + 4, { width: columnWidths[8] - 6, ellipsis: true });
+    doc.text(user["Created At"] || "", colPos + 4, textY, { width: columnWidths[8] - 8, ellipsis: true });
 
     // Draw vertical lines between columns
     let linePos = margins;
@@ -257,6 +280,7 @@ const generatePDFReport = (res: Response, users: any[], filter: any) => {
         .stroke();
     }
 
+    // Move to next row (no gap)
     doc.y = rowY + currentRowHeight;
   });
 
