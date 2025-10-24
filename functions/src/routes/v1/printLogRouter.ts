@@ -1,6 +1,6 @@
 import express from "express";
-import { downloadFarmerUpdatesReport } from "../../controllers/v1/log/farmerUpdate";
-import { downloadSystemUsersReport } from "../../controllers/v1/log/systemUser";
+import { downloadFarmerUpdatesReport } from "../../controllers/v1/download/farmerUpdate";
+import { downloadSystemUsersReport } from "../../controllers/v1/download/systemUser";
 import { AuthGuard } from "../../middleware/auth";
 
 const systemLogRouter = express.Router();
