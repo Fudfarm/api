@@ -1,5 +1,5 @@
 import admin from "firebase-admin";
-import { SERVER } from "../variables";
+import { AdminConfig, ServiceAccountJSON } from "./config";
 
 /**
  * Ensure firebase-admin is initialized. In Cloud Functions the environment
@@ -7,7 +7,10 @@ import { SERVER } from "../variables";
  * or pass a service account when initializing elsewhere.
  */
 if (!admin.apps.length) {
-  admin.initializeApp();
+  admin.initializeApp({
+    credential: admin.credential.cert(ServiceAccountJSON),
+    storageBucket: AdminConfig.storageBucket, // should be just the bucket name, e.g. 'farmdev-e3d46.appspot.com'
+  });
 }
 
 /**
@@ -22,7 +25,9 @@ if (!admin.apps.length) {
  */
 export async function renameStorageFile(srcPath: string, destPath: string): Promise<string> {
   try {
-    const bucket = admin.storage().bucket(SERVER.ASSET_BUCKET_URL);
+    // Use only the bucket name, not a URL
+    const bucketName = AdminConfig.storageBucket;
+    const bucket = bucketName ? admin.storage().bucket(bucketName) : admin.storage().bucket();
 
     const srcFile = bucket.file(srcPath);
     const [exists] = await srcFile.exists();
