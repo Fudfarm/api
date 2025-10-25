@@ -235,24 +235,41 @@ export const validateOccupation = (occupation: any): string[] => {
 export const validateOtherFarmInfo = (otherFarmInfo: any): string[] => {
   const errors: string[] = [];
 
-  if (otherFarmInfo.numCrops && otherFarmInfo.numCrops.trim()) {
-    if (typeof otherFarmInfo.numCrops !== "number" || otherFarmInfo.numCrops < 0) {
+  // Helper to check whether a value is provided (not null/undefined and not empty when string)
+  const isProvided = (v: any) => v !== undefined && v !== null && (typeof v !== "string" || v.trim() !== "");
+
+  // numCrops: accept number or numeric string
+  if (isProvided(otherFarmInfo.numCrops)) {
+    const raw = otherFarmInfo.numCrops;
+    const asNumber = typeof raw === "string" ? Number(raw.trim()) : Number(raw);
+    if (!Number.isFinite(asNumber) || asNumber < 0) {
       errors.push("Please provide a valid number of crops (must be 0 or greater)");
     }
   }
-  if (otherFarmInfo.numLivestock && otherFarmInfo.numLivestock.trim()) {
-    if (typeof otherFarmInfo.numLivestock !== "number" || otherFarmInfo.numLivestock < 0) {
+
+  // numLivestock: accept number or numeric string
+  if (isProvided(otherFarmInfo.numLivestock)) {
+    const raw = otherFarmInfo.numLivestock;
+    const asNumber = typeof raw === "string" ? Number(raw.trim()) : Number(raw);
+    if (!Number.isFinite(asNumber) || asNumber < 0) {
       errors.push("Please provide a valid number of livestock (must be 0 or greater)");
     }
   }
-  // Annual harvest is now optional
-  if (otherFarmInfo.annualHarvest && otherFarmInfo.annualHarvest.trim()) {
-    if (otherFarmInfo.annualHarvest && typeof otherFarmInfo.annualHarvest !== "string") {
+
+  // Annual harvest: should be a non-empty string when provided
+  if (isProvided(otherFarmInfo.annualHarvest)) {
+    if (typeof otherFarmInfo.annualHarvest !== "string") {
+      errors.push("Please provide valid information about your annual harvest");
+    } else if (otherFarmInfo.annualHarvest.trim() === "") {
       errors.push("Please provide valid information about your annual harvest");
     }
   }
-  if (otherFarmInfo.yearsExperience && otherFarmInfo.yearsExperience.trim()) {
-    if (typeof otherFarmInfo.yearsExperience !== "number" || otherFarmInfo.yearsExperience < 0) {
+
+  // yearsExperience: accept number or numeric string
+  if (isProvided(otherFarmInfo.yearsExperience)) {
+    const raw = otherFarmInfo.yearsExperience;
+    const asNumber = typeof raw === "string" ? Number(raw.trim()) : Number(raw);
+    if (!Number.isFinite(asNumber) || asNumber < 0) {
       errors.push("Please provide valid years of farming experience (must be 0 or greater)");
     }
   }
