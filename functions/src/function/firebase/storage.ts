@@ -49,11 +49,6 @@ export async function renameStorageFile(oldPath: string, newPath: string): Promi
   const oldFile = bucket.file(oldPath);
   const newFile = bucket.file(newPath);
 
-  console.log("Bucket Name:", bucket.name);
-  console.log("Bucket env", AdminConfig.storageBucket);
-  console.log("Old File Path:", oldPath);
-  console.log("New File Path:", newPath);
-
   const [exists] = await oldFile.exists();
   if (!exists) {
     console.warn(`⚠️ Source file not found: ${oldPath}`);
@@ -62,6 +57,4 @@ export async function renameStorageFile(oldPath: string, newPath: string): Promi
 
   await oldFile.copy(newFile);
   await oldFile.delete();
-
-  console.log(`✅ Renamed file: ${oldPath} → ${newPath}`);
 }
