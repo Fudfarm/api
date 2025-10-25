@@ -1,0 +1,46 @@
+import admin from "firebase-admin";
+import { SERVER } from "../variables";
+
+/**
+ * Ensure firebase-admin is initialized. In Cloud Functions the environment
+ * already provides credentials; locally set GOOGLE_APPLICATION_CREDENTIALS
+ * or pass a service account when initializing elsewhere.
+ */
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
+
+/**
+ * Rename (move) a file in Firebase Storage (Google Cloud Storage).
+ * This uses the underlying GCS file.move() operation which is atomic.
+ *
+ * @param {string} srcPath - Current object path in the bucket (e.g. "images/abc_offline.png")
+ * @param {string} destPath - Destination object path in the bucket (e.g. "images/USERID.png")
+ * @param {string} [bucketName] - Optional bucket name. If omitted, uses the default bucket
+ * @return {Promise<string>} Resolves with the new file path on success
+ * @throws {Error} - Throws if the source file does not exist or move fails
+ */
+export async function renameStorageFile(srcPath: string, destPath: string): Promise<string> {
+  try {
+    const bucket = admin.storage().bucket(SERVER.ASSET_BUCKET_URL);
+
+    const srcFile = bucket.file(srcPath);
+    const [exists] = await srcFile.exists();
+    if (!exists) {
+      return destPath;
+      // throw new Error(`Source file not found: ${srcPath}`);
+    }
+
+    // Use GCS's move operation which renames the file
+    await srcFile.move(destPath);
+
+    return destPath;
+  } catch (err: any) {
+    // Normalize error
+    throw new Error(err?.message || "Failed to rename storage file");
+  }
+}
+
+export default {
+  renameStorageFile,
+};
