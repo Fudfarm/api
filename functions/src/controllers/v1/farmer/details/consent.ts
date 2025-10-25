@@ -24,13 +24,13 @@ export const getFarmerConsent = async (req: AuthenticatedRequest, res: Response)
     // some images exist in firebase storage with offlineID as identifier
     // this is because they failed to upload at the time of submission
     // and they use the offlineID as identifier
-    // they look like this: <uuid>_offline.png
-    // e.g. 24491377-6da3-4584-9bb8-4c4b701c6f08_offline.png
+    // they look like this: <uuid>_offline.mp4
+    // e.g. 24491377-6da3-4584-9bb8-4c4b701c6f08_offline.mp4
     // we need to rename the image to use the user id as identifier
     const path = `${SERVER.FARMER_CONSENT_PATH}`;
     await renameStorageFile(
-      `${path}/${user.offlineID}_offline.png`,
-      `${path}/${id}.png`
+      `${path}/${user.offlineID}_offline.mp4`,
+      `${path}/${id}.mp4`
     );
 
     return res.status(200).json({
