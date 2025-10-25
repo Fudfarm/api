@@ -1,5 +1,5 @@
 import admin from "firebase-admin";
-import { AdminConfig, ServiceAccountJSON } from "./config";
+import { AdminConfig } from "./config";
 
 /**
  * Ensure firebase-admin is initialized. In Cloud Functions the environment
@@ -8,7 +8,7 @@ import { AdminConfig, ServiceAccountJSON } from "./config";
  */
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(ServiceAccountJSON),
+    credential: admin.credential.cert(AdminConfig.serviceAccount as admin.ServiceAccount),
     storageBucket: AdminConfig.storageBucket, // should be just the bucket name, e.g. 'farmdev-e3d46.appspot.com'
   });
 }
