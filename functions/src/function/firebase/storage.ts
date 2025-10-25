@@ -1,14 +1,29 @@
 import admin from "firebase-admin";
-import { AdminConfig } from "./config";
+import { AdminConfig, ServiceAccountJSON } from "./config";
 
 /**
  * Ensure firebase-admin is initialized. In Cloud Functions the environment
  * already provides credentials; locally set GOOGLE_APPLICATION_CREDENTIALS
  * or pass a service account when initializing elsewhere.
  */
+// Runtime check for required service account fields
+const requiredFields = [
+  "type", "project_id", "private_key_id", "private_key",
+  "client_email", "client_id", "auth_uri", "token_uri",
+  "auth_provider_x509_cert_url", "client_x509_cert_url",
+];
+for (const key of requiredFields) {
+  if (!ServiceAccountJSON[key] || typeof ServiceAccountJSON[key] !== "string") {
+    // Print the object for debugging
+    // eslint-disable-next-line no-console
+    console.error("ServiceAccountJSON:", ServiceAccountJSON);
+    throw new Error(`Missing or invalid service account field: ${key}`);
+  }
+}
+
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(AdminConfig.serviceAccount as admin.ServiceAccount),
+    credential: admin.credential.cert(ServiceAccountJSON),
     storageBucket: AdminConfig.storageBucket, // should be just the bucket name, e.g. 'farmdev-e3d46.appspot.com'
   });
 }
