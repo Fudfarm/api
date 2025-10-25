@@ -260,7 +260,7 @@ const validateOtherFarmInfo = (otherFarmInfo: any): string[] => {
       errors.push("Please provide a valid number of crops (must be 0 or greater)");
     }
   }
-  if (otherFarmInfo.numCrops && otherFarmInfo.numCrops.trim()) {
+  if (otherFarmInfo.numLivestock && otherFarmInfo.numLivestock.trim()) {
     if (typeof otherFarmInfo.numLivestock !== "number" || otherFarmInfo.numLivestock < 0) {
       errors.push("Please provide a valid number of livestock (must be 0 or greater)");
     }

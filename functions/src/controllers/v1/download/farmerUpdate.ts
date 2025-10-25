@@ -1,126 +1,390 @@
-
-
+// download farmer update changes report
 import ExcelJS from "exceljs";
 import { Response } from "express";
 import { Parser } from "json2csv";
 import PDFDocument from "pdfkit";
 import { handleError } from "../../../function/error";
+import { formatDateToShort } from "../../../function/function3";
 import { AuthenticatedRequest } from "../../../middleware/auth";
 import { fetchRecentlyUpdatedFarmerData } from "../../v1/auth/userJobStat";
 
 /**
- * Download recently updated farmer data as PDF, XLSX, or CSV
- * @route GET /api/v1/download/farmer-update?updatedFrom=YYYY-MM-DD&updatedTo=YYYY-MM-DD&type=pdf|xlsx|csv
- * @param {AuthenticatedRequest} req
- * @param {Response} res
+ * Download farmer updates report in various formats (PDF, CSV, XLSX)
+ * @param {AuthenticatedRequest} req - Express authenticated request
+ * @param {Response} res - Express response
+ * @return {Promise<Response>} File download response
  */
 export const downloadFarmerUpdatesReport = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { updatedFrom, updatedTo, type = "xlsx" } = req.query;
+    const { updatedFrom, updatedTo, reportFormat = "PDF" } = req.query;
+
+    // Validate that both dates are provided
     if (!updatedFrom || !updatedTo) {
-      return res.status(400).json({ message: "Both 'updatedFrom' and 'updatedTo' are required" });
+      return res.status(400).json({
+        message: "Both 'updatedFrom' and 'updatedTo' dates are required",
+      });
     }
 
-    const data = await fetchRecentlyUpdatedFarmerData(updatedFrom as string, updatedTo as string);
-    const farmers = data.farmers || [];
-    const summary = data.summary || {};
+    // Fetch data using the shared function from userJobStat
+    const result = await fetchRecentlyUpdatedFarmerData(updatedFrom as string, updatedTo as string);
 
-    // Flatten data for export
-    const exportRows = farmers.map((f: any) => {
-      return {
-        userId: f.userId,
-        surname: f.user?.surname || "",
-        firstname: f.user?.firstname || "",
-        othernames: f.user?.othernames || "",
-        email: f.user?.email || "",
-        phone: f.user?.phone || "",
-        totalUpdates: f.totalUpdates,
-        affectedTables: f.affectedTables.map((t: any) => t.tableName).join(", "),
-        lastUpdate: f.affectedTables.length > 0 ? f.affectedTables[0].updatedAt : "",
-        profileLink: f.profileLink,
-      };
+    const { summary, farmers } = result;
+
+    // Flatten data for export - one row per table update per farmer
+    // Only include farmers with valid user data
+    const exportData: any[] = [];
+    farmers.forEach((farmer: any) => {
+      // Skip farmers whose user data wasn't found
+      if (!farmer.user) {
+        return;
+      }
+
+      const user = farmer.user;
+      farmer.affectedTables.forEach((table: any) => {
+        exportData.push({
+          "Farmer ID": farmer.userId,
+          "Surname": user.surname || "",
+          "Firstname": user.firstname || "",
+          "Othernames": user.othernames || "",
+          "Email": user.email || "",
+          "Phone": user.phone || "",
+          "Table Updated": table.tableName,
+          "Record ID": table.recordId,
+          "Parent ID": table.parentId || "",
+          "Updated At": table.updatedAt,
+          "Farmer Total Updates": farmer.totalUpdates,
+        });
+      });
     });
 
-    if (type === "csv") {
-      // CSV
-      const parser = new Parser();
-      const csv = parser.parse(exportRows);
-      res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", `attachment; filename=farmer-updates-${updatedFrom}-${updatedTo}.csv`);
-      return res.send(csv);
-    } else if (type === "xlsx") {
-      // XLSX
-      const workbook = new ExcelJS.Workbook();
-      const sheet = workbook.addWorksheet("Farmer Updates");
-      sheet.columns = [
-        { header: "User ID", key: "userId", width: 24 },
-        { header: "Surname", key: "surname", width: 16 },
-        { header: "Firstname", key: "firstname", width: 16 },
-        { header: "Othernames", key: "othernames", width: 16 },
-        { header: "Email", key: "email", width: 24 },
-        { header: "Phone", key: "phone", width: 16 },
-        { header: "Total Updates", key: "totalUpdates", width: 14 },
-        { header: "Affected Tables", key: "affectedTables", width: 32 },
-        { header: "Last Update", key: "lastUpdate", width: 20 },
-        { header: "Profile Link", key: "profileLink", width: 32 },
-      ];
-      exportRows.forEach((row) => sheet.addRow(row));
-      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-      res.setHeader("Content-Disposition", `attachment; filename=farmer-updates-${updatedFrom}-${updatedTo}.xlsx`);
-      await workbook.xlsx.write(res);
-      res.end();
-      return;
-    } else if (type === "pdf") {
-      // PDF
-      const doc = new PDFDocument({ margin: 30, size: "A4" });
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename=farmer-updates-${updatedFrom}-${updatedTo}.pdf`);
-      doc.pipe(res);
+    const format = String(reportFormat).toUpperCase();
 
-      doc.fontSize(16).text("Farmer Update Changes Report", { align: "center" });
-      doc.moveDown();
-      doc.fontSize(10).text(`Date Range: ${summary.dateRange?.from || ""} - ${summary.dateRange?.to || ""}`);
-      doc.text(`Total Updates: ${summary.totalUpdates || 0}`);
-      doc.text(`Total Farmers Affected: ${summary.totalFarmersAffected || 0}`);
-      doc.moveDown();
+    // Generate report based on format
+    switch (format) {
+      case "PDF":
+        return generatePDFReport(res, exportData, summary);
 
-      // Table header
-      doc.fontSize(11).text(
-        [
-          "Surname",
-          "Firstname",
-          "Othernames",
-          "Email",
-          "Phone",
-          "Total Updates",
-          "Affected Tables",
-          "Last Update",
-        ].join(" | ")
-      );
-      doc.moveDown(0.5);
+      case "CSV":
+        return generateCSVReport(res, exportData);
 
-      // Table rows
-      exportRows.forEach((row) => {
-        doc.fontSize(10).text(
-          [
-            row.surname,
-            row.firstname,
-            row.othernames,
-            row.email,
-            row.phone,
-            row.totalUpdates,
-            row.affectedTables,
-            row.lastUpdate,
-          ].join(" | ")
-        );
-      });
+      case "XLSX":
+        return generateXLSXReport(res, exportData, summary);
 
-      doc.end();
-      return;
-    } else {
-      return res.status(400).json({ message: "Invalid type. Use one of: pdf, xlsx, csv" });
+      default:
+        return res.status(400).json({
+          message: "Invalid report format. Use: PDF, CSV, or XLSX",
+        });
     }
   } catch (error) {
-    return handleError(error, res, "Error generating farmer update download");
+    return handleError(error, res, "Error generating farmer updates report");
   }
+};
+
+/**
+ * Generate PDF report for farmer updates
+ * @param {Response} res - Express response
+ * @param {any[]} data - Array of formatted update data
+ * @param {any} summary - Summary statistics
+ */
+const generatePDFReport = (res: Response, data: any[], summary: any) => {
+  const doc = new PDFDocument({ margin: 25, size: "A4", layout: "landscape" });
+
+  // Set response headers
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename=farmer-updates-report-${Date.now()}.pdf`);
+
+  doc.pipe(res);
+
+  const margins = 25;
+  const pageWidth = doc.page.width - (margins * 2);
+
+  // Logo - positioned at top left
+  const logoUrl = "https://habideenibrahim.com.ng/images/logo/logo.png";
+  try {
+    doc.image(logoUrl, margins, margins, { width: 50, height: 50 });
+  } catch (error) {
+    // If logo fails to load, continue without it
+  }
+
+  // Header
+  doc.fontSize(18).text("Farmer Updates Report", margins + 60, margins + 10, { align: "left" });
+  doc.fontSize(9);
+  const generatedOn = formatDateToShort(new Date().toISOString(), { includeTime: true });
+  doc.text(`Generated on: ${generatedOn}`, margins + 60, margins + 32);
+  doc.text(`Period: ${summary.dateRange.from} to ${summary.dateRange.to}`, margins + 60, margins + 44);
+
+  // Move down after header
+  doc.y = margins + 65;
+
+  // Summary section
+  doc.fontSize(10).text("Summary", { underline: true });
+  doc.fontSize(8);
+  doc.text(`Total Updates: ${summary.totalUpdates}`);
+  doc.text(`Farmers Affected: ${summary.totalFarmersAffected}`);
+  doc.text(`Tables Affected: ${summary.tablesAffected}`);
+  doc.y += 5;
+
+  // Table header - full width table
+  doc.fontSize(8).font("Helvetica-Bold");
+  const startY = doc.y;
+  const headers = ["#", "Surname", "Firstname", "Othernames", "Email", "Phone", "Total Updates", "Table", "Updated At"];
+
+  // Calculate proportional column widths
+  const totalParts = 30 + 70 + 70 + 70 + 105 + 75 + 55 + 85 + 95;
+  const columnWidths = [
+    (30 / totalParts) * pageWidth,
+    (70 / totalParts) * pageWidth,
+    (70 / totalParts) * pageWidth,
+    (70 / totalParts) * pageWidth,
+    (105 / totalParts) * pageWidth,
+    (75 / totalParts) * pageWidth,
+    (55 / totalParts) * pageWidth,
+    (85 / totalParts) * pageWidth,
+    (95 / totalParts) * pageWidth,
+  ];
+  const tableWidth = pageWidth;
+  const rowHeight = 20;
+
+  // Draw header background with faint border
+  doc.strokeColor("#CCCCCC").lineWidth(0.5);
+  doc.fillColor("#F5F5F5")
+    .rect(margins, startY, tableWidth, rowHeight)
+    .fillAndStroke();
+
+  // Draw header text with vertical centering
+  doc.fillColor("#000000");
+  let xPos = margins;
+  headers.forEach((header, i) => {
+    const textY = startY + (rowHeight / 2) - 4;
+    doc.text(header, xPos + 4, textY, { width: columnWidths[i] - 8, ellipsis: true });
+    if (i < headers.length - 1) {
+      doc.strokeColor("#CCCCCC").lineWidth(0.5);
+      doc.moveTo(xPos + columnWidths[i], startY)
+        .lineTo(xPos + columnWidths[i], startY + rowHeight)
+        .stroke();
+    }
+    xPos += columnWidths[i];
+  });
+
+  doc.y = startY + rowHeight;
+  doc.font("Helvetica");
+
+  // Table rows
+  data.forEach((item, index) => {
+    const rowY = doc.y;
+    const currentRowHeight = 18;
+
+    // Check if we need a new page
+    if (rowY + currentRowHeight > doc.page.height - 50) {
+      doc.addPage();
+      doc.y = margins;
+
+      // Redraw table header on new page
+      const newStartY = doc.y;
+      doc.strokeColor("#CCCCCC").lineWidth(0.5);
+      doc.fillColor("#F5F5F5")
+        .rect(margins, newStartY, tableWidth, rowHeight)
+        .fillAndStroke();
+
+      doc.fillColor("#000000").font("Helvetica-Bold").fontSize(8);
+      let headerXPos = margins;
+      headers.forEach((header, i) => {
+        const textY = newStartY + (rowHeight / 2) - 4;
+        doc.text(header, headerXPos + 4, textY, { width: columnWidths[i] - 8, ellipsis: true });
+        if (i < headers.length - 1) {
+          doc.strokeColor("#CCCCCC").lineWidth(0.5);
+          doc.moveTo(headerXPos + columnWidths[i], newStartY)
+            .lineTo(headerXPos + columnWidths[i], newStartY + rowHeight)
+            .stroke();
+        }
+        headerXPos += columnWidths[i];
+      });
+
+      doc.y = newStartY + rowHeight;
+      doc.font("Helvetica");
+    }
+
+    const finalRowY = doc.y;
+
+    // Draw row background (alternating colors) with faint border
+    doc.strokeColor("#CCCCCC").lineWidth(0.5);
+    if (index % 2 === 0) {
+      doc.fillColor("#FAFAFA").rect(margins, finalRowY, tableWidth, currentRowHeight).fillAndStroke();
+    } else {
+      doc.fillColor("#FFFFFF").rect(margins, finalRowY, tableWidth, currentRowHeight).fillAndStroke();
+    }
+
+    // Draw cell content with vertical centering
+    doc.fillColor("#000000").fontSize(7);
+    let colPos = margins;
+    const textY = finalRowY + (currentRowHeight / 2) - 3;
+
+    doc.text(String(index + 1), colPos + 4, textY, { width: columnWidths[0] - 8, ellipsis: true });
+    colPos += columnWidths[0];
+    doc.text(item.Surname || "", colPos + 4, textY, { width: columnWidths[1] - 8, ellipsis: true });
+    colPos += columnWidths[1];
+    doc.text(item.Firstname || "", colPos + 4, textY, { width: columnWidths[2] - 8, ellipsis: true });
+    colPos += columnWidths[2];
+    doc.text(item.Othernames || "", colPos + 4, textY, { width: columnWidths[3] - 8, ellipsis: true });
+    colPos += columnWidths[3];
+    doc.text(item.Email || "", colPos + 4, textY, { width: columnWidths[4] - 8, ellipsis: true });
+    colPos += columnWidths[4];
+    doc.text(item.Phone || "", colPos + 4, textY, { width: columnWidths[5] - 8, ellipsis: true });
+    colPos += columnWidths[5];
+    doc.text(String(item["Farmer Total Updates"] || ""), colPos + 4, textY, { width: columnWidths[6] - 8, ellipsis: true });
+    colPos += columnWidths[6];
+    doc.text(item["Table Updated"] || "", colPos + 4, textY, { width: columnWidths[7] - 8, ellipsis: true });
+    colPos += columnWidths[7];
+    doc.text(item["Updated At"] || "", colPos + 4, textY, { width: columnWidths[8] - 8, ellipsis: true });
+
+    // Draw vertical lines between columns
+    let linePos = margins;
+    for (let i = 1; i < headers.length; i++) {
+      linePos += columnWidths[i - 1];
+      doc.strokeColor("#CCCCCC").lineWidth(0.5);
+      doc.moveTo(linePos, finalRowY)
+        .lineTo(linePos, finalRowY + currentRowHeight)
+        .stroke();
+    }
+
+    doc.y = finalRowY + currentRowHeight;
+  });
+
+  // Footer
+  const footerY = doc.page.height - 30;
+  doc.fontSize(7).text(
+    "Report generated from FudFarm System",
+    margins,
+    footerY,
+    { align: "center", width: pageWidth },
+  );
+
+  doc.end();
+};
+
+/**
+ * Generate CSV report for farmer updates
+ * @param {Response} res - Express response
+ * @param {any[]} data - Array of formatted update data
+ * @return {Response} CSV file response
+ */
+const generateCSVReport = (res: Response, data: any[]) => {
+  // Add serial numbers to data
+  const dataWithSerial = data.map((item, index) => ({
+    "#": index + 1,
+    ...item,
+  }));
+
+  const fields = [
+    "#",
+    "Farmer ID",
+    "Surname",
+    "Firstname",
+    "Othernames",
+    "Email",
+    "Phone",
+    "Farmer Total Updates",
+    "Table Updated",
+    "Parent ID",
+    "Updated At",
+  ];
+
+  const json2csvParser = new Parser({ fields });
+  const csv = json2csvParser.parse(dataWithSerial);
+
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader("Content-Disposition", `attachment; filename=farmer-updates-report-${Date.now()}.csv`);
+
+  return res.status(200).send(csv);
+};
+
+/**
+ * Generate XLSX report for farmer updates
+ * @param {Response} res - Express response
+ * @param {any[]} data - Array of formatted update data
+ * @param {any} summary - Summary statistics
+ * @return {Promise<void>} XLSX file response
+ */
+const generateXLSXReport = async (res: Response, data: any[], summary: any) => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Farmer Updates");
+
+  // Add summary section
+  worksheet.addRow(["Farmer Updates Report"]).font = { bold: true, size: 14 };
+  worksheet.addRow([]);
+  worksheet.addRow(["Summary"]).font = { bold: true };
+  worksheet.addRow(["Total Updates:", summary.totalUpdates]);
+  worksheet.addRow(["Farmers Affected:", summary.totalFarmersAffected]);
+  worksheet.addRow(["Tables Affected:", summary.tablesAffected]);
+  worksheet.addRow(["Date Range:", `${summary.dateRange.from} to ${summary.dateRange.to}`]);
+  worksheet.addRow([]);
+
+  // Define columns for data table
+  const headerRow = worksheet.addRow([
+    "#",
+    "Farmer ID",
+    "Surname",
+    "Firstname",
+    "Othernames",
+    "Email",
+    "Phone",
+    "Farmer Total Updates",
+    "Table Updated",
+    "Parent ID",
+    "Updated At",
+  ]);
+
+  // Style header row
+  headerRow.font = { bold: true };
+  headerRow.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFD3D3D3" },
+  };
+
+  // Set column widths
+  worksheet.columns = [
+    { width: 8 }, // #
+    { width: 25 }, // Farmer ID
+    { width: 20 }, // Surname
+    { width: 20 }, // Firstname
+    { width: 20 }, // Othernames
+    { width: 30 }, // Email
+    { width: 15 }, // Phone
+    { width: 18 }, // Farmer Total Updates
+    { width: 20 }, // Table Updated
+    { width: 20 }, // Parent ID
+    { width: 20 }, // Updated At
+  ];
+
+  // Add data rows with serial numbers
+  data.forEach((item, index) => {
+    worksheet.addRow([
+      index + 1,
+      item["Farmer ID"],
+      item.Surname,
+      item.Firstname,
+      item.Othernames,
+      item.Email,
+      item.Phone,
+      item["Farmer Total Updates"],
+      item["Table Updated"],
+      item["Parent ID"],
+      item["Updated At"],
+    ]);
+  });
+
+  // Set response headers
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  );
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=farmer-updates-report-${Date.now()}.xlsx`,
+  );
+
+  // Write to response
+  await workbook.xlsx.write(res);
+  res.end();
 };
