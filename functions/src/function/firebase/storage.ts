@@ -79,7 +79,11 @@ const storage = new Storage({
   credentials: AdminConfig.serviceAccount,
 });
 
-const bucketName = AdminConfig.storageBucket.replace(/^gs:\/\//, ""); // remove "gs://" if accidentally included
+const rawBucket = process.env.GCS_STORAGE_BUCKET ?? AdminConfig.storageBucket;
+if (!rawBucket) {
+  throw new Error("❌ Missing storage bucket name. Check GCS_STORAGE_BUCKET in environment.");
+}
+const bucketName = rawBucket.replace(/^gs:\/\//, ""); // remove "gs://" if accidentally included
 const bucket = storage.bucket(bucketName);
 
 /**
