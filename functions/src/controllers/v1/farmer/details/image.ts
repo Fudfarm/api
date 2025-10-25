@@ -27,7 +27,7 @@ export const getFarmerImage = async (req: AuthenticatedRequest, res: Response) =
     // they look like this: <uuid>_offline.png
     // e.g. 24491377-6da3-4584-9bb8-4c4b701c6f08_offline.png
     // we need to rename the image to use the user id as identifier
-    const path = `${SERVER.ASSET_BUCKET_URL}/${SERVER.FARMER_IMAGE_PATH}`;
+    const path = `${SERVER.FARMER_IMAGE_PATH}`;
     await renameStorageFile(
       `${path}/${user.offlineID}_offline.png`,
       `${path}/${id}.png`
