@@ -69,13 +69,18 @@
 import { Storage } from "@google-cloud/storage";
 import { AdminConfig } from "./config.js";
 
+if (!AdminConfig.storageBucket) {
+  throw new Error("❌ Missing storage bucket name. Check GCS_STORAGE_BUCKET in environment.");
+}
+
 // Initialize Google Cloud Storage
 const storage = new Storage({
   projectId: AdminConfig.projectId,
   credentials: AdminConfig.serviceAccount,
 });
 
-const bucket = storage.bucket(AdminConfig.storageBucket || "");
+const bucketName = AdminConfig.storageBucket.replace(/^gs:\/\//, ""); // remove "gs://" if accidentally included
+const bucket = storage.bucket(bucketName);
 
 /**
  * Rename (move) a file in Firebase Storage
@@ -88,10 +93,14 @@ export async function renameStorageFile(oldPath: string, newPath: string): Promi
     const oldFile = bucket.file(oldPath);
     const newFile = bucket.file(newPath);
 
-    // Copy to new path
-    await oldFile.copy(newFile);
+    const [exists] = await oldFile.exists();
+    if (!exists) {
+      console.warn(`⚠️ Source file not found: ${oldPath}`);
+      return;
+    }
 
-    // Delete old file
+    // Copy then delete
+    await oldFile.copy(newFile);
     await oldFile.delete();
 
     console.log(`✅ Renamed file: ${oldPath} → ${newPath}`);
