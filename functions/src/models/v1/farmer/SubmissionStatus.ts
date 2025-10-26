@@ -15,7 +15,7 @@ const submissionStatusSchema = new Schema<ISubmissionStatusDoc>(
     recordID: {
       type: String,
       required: true,
-      ref: "Biodata",
+      ref: "User",
     },
     isUpdated: {
       type: Boolean,
