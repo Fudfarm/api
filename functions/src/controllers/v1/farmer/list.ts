@@ -95,8 +95,19 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
       },
     });
 
+    pipeline.push({
+      $lookup: {
+        from: "Submissions",
+        localField: "_id",
+        foreignField: "recordID",
+        as: "submissionDocs",
+        select: { status: 1 },
+      },
+    });
+
     // Unwind so we can filter; keep empty if none
     pipeline.push({ $unwind: { path: "$businessTypeDocs", preserveNullAndEmptyArrays: true } });
+    pipeline.push({ $unwind: { path: "$submissionDocs", preserveNullAndEmptyArrays: true } });
 
     // If businessType is Farmer or Seller, add a match stage
     if (businessType && businessType !== "All") {
@@ -125,6 +136,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
         createdAt: 1,
         updatedAt: 1,
         businessTypeDocs: 1,
+        submissionDocs: 1,
       },
     });
 
@@ -156,6 +168,8 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
         else if (isSeller) businessType = "Trader";
       }
 
+      const status = user.submissionDocs ? user.submissionDocs.status : "Pending";
+
       return {
         id: user._id,
         firstname: user.firstname,
@@ -169,7 +183,8 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
           ? formatDateToShort(new Date(user.birthdate).toISOString())
           : undefined,
         role: user.role,
-        status: user.status,
+        accountStatus: user.status,
+        status: status, // from Submissions
         createdAt: user.createdAt
           ? formatDateToShort(new Date(user.createdAt).toISOString())
           : undefined,
