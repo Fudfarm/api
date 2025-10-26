@@ -101,7 +101,6 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
         localField: "_id",
         foreignField: "recordID",
         as: "submissionDocs",
-        select: { status: 1 },
       },
     });
 
