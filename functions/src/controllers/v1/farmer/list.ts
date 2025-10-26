@@ -123,6 +123,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
         role: 1,
         status: 1,
         createdAt: 1,
+        updatedAt: 1,
         businessTypeDocs: 1,
       },
     });
