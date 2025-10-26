@@ -97,7 +97,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
 
     pipeline.push({
       $lookup: {
-        from: "SubmissionStatus",
+        from: "submissionstatuses",
         localField: "_id",
         foreignField: "recordID",
         as: "submissionDocs",
