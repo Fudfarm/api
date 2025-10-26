@@ -135,13 +135,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
         createdAt: 1,
         updatedAt: 1,
         businessTypeDocs: 1,
-        submissionDocs: {
-          $cond: [
-            { $gt: [{ $size: "$submissionDocs" }, 0] },
-            { status: { $arrayElemAt: ["$submissionDocs.status", 0] } },
-            null,
-          ],
-        },
+        submissionDocs: 1,
       },
     });
 
