@@ -173,6 +173,9 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
         createdAt: user.createdAt
           ? formatDateToShort(new Date(user.createdAt).toISOString())
           : undefined,
+        updatedAt: user.updatedAt
+          ? formatDateToShort(new Date(user.updatedAt).toISOString())
+          : undefined,
         businessType,
       };
     });
