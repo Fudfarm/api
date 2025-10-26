@@ -143,24 +143,38 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
     const total = (aggResult[0]?.metadata?.[0]?.total) || 0;
     const users = aggResult[0]?.data || [];
 
-    const formattedUsers = users.map((user: any) => ({
-      id: user._id,
-      firstname: user.firstname,
-      othernames: user.othernames,
-      surname: user.surname,
-      phone: user.phone,
-      email: user.email,
-      gender: user.gender,
-      maritalStatus: user.maritalStatus,
-      birthdate: user.birthdate
-        ? formatDateToShort(new Date(user.birthdate).toISOString())
-        : undefined,
-      role: user.role,
-      status: user.status,
-      createdAt: user.createdAt
-        ? formatDateToShort(new Date(user.createdAt).toISOString())
-        : undefined,
-    }));
+    const formattedUsers = users.map((user: any) => {
+      const docs = user.businessTypeDocs;
+      let businessType = "N/A";
+
+      if (docs) {
+        const { isFarmer, isSeller } = docs;
+
+        if (isFarmer && isSeller) businessType = "Farmer & Trader";
+        else if (isFarmer) businessType = "Farmer";
+        else if (isSeller) businessType = "Trader";
+      }
+
+      return {
+        id: user._id,
+        firstname: user.firstname,
+        othernames: user.othernames,
+        surname: user.surname,
+        phone: user.phone,
+        email: user.email,
+        gender: user.gender,
+        maritalStatus: user.maritalStatus,
+        birthdate: user.birthdate
+          ? formatDateToShort(new Date(user.birthdate).toISOString())
+          : undefined,
+        role: user.role,
+        status: user.status,
+        createdAt: user.createdAt
+          ? formatDateToShort(new Date(user.createdAt).toISOString())
+          : undefined,
+        businessType,
+      };
+    });
 
     // Prepare search parameters summary
     const searchParams = {
