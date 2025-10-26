@@ -68,6 +68,7 @@ const farmerRouter = express.Router();
 
 farmerRouter.post("/upload", AuthGuard(["Field Officer"]), farmersUpload);
 farmerRouter.get("/list", AuthGuard([...USER_ROLES]), farmersList);
+// farmerRouter.get("/list-mobile", AuthGuard([...USER_ROLES]), farmersListMobile);
 
 // details sub-router mounted at /details
 const details = express.Router();
