@@ -96,12 +96,15 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
     });
 
     pipeline.push({
-      $lookup: {
-        from: "submissionstatuses",
-        localField: "_id",
-        foreignField: "recordID",
-        as: "submissionDocs",
-      },
+      from: "submissionstatuses",
+      let: { userId: "$_id" },
+      pipeline: [
+        { $match: { $expr: { $eq: ["$recordID", "$$userId"] } } },
+        { $sort: { createdAt: -1 } }, // Optional: latest first
+        { $limit: 1 }, // 🔥 Only one document per user
+        { $project: { status: 1, _id: 0 } },
+      ],
+      as: "submissionDocs",
     });
 
     // Unwind so we can filter; keep empty if none
