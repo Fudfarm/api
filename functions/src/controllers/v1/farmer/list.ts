@@ -96,20 +96,13 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
     });
 
     pipeline.push({
-      from: "submissionstatuses",
-      let: { userId: "$_id" },
-      pipeline: [
-        { $match: { $expr: { $eq: ["$recordID", "$$userId"] } } },
-        { $sort: { createdAt: -1 } }, // Optional: latest first
-        { $limit: 1 }, // 🔥 Only one document per user
-        { $project: { status: 1, _id: 0 } },
-      ],
-      as: "submissionDocs",
+      $lookup: {
+        from: "submissionstatuses",
+        localField: "_id",
+        foreignField: "recordID",
+        as: "submissionDocs",
+      },
     });
-
-    // Unwind so we can filter; keep empty if none
-    pipeline.push({ $unwind: { path: "$businessTypeDocs", preserveNullAndEmptyArrays: true } });
-    pipeline.push({ $unwind: { path: "$submissionDocs", preserveNullAndEmptyArrays: true } });
 
     // If businessType is Farmer or Seller, add a match stage
     if (businessType && businessType !== "All") {
@@ -137,9 +130,9 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
         status: 1,
         createdAt: 1,
         updatedAt: 1,
-        businessTypeDocs: 1,
+        businessTypeDocs: { $first: "$businessTypeDocs" },
         submissionStatus: {
-          $ifNull: ["$submissionDocs.status", "Pending"],
+          $ifNull: [{ $first: "$submissionDocs.status" }, "Pending"],
         },
       },
     });
