@@ -135,12 +135,8 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
         createdAt: 1,
         updatedAt: 1,
         businessTypeDocs: 1,
-        submissionDocs: {
-          $cond: [
-            { $gt: [{ $size: "$submissionDocs" }, 0] },
-            { status: { $arrayElemAt: ["$submissionDocs.status", 0] } },
-            null,
-          ],
+        submissionStatus: {
+          $ifNull: [{ $first: "$submissionDocs.status" }, "Pending"],
         },
       },
     });
@@ -173,8 +169,8 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
         else if (isSeller) businessType = "Trader";
       }
 
-      console.log("Submission Docs:", user.submissionDocs);
-      const status = user.submissionDocs ? user.submissionDocs.status : "Pending";
+      // console.log("Submission Docs:", user.submissionDocs);
+      // const status = user.submissionDocs ? user.submissionDocs.status : "Pending";
 
       return {
         id: user._id,
@@ -190,7 +186,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
           : undefined,
         role: user.role,
         accountStatus: user.status,
-        status: status, // from Submissions
+        status: user.submissionStatus, // from Submissions
         createdAt: user.createdAt
           ? formatDateToShort(new Date(user.createdAt).toISOString())
           : undefined,
