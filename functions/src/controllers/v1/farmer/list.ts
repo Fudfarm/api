@@ -136,7 +136,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
         updatedAt: 1,
         businessTypeDocs: 1,
         submissionStatus: {
-          $ifNull: [{ $first: "$submissionDocs.status" }, "Pending"],
+          $ifNull: ["$submissionDocs.status", "Pending"],
         },
       },
     });
