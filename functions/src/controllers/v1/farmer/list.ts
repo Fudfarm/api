@@ -167,6 +167,7 @@ export const farmersList = async (req: AuthenticatedRequest, res: Response) => {
         else if (isSeller) businessType = "Trader";
       }
 
+      console.log("Submission Docs:", user.submissionDocs);
       const status = user.submissionDocs ? user.submissionDocs.status : "Pending";
 
       return {
