@@ -71,7 +71,9 @@ export async function BiodataResponse(biodata: any): Promise<object> {
     othernames: biodata.othernames,
     gender: biodata.gender,
     maritalStatus: biodata.maritalStatus,
-    birthdate: biodata.birthdate,
+    birthdate: biodata.birthdate
+      ? formatDateToShort(biodata.birthdate.toISOString())
+      : undefined,
     noOfFamily: biodata.noOfFamily,
     disease: biodata.disease || undefined,
     role: biodata.role,
