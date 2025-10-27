@@ -6,6 +6,7 @@ import { getFarmerBiodata } from "../../controllers/v1/farmer/details/biodata";
 import { getFarmerBusinessType } from "../../controllers/v1/farmer/details/business_type";
 import { getFarmerConsent } from "../../controllers/v1/farmer/details/consent";
 import { getFarmerContact } from "../../controllers/v1/farmer/details/contact";
+import { downloadRawRejectedData } from "../../controllers/v1/farmer/details/downloadRawRejectedData";
 import { getFarmerFarmInfoList } from "../../controllers/v1/farmer/details/farm_info_list";
 import { getFarmerHarvestPerCropList } from "../../controllers/v1/farmer/details/harvest_per_crop";
 import { getFarmerImage } from "../../controllers/v1/farmer/details/image";
@@ -76,6 +77,7 @@ const edit = express.Router();
 const add = express.Router();
 const destroy = express.Router();
 const validate = express.Router();
+const download = express.Router();
 
 details.get("/biodata/:id", getFarmerBiodata);
 edit.put("/biodata/:id", validateM(biodataSchema), editFarmerBiodata);
@@ -132,6 +134,7 @@ edit.put("/work-force/:id", validateM(workForceSchema), editFarmerWorkForce);
 details.get("/submission/:id", getFarmerSubmission);
 details.get("/image/:id", getFarmerImage);
 details.get("/consent/:id", getFarmerConsent);
+download.get("/download-rejected-data", downloadRawRejectedData);
 
 // management
 edit.put("/image-status/:id", validateM(imageSchema), updateImageStatus);
@@ -145,5 +148,6 @@ farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 farmerRouter.use("/edit", AuthGuard([...USER_ROLES]), edit);
 farmerRouter.use("/add", AuthGuard([...USER_ROLES]), add);
 farmerRouter.use("/destroy", AuthGuard([...USER_ROLES]), destroy);
+farmerRouter.use("/download", AuthGuard(["Field Officer"]), download);
 
 export default farmerRouter;
