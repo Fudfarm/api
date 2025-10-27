@@ -59,10 +59,9 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
       errors: [],
     };
 
-    // Process each record individually to avoid timeout
+
     for (const data of uploadData) {
       const session = await mongoose.startSession();
-
       try {
         await session.withTransaction(async () => {
           // Validate all required sections
@@ -96,144 +95,291 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             throw new Error(JSON.stringify(allErrors));
           }
 
-          // Generate UUID for user record (this becomes the recordID for all other records)
-          const recordID = uuidv4();
-          const password = randomPassword(20);
+          let recordID = data.onlineID || null;
+          let password = randomPassword(20);
+          let isUpdate = false;
 
-          // Create user record with farmer data
-          const user = new User({
-            _id: recordID,
-            offlineID: data.offlineID,
-            surname: data.biodata.surname,
-            firstname: data.biodata.firstname,
-            othernames: data.biodata.othernames,
-            email: data.contact.email || undefined,
-            phone: data.contact.phone1 || undefined,
-            gender: data.biodata.gender,
-            maritalStatus: data.biodata.marital,
-            birthdate: new Date(data.biodata.birthDate),
-            noOfFamily: parseInt(data.biodata.families) || 0,
-            disease: data.biodata.disease || "",
-            createdBy: uploadedBy,
-            role: "Farmer",
-            status: "Disabled",
-            password,
-            otherInfo: data.biodata.others || "",
-          });
+          if (recordID) {
+            // Try to find existing user
+            const existingUser = await User.findById(recordID).session(session);
+            if (existingUser) {
+              isUpdate = true;
+              password = existingUser.password;
+              // Update user fields
+              existingUser.surname = data.biodata.surname;
+              existingUser.firstname = data.biodata.firstname;
+              existingUser.othernames = data.biodata.othernames;
+              existingUser.email = data.contact.email || undefined;
+              existingUser.phone = data.contact.phone1 || undefined;
+              existingUser.gender = data.biodata.gender;
+              existingUser.maritalStatus = data.biodata.marital;
+              existingUser.birthdate = new Date(data.biodata.birthDate);
+              existingUser.noOfFamily = parseInt(data.biodata.families) || 0;
+              existingUser.disease = data.biodata.disease || "";
+              existingUser.otherInfo = data.biodata.others || "";
+              await existingUser.save({ session });
 
-          // Create contact record
-          const contact = new Contact({
-            recordID,
-            phone1: data.contact.phone1 || "",
-            phone2: data.contact.phone2 || "",
-            email: data.contact.email || "",
-            website: data.contact.website || "",
-            promoMeans1: data.contact.promoMeans1,
-            promoMeans2: data.contact.promoMeans2 || "",
-            others: data.contact.others || "",
-          });
+              // Update or upsert all single-record associates
+              await Contact.findOneAndUpdate(
+                { recordID },
+                {
+                  phone1: data.contact.phone1 || "",
+                  phone2: data.contact.phone2 || "",
+                  email: data.contact.email || "",
+                  website: data.contact.website || "",
+                  promoMeans1: data.contact.promoMeans1,
+                  promoMeans2: data.contact.promoMeans2 || "",
+                  others: data.contact.others || "",
+                },
+                { upsert: true, session }
+              );
+              await Address.findOneAndUpdate(
+                { recordID },
+                {
+                  resState: data.address.resState,
+                  resLga: data.address.resLga,
+                  resTown: data.address.resTown,
+                  resDistrict: data.address.resDistrict,
+                  resStreet: data.address.resStreet,
+                  resLandmark: data.address.resLandmark,
+                  resHouseNumber: data.address.resHouseNumber,
+                  resHouseName: data.address.resHouseName,
+                  resFloorNumber: data.address.resFloorNumber,
+                  resFlatRoom: data.address.resFlatRoom,
+                  permState: data.address.permState,
+                  permLga: data.address.permLga,
+                  permTown: data.address.permTown,
+                  permDistrict: data.address.permDistrict,
+                  permStreet: data.address.permStreet,
+                  permLandmark: data.address.permLandmark,
+                  permHouseNumber: data.address.permHouseNumber,
+                  permHouseName: data.address.permHouseName,
+                  permFloorNumber: data.address.permFloorNumber,
+                  permFlatRoom: data.address.permFlatRoom,
+                },
+                { upsert: true, session }
+              );
+              await Workforce.findOneAndUpdate(
+                { recordID },
+                {
+                  staffSize: data.workforce.staffSize,
+                  labourType: data.workforce.labourType || "",
+                },
+                { upsert: true, session }
+              );
+              await Bank.findOneAndUpdate(
+                { recordID },
+                {
+                  bank: data.bank.bank,
+                  accountName: data.bank.accountName,
+                  accountNumber: data.bank.accountNumber,
+                },
+                { upsert: true, session }
+              );
+              await Verification.findOneAndUpdate(
+                { recordID },
+                {
+                  bvn: data.verification.bvn,
+                  nin: data.verification.nin || "",
+                  businessName: data.verification.businessName || "",
+                  businessNumber: data.verification.businessNumber || "",
+                  otherType: data.verification.otherType || "",
+                  otherNumber: data.verification.otherNumber || "",
+                  others: data.verification.others || "",
+                },
+                { upsert: true, session }
+              );
+              await Occupation.findOneAndUpdate(
+                { recordID },
+                {
+                  primaryOccupation: data.occupation.primaryOccupation,
+                  secondaryOccupation: data.occupation.secondaryOccupation || "",
+                  yearsExperience: data.occupation.yearsExperience,
+                },
+                { upsert: true, session }
+              );
+              await OtherFarmInfo.findOneAndUpdate(
+                { recordID },
+                {
+                  numCrops: data.otherFarmInfo.numCrops || 0,
+                  numLivestock: data.otherFarmInfo.numLivestock || 0,
+                  annualHarvest: data.otherFarmInfo.annualHarvest || "",
+                  yearsExperience: data.otherFarmInfo.yearsExperience || 0,
+                  challenges: data.otherFarmInfo.challenges || "",
+                },
+                { upsert: true, session }
+              );
+              await BusinessType.findOneAndUpdate(
+                { recordID },
+                {
+                  isFarmer: data.business_type.isFarmer,
+                  isSeller: data.business_type.isSeller,
+                },
+                { upsert: true, session }
+              );
+              await SubmissionStatus.findOneAndUpdate(
+                { recordID },
+                {
+                  isUpdated: data.submissionStatus.isUpdated,
+                  isConsent: data.submissionStatus.isConsent,
+                  isImage: data.submissionStatus.isImage,
+                  isSubmitted: data.submissionStatus.isSubmitted,
+                  submittedBy: uploadedBy,
+                  status: "Pending",
+                },
+                { upsert: true, session }
+              );
 
-          // Create address record
-          const address = new Address({
-            recordID,
-            resState: data.address.resState,
-            resLga: data.address.resLga,
-            resTown: data.address.resTown,
-            resDistrict: data.address.resDistrict,
-            resStreet: data.address.resStreet,
-            resLandmark: data.address.resLandmark,
-            resHouseNumber: data.address.resHouseNumber,
-            resHouseName: data.address.resHouseName,
-            resFloorNumber: data.address.resFloorNumber,
-            resFlatRoom: data.address.resFlatRoom,
-            permState: data.address.permState,
-            permLga: data.address.permLga,
-            permTown: data.address.permTown,
-            permDistrict: data.address.permDistrict,
-            permStreet: data.address.permStreet,
-            permLandmark: data.address.permLandmark,
-            permHouseNumber: data.address.permHouseNumber,
-            permHouseName: data.address.permHouseName,
-            permFloorNumber: data.address.permFloorNumber,
-            permFlatRoom: data.address.permFlatRoom,
-          });
+              // Delete all shop locations and items for this user
+              await ShopItems.deleteMany({ recordID }, { session });
+              await ShopLocation.deleteMany({ recordID }, { session });
+            } else {
+              // If not found, treat as new
+              recordID = uuidv4();
+            }
+          } else {
+            // New record
+            recordID = uuidv4();
+          }
 
-          // Create workforce record
-          const workforce = new Workforce({
-            recordID,
-            staffSize: data.workforce.staffSize,
-            labourType: data.workforce.labourType || "",
-          });
+          if (!isUpdate) {
+            // Create user record with farmer data
+            const user = new User({
+              _id: recordID,
+              offlineID: data.offlineID,
+              surname: data.biodata.surname,
+              firstname: data.biodata.firstname,
+              othernames: data.biodata.othernames,
+              email: data.contact.email || undefined,
+              phone: data.contact.phone1 || undefined,
+              gender: data.biodata.gender,
+              maritalStatus: data.biodata.marital,
+              birthdate: new Date(data.biodata.birthDate),
+              noOfFamily: parseInt(data.biodata.families) || 0,
+              disease: data.biodata.disease || "",
+              createdBy: uploadedBy,
+              role: "Farmer",
+              status: "Disabled",
+              password,
+              otherInfo: data.biodata.others || "",
+            });
+            await user.save({ session });
+          }
 
-          // Create bank record
-          const bank = new Bank({
-            recordID,
-            bank: data.bank.bank,
-            accountName: data.bank.accountName,
-            accountNumber: data.bank.accountNumber,
-          });
+          // Save or update all single-record associates (upsert covers both cases)
+          await Contact.findOneAndUpdate(
+            { recordID },
+            {
+              phone1: data.contact.phone1 || "",
+              phone2: data.contact.phone2 || "",
+              email: data.contact.email || "",
+              website: data.contact.website || "",
+              promoMeans1: data.contact.promoMeans1,
+              promoMeans2: data.contact.promoMeans2 || "",
+              others: data.contact.others || "",
+            },
+            { upsert: true, session }
+          );
+          await Address.findOneAndUpdate(
+            { recordID },
+            {
+              resState: data.address.resState,
+              resLga: data.address.resLga,
+              resTown: data.address.resTown,
+              resDistrict: data.address.resDistrict,
+              resStreet: data.address.resStreet,
+              resLandmark: data.address.resLandmark,
+              resHouseNumber: data.address.resHouseNumber,
+              resHouseName: data.address.resHouseName,
+              resFloorNumber: data.address.resFloorNumber,
+              resFlatRoom: data.address.resFlatRoom,
+              permState: data.address.permState,
+              permLga: data.address.permLga,
+              permTown: data.address.permTown,
+              permDistrict: data.address.permDistrict,
+              permStreet: data.address.permStreet,
+              permLandmark: data.address.permLandmark,
+              permHouseNumber: data.address.permHouseNumber,
+              permHouseName: data.address.permHouseName,
+              permFloorNumber: data.address.permFloorNumber,
+              permFlatRoom: data.address.permFlatRoom,
+            },
+            { upsert: true, session }
+          );
+          await Workforce.findOneAndUpdate(
+            { recordID },
+            {
+              staffSize: data.workforce.staffSize,
+              labourType: data.workforce.labourType || "",
+            },
+            { upsert: true, session }
+          );
+          await Bank.findOneAndUpdate(
+            { recordID },
+            {
+              bank: data.bank.bank,
+              accountName: data.bank.accountName,
+              accountNumber: data.bank.accountNumber,
+            },
+            { upsert: true, session }
+          );
+          await Verification.findOneAndUpdate(
+            { recordID },
+            {
+              bvn: data.verification.bvn,
+              nin: data.verification.nin || "",
+              businessName: data.verification.businessName || "",
+              businessNumber: data.verification.businessNumber || "",
+              otherType: data.verification.otherType || "",
+              otherNumber: data.verification.otherNumber || "",
+              others: data.verification.others || "",
+            },
+            { upsert: true, session }
+          );
+          await Occupation.findOneAndUpdate(
+            { recordID },
+            {
+              primaryOccupation: data.occupation.primaryOccupation,
+              secondaryOccupation: data.occupation.secondaryOccupation || "",
+              yearsExperience: data.occupation.yearsExperience,
+            },
+            { upsert: true, session }
+          );
+          await OtherFarmInfo.findOneAndUpdate(
+            { recordID },
+            {
+              numCrops: data.otherFarmInfo.numCrops || 0,
+              numLivestock: data.otherFarmInfo.numLivestock || 0,
+              annualHarvest: data.otherFarmInfo.annualHarvest || "",
+              yearsExperience: data.otherFarmInfo.yearsExperience || 0,
+              challenges: data.otherFarmInfo.challenges || "",
+            },
+            { upsert: true, session }
+          );
+          await BusinessType.findOneAndUpdate(
+            { recordID },
+            {
+              isFarmer: data.business_type.isFarmer,
+              isSeller: data.business_type.isSeller,
+            },
+            { upsert: true, session }
+          );
+          await SubmissionStatus.findOneAndUpdate(
+            { recordID },
+            {
+              isUpdated: data.submissionStatus.isUpdated,
+              isConsent: data.submissionStatus.isConsent,
+              isImage: data.submissionStatus.isImage,
+              isSubmitted: data.submissionStatus.isSubmitted,
+              submittedBy: uploadedBy,
+              status: "Pending",
+            },
+            { upsert: true, session }
+          );
 
-          // Create verification record
-          const verification = new Verification({
-            recordID,
-            bvn: data.verification.bvn,
-            nin: data.verification.nin || "",
-            businessName: data.verification.businessName || "",
-            businessNumber: data.verification.businessNumber || "",
-            otherType: data.verification.otherType || "",
-            otherNumber: data.verification.otherNumber || "",
-            others: data.verification.others || "",
-          });
-
-          // Create occupation record
-          const occupation = new Occupation({
-            recordID,
-            primaryOccupation: data.occupation.primaryOccupation,
-            secondaryOccupation: data.occupation.secondaryOccupation || "",
-            yearsExperience: data.occupation.yearsExperience,
-          });
-
-          // Create other farm info record
-          const otherFarmInfo = new OtherFarmInfo({
-            recordID,
-            numCrops: data.otherFarmInfo.numCrops || 0,
-            numLivestock: data.otherFarmInfo.numLivestock || 0,
-            annualHarvest: data.otherFarmInfo.annualHarvest || "",
-            yearsExperience: data.otherFarmInfo.yearsExperience || 0,
-            challenges: data.otherFarmInfo.challenges || "",
-          });
-
-          // Create business type record
-          const businessType = new BusinessType({
-            recordID,
-            isFarmer: data.business_type.isFarmer,
-            isSeller: data.business_type.isSeller,
-          });
-
-          // Create submission status record
-          const submissionStatus = new SubmissionStatus({
-            recordID,
-            isUpdated: data.submissionStatus.isUpdated,
-            isConsent: data.submissionStatus.isConsent,
-            isImage: data.submissionStatus.isImage,
-            isSubmitted: data.submissionStatus.isSubmitted,
-            submittedBy: uploadedBy,
-            status: "Pending",
-          });
-
-          // Save main records in parallel for better performance
-          await Promise.all([
-            user.save({ session }),
-            contact.save({ session }),
-            address.save({ session }),
-            workforce.save({ session }),
-            bank.save({ session }),
-            verification.save({ session }),
-            occupation.save({ session }),
-            otherFarmInfo.save({ session }),
-            businessType.save({ session }),
-            submissionStatus.save({ session }),
-          ]);
+          // Always delete all shop locations and items for this user (for both update and new)
+          await ShopItems.deleteMany({ recordID }, { session });
+          await ShopLocation.deleteMany({ recordID }, { session });
 
           // Create array records
           const arrayPromises = [];

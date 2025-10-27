@@ -1,22 +1,23 @@
-import { IBiodata } from "./biodata";
-import { IContact } from "./contact";
 import { IAddress } from "./address";
-import { IWorkforce } from "./workforce";
-import { IBank } from "./bank";
-import { IVerification } from "./verification";
-import { IOccupation } from "./occupation";
-import { IOtherFarmInfo } from "./otherFarmInfo";
-import { IBusinessType } from "./businessType";
 import { IAnimalInfo } from "./animalInfo";
+import { IBank } from "./bank";
+import { IBiodata } from "./biodata";
+import { IBusinessType } from "./businessType";
+import { IContact } from "./contact";
 import { ICropInfo } from "./cropInfo";
 import { IFarmInfo } from "./farmInfo";
-import { IShopLocation } from "./shopLocation";
+import { IOccupation } from "./occupation";
+import { IOtherFarmInfo } from "./otherFarmInfo";
 import { IShopItems } from "./shopItems";
+import { IShopLocation } from "./shopLocation";
 import { ISubmissionStatus } from "./submissionStatus";
+import { IVerification } from "./verification";
+import { IWorkforce } from "./workforce";
 
 // Upload data structure (what comes from the client)
 export interface IUploadData {
   offlineID: string;
+  onlineID: string;
   biodata: Omit<IBiodata, "_id" | "createdAt" | "updatedAt"> & {
     offlineID: string;
     createdAt: string;
