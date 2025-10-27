@@ -86,7 +86,7 @@ export const downloadRawRejectedData = async (req: AuthenticatedRequest, res: Re
   try {
     // 1) Find rejected submissions
     const rejectedSubs = await SubmissionStatus.find({ status: "Rejected" })
-      .select("recordID status comments reasons message updatedAt createdAt")
+      .select("recordID status comments isConsent isImage reasons message updatedAt createdAt")
       .lean();
 
     if (!rejectedSubs || rejectedSubs.length === 0) {
@@ -99,11 +99,7 @@ export const downloadRawRejectedData = async (req: AuthenticatedRequest, res: Re
     const userIds = rejectedSubs.map((s: any) => String(s.recordID));
 
     // 2) Fetch base user biodata
-    const users = await User.find({ _id: { $in: userIds }, role: "Farmer" })
-      .select(
-        "_id offlineID surname firstname othernames email phone gender maritalStatus birthdate status createdAt updatedAt"
-      )
-      .lean();
+    const users = await User.find({ _id: { $in: userIds }, role: "Farmer" }).lean();
 
     // Build a quick map
     const userMap = new Map<string, any>();
