@@ -386,6 +386,10 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
 
           // Create animal info records
           if (data.animalInfo && Array.isArray(data.animalInfo)) {
+            // delete existing animal info records to avoid duplicates
+            if (data.animalInfo.length > 0)
+              await AnimalInfo.deleteMany({ recordID }, { session });
+
             for (const animal of data.animalInfo) {
               const animalInfo = new AnimalInfo({
                 recordID,
@@ -398,6 +402,10 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
 
           // Create crop info records
           if (data.cropInfo && Array.isArray(data.cropInfo)) {
+            // delete existing crop info records to avoid duplicates
+            if (data.cropInfo.length > 0)
+              await CropInfo.deleteMany({ recordID }, { session });
+
             for (const crop of data.cropInfo) {
               const cropInfo = new CropInfo({
                 recordID,
@@ -411,6 +419,10 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
 
           // Create farm info records
           if (data.farmInfo && Array.isArray(data.farmInfo)) {
+            // delete existing farm info records to avoid duplicates
+            if (data.farmInfo.length > 0)
+              await FarmInfo.deleteMany({ recordID }, { session });
+
             for (const farm of data.farmInfo) {
               const farmInfo = new FarmInfo({
                 recordID,
