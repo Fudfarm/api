@@ -7,4 +7,6 @@ export const loginSchema = z.object({
     .string({ required_error: "Email is required" })
     .email("Invalid email"),
   password: z.string({ required_error: "Password is required" }),
+  rememberMe: z.boolean().optional(),
+  token: z.string().optional(),
 });
