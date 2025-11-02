@@ -7,6 +7,7 @@ export const loginSchema = z.object({
     .string({ required_error: "Email is required" })
     .email("Invalid email"),
   password: z.string({ required_error: "Password is required" }),
-  rememberMe: z.boolean().optional(),
+  // Form values often arrive as strings ("true"/"false"). Coerce to boolean so validation succeeds
+  rememberMe: z.coerce.boolean().optional(),
   // token: z.string().optional(),
 });
