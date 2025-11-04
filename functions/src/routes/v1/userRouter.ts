@@ -4,6 +4,7 @@ import {
   getFarmerEnrollmentStats,
   getRecentlyUpdatedFarmerRecords,
 } from "../../controllers/v1/auth/userJobStat";
+import { webDashboardStats } from "../../controllers/v1/auth/webDashboardStats";
 import { contactUs } from "../../controllers/v1/contactUs";
 import { feedbackBotContact } from "../../controllers/v1/feedback";
 import { getProfile, updateProfile } from "../../controllers/v1/user/getProfile";
@@ -31,5 +32,6 @@ userRouter.post("/devices", AuthGuard([...USER_ROLES]), getDevices);
 userRouter.get("/user/statistics/enrollments", AuthGuard(["Admin"]), getFarmerEnrollmentStats);
 userRouter.get("/user/statistics/updates", AuthGuard(["Admin"]), getRecentlyUpdatedFarmerRecords);
 
+userRouter.get("/web-dashboard", AuthGuard(["Admin"]), webDashboardStats);
 
 export default userRouter;
