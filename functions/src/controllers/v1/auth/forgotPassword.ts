@@ -10,6 +10,9 @@ import { sendEmail } from "../../../utils/mailer";
 export const forgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
 
+  const allUsers = await User.find().select("email").lean();
+  console.log("All registered user emails:", allUsers.map((u) => u.email));
+
   const user = await User.findOne({ email });
   if (!user)
     return res.status(404).json({ message: "Record not found" });
