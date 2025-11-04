@@ -25,8 +25,7 @@ export const verifyTurnstile = async (
 
     if (!turnstileToken) {
       return res.status(400).json({
-        message: "Captcha verification failed",
-        error: "Captcha token is required",
+        message: "Captcha token is required",
       });
     }
 
@@ -35,8 +34,7 @@ export const verifyTurnstile = async (
     if (!secretKey) {
       console.error("TURNSTILE_SECRET_KEY is not configured");
       return res.status(500).json({
-        message: "Captcha verification failed",
-        error: "Server configuration error",
+        message: "Captcha service not configured",
       });
     }
 
@@ -67,8 +65,7 @@ export const verifyTurnstile = async (
     if (!result.success) {
       console.error("Turnstile verification failed:", result["error-codes"]);
       return res.status(400).json({
-        message: "Captcha verification failed",
-        error: "Invalid captcha token",
+        message: "Invalid captcha token",
         details: result["error-codes"],
       });
     }
