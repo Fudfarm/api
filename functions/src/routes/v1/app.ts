@@ -15,7 +15,7 @@ const apiRouter = express.Router();
 const allowedOrigins = [
   "http://localhost:3000",
   "https://localhost:3000",
-  "https://habideenibrahim.com.ng",
+  process.env.CLIENT_URL || "",
 ];
 
 app.use(
