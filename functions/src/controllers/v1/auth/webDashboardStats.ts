@@ -145,7 +145,7 @@ export const webDashboardStats = async (req: AuthenticatedRequest, res: Response
           admins: totalAdmins,
           farmers: totalFarmers,
         },
-        registered: {
+        farmersRegistered: {
           thisYear: registeredThisYear,
           thisMonth: registeredThisMonth,
           thisWeek: registeredThisWeek,
