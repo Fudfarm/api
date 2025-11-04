@@ -1,14 +1,17 @@
-import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import User from "../../../models/v1/User";
+import { Request, Response } from "express";
+import { config } from "../../../config";
+import { resetPasswordBody } from "../../../emails/reset-password";
 import { generateToken } from "../../../function/function3";
 import { PasswordReset } from "../../../models/v1/PasswordReset";
-import { config } from "../../../config";
+import User from "../../../models/v1/User";
 import { sendEmail } from "../../../utils/mailer";
-import { resetPasswordBody } from "../../../emails/reset-password";
 
 export const forgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
+
+  const allUsers = await User.find().select("email").lean();
+  console.log("All registered user emails:", allUsers.map((u) => u.email));
 
   const user = await User.findOne({ email });
   if (!user)
