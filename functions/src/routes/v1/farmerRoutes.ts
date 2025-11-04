@@ -25,6 +25,7 @@ import { editFarmerBusinessType } from "../../controllers/v1/farmer/edit/busines
 import { updateConsentStatus } from "../../controllers/v1/farmer/edit/consent";
 import { editFarmerContact } from "../../controllers/v1/farmer/edit/contact";
 import { addFarmerCrop, destroyFarmerCrop, editFarmerCrop } from "../../controllers/v1/farmer/edit/crop";
+import { destroyFarmer } from "../../controllers/v1/farmer/edit/destroyFarmer";
 import { addFarmerFarm, destroyFarmerFarm, editFarmerFarm } from "../../controllers/v1/farmer/edit/farm_info";
 import { updateImageStatus } from "../../controllers/v1/farmer/edit/image";
 import { editFarmerOccupation } from "../../controllers/v1/farmer/edit/occupation";
@@ -64,6 +65,7 @@ import { submissionSchema } from "../../validators/farmer/submission";
 import { verificationSchema } from "../../validators/farmer/verification";
 import { videoSchema } from "../../validators/farmer/video";
 import { workForceSchema } from "../../validators/farmer/work_force";
+import { passwordSchema } from "../../validators/password";
 
 const farmerRouter = express.Router();
 
@@ -143,6 +145,7 @@ edit.put("/consent-status/:id", validateM(videoSchema), updateConsentStatus);
 validate.put("/update-record-status/:id", validateM(submissionSchema), updateFarmerRecordStatus);
 farmerRouter.use("/validate", AuthGuard(["Admin"]), validate);
 
+destroy.delete("/destroy-farmer/:id", AuthGuard(["Admin"]), validateM(passwordSchema), destroyFarmer);
 
 farmerRouter.use("/details", AuthGuard([...USER_ROLES]), details);
 farmerRouter.use("/edit", AuthGuard([...USER_ROLES]), edit);

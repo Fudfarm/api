@@ -58,3 +58,18 @@ export async function renameStorageFile(oldPath: string, newPath: string): Promi
   await oldFile.copy(newFile);
   await oldFile.delete();
 }
+
+/**
+ * Delete a file from Firebase Storage / Google Cloud Storage if it exists.
+ * @param {string} path - Path of the file in the bucket
+ */
+export async function deleteStorageFile(path: string): Promise<void> {
+  const bucket = getBucket();
+  const file = bucket.file(path);
+  const [exists] = await file.exists();
+  if (!exists) {
+    console.warn(`⚠️ File not found for deletion: ${path}`);
+    return;
+  }
+  await file.delete();
+}
