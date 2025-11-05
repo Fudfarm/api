@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { handleError } from "../../../function/error";
-import { formatDateToShort } from "../../../function/function3";
+// import { formatDateToShort } from "../../../function/function3";
 import { AuthenticatedRequest } from "../../../middleware/auth";
 import User from "../../../models/v1/User";
 
@@ -127,21 +127,21 @@ export const webDashboardStats = async (req: AuthenticatedRequest, res: Response
     });
 
     // Last 10 updated farmer records
-    const lastUpdatedFarmers = await User.find({ role: "Farmer" })
-      .select("_id surname firstname othernames email phone updatedAt createdAt")
-      .sort({ updatedAt: -1 })
-      .limit(10)
-      .lean();
+    // const lastUpdatedFarmers = await User.find({ role: "Farmer" })
+    //   .select("_id surname firstname othernames email phone updatedAt createdAt")
+    //   .sort({ updatedAt: -1 })
+    //   .limit(10)
+    //   .lean();
 
-    const lastUpdated = lastUpdatedFarmers.map((u: any) => ({
-      id: u._id,
-      name: `${u.surname} ${u.firstname} ${u.othernames || ""}`.trim(),
-      email: u.email,
-      phone: u.phone,
-      createdAt: u.createdAt ? formatDateToShort(u.createdAt?.toISOString()) : "N/A",
-      updatedAt: u.updatedAt ? formatDateToShort(u.updatedAt?.toISOString(), { includeTime: true }) : "N/A",
-      profileLink: `/admin/farmer/${u._id}`,
-    }));
+    // const lastUpdated = lastUpdatedFarmers.map((u: any) => ({
+    //   id: u._id,
+    //   name: `${u.surname} ${u.firstname} ${u.othernames || ""}`.trim(),
+    //   email: u.email,
+    //   phone: u.phone,
+    //   createdAt: u.createdAt ? formatDateToShort(u.createdAt?.toISOString()) : "N/A",
+    //   updatedAt: u.updatedAt ? formatDateToShort(u.updatedAt?.toISOString(), { includeTime: true }) : "N/A",
+    //   profileLink: `/admin/farmer/${u._id}`,
+    // }));
 
     return res.status(200).json({
       message: "Web dashboard statistics retrieved",
@@ -165,7 +165,7 @@ export const webDashboardStats = async (req: AuthenticatedRequest, res: Response
           quarterly,
           annual,
         },
-        lastUpdated,
+        // lastUpdated,
       },
     });
   } catch (error) {
