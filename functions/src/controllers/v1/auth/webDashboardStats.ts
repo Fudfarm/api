@@ -21,10 +21,12 @@ export const webDashboardStats = async (req: AuthenticatedRequest, res: Response
     const year = Number.isFinite(yearParam) && yearParam > 1900 ? yearParam : now.getFullYear();
 
     // Role totals
-    const [totalFieldOfficers, totalAdmins, totalFarmers] = await Promise.all([
+    const [totalFieldOfficers, totalAdmins, totalFarmers, inactiveFieldOfficers, inactiveAdmins] = await Promise.all([
       User.countDocuments({ role: "Field Officer" }),
       User.countDocuments({ role: "Admin" }),
       User.countDocuments({ role: "Farmer" }),
+      User.countDocuments({ role: "Field Officer", status: { $ne: "Active" } }),
+      User.countDocuments({ role: "Admin", status: { $ne: "Active" } }),
     ]);
 
     // Registered counts for farmers: this year, this month, this week
@@ -148,6 +150,9 @@ export const webDashboardStats = async (req: AuthenticatedRequest, res: Response
           fieldOfficers: totalFieldOfficers,
           admins: totalAdmins,
           farmers: totalFarmers,
+          inactiveFieldOfficers,
+          inactiveAdmins,
+          totalActiveStaff: totalFieldOfficers + totalAdmins - inactiveFieldOfficers - inactiveAdmins,
         },
         farmersRegistered: {
           thisYear: registeredThisYear,
