@@ -30,15 +30,19 @@ export const webDashboardStats = async (req: AuthenticatedRequest, res: Response
     // Registered counts for farmers: this year, this month, this week
     const startOfYear = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    // Last calendar month range
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
     const dayOfWeek = now.getDay();
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - dayOfWeek);
     startOfWeek.setHours(0, 0, 0, 0);
 
-    const [registeredThisYear, registeredThisMonth, registeredThisWeek] = await Promise.all([
+    const [registeredThisYear, registeredThisMonth, registeredThisWeek, registeredLastMonth] = await Promise.all([
       User.countDocuments({ role: "Farmer", createdAt: { $gte: startOfYear, $lte: now } }),
       User.countDocuments({ role: "Farmer", createdAt: { $gte: startOfMonth, $lte: now } }),
       User.countDocuments({ role: "Farmer", createdAt: { $gte: startOfWeek, $lte: now } }),
+      User.countDocuments({ role: "Farmer", createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } }),
     ]);
 
     // Monthly counts for the specified year (Jan..Dec)
@@ -147,6 +151,7 @@ export const webDashboardStats = async (req: AuthenticatedRequest, res: Response
         },
         farmersRegistered: {
           thisYear: registeredThisYear,
+          lastMonth: registeredLastMonth,
           thisMonth: registeredThisMonth,
           thisWeek: registeredThisWeek,
         },
