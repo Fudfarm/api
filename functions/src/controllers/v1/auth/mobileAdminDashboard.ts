@@ -81,17 +81,12 @@ export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Respo
         },
         {
           $project: {
+            offlineID: 1,
             firstname: 1,
             othernames: 1,
             surname: 1,
             phone: 1,
-            email: 1,
-            gender: 1,
-            maritalStatus: 1,
-            birthdate: 1,
-            role: 1,
             status: 1,
-            createdAt: 1,
             updatedAt: 1,
             businessTypeDocs: { $first: "$businessTypeDocs" },
             submissionStatus: { $ifNull: [{ $first: "$submissionDocs.status" }, "Pending"] },
@@ -277,20 +272,12 @@ export function formatRecentUpdatedFarmers(recentUpdatedFarmers: any[]) {
 
     return {
       id: user._id,
-      firstname: user.firstname,
-      othernames: user.othernames,
-      surname: user.surname,
+      offlineID: user.offlineID,
+      fullName: `${user.firstname} ${user.othernames} ${user.surname}`.trim(),
       phone: user.phone,
-      email: user.email,
-      gender: user.gender,
-      maritalStatus: user.maritalStatus,
-      birthdate: user.birthdate ? new Date(user.birthdate).toISOString().slice(0, 10) : undefined,
-      role: user.role,
-      accountStatus: user.status,
-      status: user.submissionStatus,
-      createdAt: user.createdAt ? new Date(user.createdAt).toISOString().slice(0, 10) : undefined,
-      updatedAt: user.updatedAt ? new Date(user.updatedAt).toISOString().slice(0, 10) : undefined,
       businessType,
+      updatedAt: user.updatedAt ? new Date(user.updatedAt).toISOString().slice(0, 10) : undefined,
+      status: user.submissionStatus,
     };
   });
 }

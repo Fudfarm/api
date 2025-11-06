@@ -80,17 +80,12 @@ export const mobileFieldOfficerDashboard = async (req: AuthenticatedRequest, res
         },
         {
           $project: {
+            offlineID: 1,
             firstname: 1,
             othernames: 1,
             surname: 1,
             phone: 1,
-            email: 1,
-            gender: 1,
-            maritalStatus: 1,
-            birthdate: 1,
-            role: 1,
             status: 1,
-            createdAt: 1,
             updatedAt: 1,
             businessTypeDocs: { $first: "$businessTypeDocs" },
             submissionStatus: { $ifNull: [{ $first: "$submissionDocs.status" }, "Pending"] },
