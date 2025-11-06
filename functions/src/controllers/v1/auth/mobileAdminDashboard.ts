@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../function/error";
 import { AuthenticatedRequest } from "../../../middleware/auth";
 import User from "../../../models/v1/User";
+import { SubmissionStatus } from "../../../models/v1/farmer";
 
 export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -135,10 +136,28 @@ export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Respo
         { $group: { _id: "$year", count: { $sum: 1 } } },
       ]).exec(),
 
-      // Status counts (run in parallel)
-      User.countDocuments({ "role": "Farmer", "SubmissionStatus.status": "Approved" }),
-      User.countDocuments({ "role": "Farmer", "SubmissionStatus.status": "Pending" }),
-      User.countDocuments({ "role": "Farmer", "SubmissionStatus.status": "Rejected" }),
+      // Status counts (from SubmissionStatus collection; join to users to ensure role=Farmer)
+      SubmissionStatus.aggregate([
+        { $match: { status: "Approved" } },
+        { $lookup: { from: "users", localField: "recordID", foreignField: "_id", as: "user" } },
+        { $unwind: "$user" },
+        { $match: { "user.role": "Farmer" } },
+        { $count: "count" },
+      ]).exec().then((r: any[]) => (r[0]?.count) || 0),
+      SubmissionStatus.aggregate([
+        { $match: { status: "Pending" } },
+        { $lookup: { from: "users", localField: "recordID", foreignField: "_id", as: "user" } },
+        { $unwind: "$user" },
+        { $match: { "user.role": "Farmer" } },
+        { $count: "count" },
+      ]).exec().then((r: any[]) => (r[0]?.count) || 0),
+      SubmissionStatus.aggregate([
+        { $match: { status: "Rejected" } },
+        { $lookup: { from: "users", localField: "recordID", foreignField: "_id", as: "user" } },
+        { $unwind: "$user" },
+        { $match: { "user.role": "Farmer" } },
+        { $count: "count" },
+      ]).exec().then((r: any[]) => (r[0]?.count) || 0),
 
       // Role counts
       User.countDocuments({ role: "Field Officer" }),
@@ -240,8 +259,13 @@ export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Respo
 export default mobileAdminDashboard;
 
 
-export const formatRecentUpdatedFarmers = (recentUpdatedFarmers: any[]) =>
-  recentUpdatedFarmers.map((user) => {
+/**
+ * Format recent updated farmers into the API-friendly shape.
+ * @param {any[]} recentUpdatedFarmers - raw aggregation results from SubmissionStatus lookup
+ * @return {any[]} formatted array suitable for API responses
+ */
+export function formatRecentUpdatedFarmers(recentUpdatedFarmers: any[]) {
+  return recentUpdatedFarmers.map((user) => {
     const docs = user.businessTypeDocs;
     let businessType = "N/A";
     if (docs) {
@@ -269,3 +293,4 @@ export const formatRecentUpdatedFarmers = (recentUpdatedFarmers: any[]) =>
       businessType,
     };
   });
+}

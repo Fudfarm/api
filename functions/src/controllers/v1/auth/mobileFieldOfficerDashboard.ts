@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { handleError } from "../../../function/error";
 import { AuthenticatedRequest } from "../../../middleware/auth";
+import { SubmissionStatus } from "../../../models/v1/farmer";
 import User from "../../../models/v1/User";
 import { formatRecentUpdatedFarmers } from "./mobileAdminDashboard";
 
@@ -139,10 +140,28 @@ export const mobileFieldOfficerDashboard = async (req: AuthenticatedRequest, res
         { $group: { _id: "$year", count: { $sum: 1 } } },
       ]).exec(),
 
-      // Counts by status
-      User.countDocuments({ ...baseMatch, "SubmissionStatus.status": "Approved" }),
-      User.countDocuments({ ...baseMatch, "SubmissionStatus.status": "Pending" }),
-      User.countDocuments({ ...baseMatch, "SubmissionStatus.status": "Rejected" }),
+      // Counts by status (from SubmissionStatus collection; join to users to ensure role=Farmer and createdBy)
+      SubmissionStatus.aggregate([
+        { $match: { status: "Approved" } },
+        { $lookup: { from: "users", localField: "recordID", foreignField: "_id", as: "user" } },
+        { $unwind: "$user" },
+        { $match: { "user.role": "Farmer", "user.createdBy": userId } },
+        { $count: "count" },
+      ]).exec().then((r: any[]) => (r[0]?.count) || 0),
+      SubmissionStatus.aggregate([
+        { $match: { status: "Pending" } },
+        { $lookup: { from: "users", localField: "recordID", foreignField: "_id", as: "user" } },
+        { $unwind: "$user" },
+        { $match: { "user.role": "Farmer", "user.createdBy": userId } },
+        { $count: "count" },
+      ]).exec().then((r: any[]) => (r[0]?.count) || 0),
+      SubmissionStatus.aggregate([
+        { $match: { status: "Rejected" } },
+        { $lookup: { from: "users", localField: "recordID", foreignField: "_id", as: "user" } },
+        { $unwind: "$user" },
+        { $match: { "user.role": "Farmer", "user.createdBy": userId } },
+        { $count: "count" },
+      ]).exec().then((r: any[]) => (r[0]?.count) || 0),
     ]);
 
     // === FORMAT RESULTS ===
