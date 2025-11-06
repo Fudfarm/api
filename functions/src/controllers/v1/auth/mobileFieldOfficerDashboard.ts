@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../function/error";
 import { AuthenticatedRequest } from "../../../middleware/auth";
 import User from "../../../models/v1/User";
+import { formatRecentUpdatedFarmers } from "./mobileAdminDashboard";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const WEEK_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -47,6 +48,7 @@ export const mobileFieldOfficerDashboard = async (req: AuthenticatedRequest, res
 
     // === RUN AGGREGATIONS IN PARALLEL ===
     const [
+      recentUpdatedFarmers,
       monthlyAgg,
       dailyAggThis,
       dailyAggLast,
@@ -56,6 +58,46 @@ export const mobileFieldOfficerDashboard = async (req: AuthenticatedRequest, res
       pendingCount,
       rejectedCount,
     ] = await Promise.all([
+      // recent updated farmers (limit 10)
+      User.aggregate([
+        { $match: { ...baseMatch } },
+        {
+          $lookup: {
+            from: "businesstypes",
+            localField: "_id",
+            foreignField: "recordID",
+            as: "businessTypeDocs",
+          },
+        },
+        {
+          $lookup: {
+            from: "submissionstatuses",
+            localField: "_id",
+            foreignField: "recordID",
+            as: "submissionDocs",
+          },
+        },
+        {
+          $project: {
+            firstname: 1,
+            othernames: 1,
+            surname: 1,
+            phone: 1,
+            email: 1,
+            gender: 1,
+            maritalStatus: 1,
+            birthdate: 1,
+            role: 1,
+            status: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            businessTypeDocs: { $first: "$businessTypeDocs" },
+            submissionStatus: { $ifNull: [{ $first: "$submissionDocs.status" }, "Pending"] },
+          },
+        },
+        { $sort: { updatedAt: -1 } },
+        { $limit: 10 },
+      ]).exec(),
       // Monthly aggregation (3 years)
       User.aggregate([
         { $match: { ...baseMatch, createdAt: buildRange(monthlyStart, monthlyEnd) } },
@@ -158,13 +200,16 @@ export const mobileFieldOfficerDashboard = async (req: AuthenticatedRequest, res
       count: annualAgg.find((a) => a._id === y)?.count || 0,
     }));
 
-    // === SEND RESPONSE ===
+    // Format recent updated farmers
+    const formattedRecentUpdatedFarmers = formatRecentUpdatedFarmers(recentUpdatedFarmers);
+
     return res.status(200).json({
       message: "Web dashboard statistics retrieved",
       data: {
         pendingCount,
         approvedCount,
         rejectedCount,
+        recentUpdatedFarmers: formattedRecentUpdatedFarmers,
         series: { lastMonth, thisMonth, thisWeek, monthly, quarterly, annual },
       },
     });

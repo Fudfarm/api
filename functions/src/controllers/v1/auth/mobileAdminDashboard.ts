@@ -44,6 +44,7 @@ export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Respo
 
     // Run independent queries in parallel (improves performance)
     const [
+      recentUpdatedFarmers,
       monthlyAgg,
       dailyAggThis,
       dailyAggLast,
@@ -58,6 +59,47 @@ export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Respo
       inactiveFieldOfficers,
       inactiveAdmins,
     ] = await Promise.all([
+      // recent updated farmers (limit 10)
+      User.aggregate([
+        { $match: { role: "Farmer" } },
+        {
+          $lookup: {
+            from: "businesstypes",
+            localField: "_id",
+            foreignField: "recordID",
+            as: "businessTypeDocs",
+          },
+        },
+        {
+          $lookup: {
+            from: "submissionstatuses",
+            localField: "_id",
+            foreignField: "recordID",
+            as: "submissionDocs",
+          },
+        },
+        {
+          $project: {
+            firstname: 1,
+            othernames: 1,
+            surname: 1,
+            phone: 1,
+            email: 1,
+            gender: 1,
+            maritalStatus: 1,
+            birthdate: 1,
+            role: 1,
+            status: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            businessTypeDocs: { $first: "$businessTypeDocs" },
+            submissionStatus: { $ifNull: [{ $first: "$submissionDocs.status" }, "Pending"] },
+          },
+        },
+        { $sort: { updatedAt: -1 } },
+        { $limit: 10 },
+      ]).exec(),
+
       // Monthly aggregation
       User.aggregate([
         { $match: { role: "Farmer", createdAt: { $gte: startOfMonthlyRange, $lte: endOfMonthlyRange } } },
@@ -162,6 +204,9 @@ export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Respo
       return { year: y, count: found ? found.count : 0 };
     });
 
+    // Format recent updated farmers (same shape as field-officer response)
+    const formattedRecentUpdatedFarmers = formatRecentUpdatedFarmers(recentUpdatedFarmers);
+
     // Return same JSON structure
     return res.status(200).json({
       message: "Web dashboard statistics retrieved",
@@ -176,6 +221,7 @@ export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Respo
         pendingCount,
         approvedCount,
         rejectedCount,
+        recentUpdatedFarmers: formattedRecentUpdatedFarmers,
         series: {
           lastMonth,
           thisMonth,
@@ -192,3 +238,34 @@ export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Respo
 };
 
 export default mobileAdminDashboard;
+
+
+export const formatRecentUpdatedFarmers = (recentUpdatedFarmers: any[]) =>
+  recentUpdatedFarmers.map((user) => {
+    const docs = user.businessTypeDocs;
+    let businessType = "N/A";
+    if (docs) {
+      const { isFarmer, isSeller } = docs;
+      if (isFarmer && isSeller) businessType = "Farmer & Trader";
+      else if (isFarmer) businessType = "Farmer";
+      else if (isSeller) businessType = "Trader";
+    }
+
+    return {
+      id: user._id,
+      firstname: user.firstname,
+      othernames: user.othernames,
+      surname: user.surname,
+      phone: user.phone,
+      email: user.email,
+      gender: user.gender,
+      maritalStatus: user.maritalStatus,
+      birthdate: user.birthdate ? new Date(user.birthdate).toISOString().slice(0, 10) : undefined,
+      role: user.role,
+      accountStatus: user.status,
+      status: user.submissionStatus,
+      createdAt: user.createdAt ? new Date(user.createdAt).toISOString().slice(0, 10) : undefined,
+      updatedAt: user.updatedAt ? new Date(user.updatedAt).toISOString().slice(0, 10) : undefined,
+      businessType,
+    };
+  });
