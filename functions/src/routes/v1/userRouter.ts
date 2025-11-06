@@ -1,5 +1,7 @@
 import express from "express";
 import { getDevices } from "../../controllers/v1/auth/devices";
+import { mobileAdminDashboard } from "../../controllers/v1/auth/mobileAdminDashboard";
+import { mobileFieldOfficerDashboard } from "../../controllers/v1/auth/mobileFieldOfficerDashboard";
 import {
   getFarmerEnrollmentStats,
   getRecentlyUpdatedFarmerRecords,
@@ -33,5 +35,8 @@ userRouter.get("/user/statistics/enrollments", AuthGuard(["Admin"]), getFarmerEn
 userRouter.get("/user/statistics/updates", AuthGuard(["Admin"]), getRecentlyUpdatedFarmerRecords);
 
 userRouter.get("/web-dashboard", AuthGuard(["Admin"]), webDashboardStats);
+userRouter.get("/mobile-field-officer-dashboard", AuthGuard(["Admin"]), mobileFieldOfficerDashboard);
+userRouter.get("/mobile-admin-dashboard", AuthGuard(["Admin"]), mobileAdminDashboard);
+userRouter.get("/mobile-admin-dashboard", AuthGuard(["Admin"]), webDashboardStats);
 
 export default userRouter;
