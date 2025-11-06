@@ -3,78 +3,24 @@ import { handleError } from "../../../function/error";
 import { AuthenticatedRequest } from "../../../middleware/auth";
 import User from "../../../models/v1/User";
 
-/**
- * Returns dashboard statistics including role counts, period counts (year/month/week),
- * monthly series for a year, quarterly aggregates and annual aggregates (last 5 years),
- * and the last 10 farmers ordered by updatedAt.
- *
- * @param {AuthenticatedRequest} req - Authenticated Express request (optional query: year)
- * @param {Response} res - Express response
- */
 export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const now = new Date();
 
-    // Optional query params
     const yearParam = req.query.year ? Number(req.query.year) : now.getFullYear();
     const year = Number.isFinite(yearParam) && yearParam > 1900 ? yearParam : now.getFullYear();
 
-    // Registered counts for farmers: this year, this month, this week
+    // Calculate reusable date ranges
     const dayOfWeek = now.getDay();
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - dayOfWeek);
     startOfWeek.setHours(0, 0, 0, 0);
 
-    // Monthly counts for the present year and two years backward (Jan..Dec per year)
-    // Build years array: [currentYear-2, currentYear-1, currentYear]
-    const monthlyYears: number[] = [];
-    for (let i = 2; i >= 0; i--) {
-      monthlyYears.push(now.getFullYear() - i);
-    }
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
 
-    const startOfMonthlyRange = new Date(monthlyYears[0], 0, 1, 0, 0, 0, 0);
-    const endOfMonthlyRange = new Date(monthlyYears[monthlyYears.length - 1], 11, 31, 23, 59, 59, 999);
-
-    // Aggregate by year and month across the 3-year range
-    const monthlyAgg = await User.aggregate([
-      {
-        $match: {
-          "role": "Farmer",
-          "createdAt": { $gte: startOfMonthlyRange, $lte: endOfMonthlyRange },
-        },
-      },
-      {
-        $project: {
-          year: { $year: "$createdAt" },
-          month: { $month: "$createdAt" },
-        },
-      },
-      {
-        $group: {
-          _id: { year: "$year", month: "$month" },
-          count: { $sum: 1 },
-        },
-      },
-    ]).exec();
-
-    // Map aggregation results into an array of years each containing 12 months
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const monthly = monthlyYears.map((y) => {
-      const months = monthNames.map((m, idx) => {
-        const monthNumber = idx + 1;
-        const found = monthlyAgg.find((a: any) => Number(a._id.year) === y && Number(a._id.month) === monthNumber);
-        return {
-          label: `${m}`,
-          month: monthNumber,
-          year: y,
-          count: found ? found.count : 0,
-        };
-      });
-      return { year: y, months };
-    });
-
-    // Daily counts for this month and last month (include all days even if count is 0)
-    const thisMonthIndex = now.getMonth(); // 0-based
+    const thisMonthIndex = now.getMonth();
     const thisMonthYear = now.getFullYear();
     const lastMonthDate = new Date(thisMonthYear, thisMonthIndex - 1, 1);
     const lastMonthIndex = lastMonthDate.getMonth();
@@ -86,103 +32,154 @@ export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Respo
     const startOfLastMonth = new Date(lastMonthYear, lastMonthIndex, 1, 0, 0, 0, 0);
     const endOfLastMonth = new Date(lastMonthYear, lastMonthIndex + 1, 0, 23, 59, 59, 999);
 
-    const dailyAggThis = await User.aggregate([
-      { $match: { role: "Farmer", createdAt: { $gte: startOfThisMonth, $lte: endOfThisMonth } } },
-      { $project: { day: { $dayOfMonth: "$createdAt" } } },
-      { $group: { _id: "$day", count: { $sum: 1 } } },
-    ]).exec();
+    // 3 years range for monthly
+    const monthlyYears = [now.getFullYear() - 2, now.getFullYear() - 1, now.getFullYear()];
+    const startOfMonthlyRange = new Date(monthlyYears[0], 0, 1);
+    const endOfMonthlyRange = new Date(monthlyYears[2], 11, 31, 23, 59, 59, 999);
 
-    const dailyAggLast = await User.aggregate([
-      { $match: { role: "Farmer", createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
-      { $project: { day: { $dayOfMonth: "$createdAt" } } },
-      { $group: { _id: "$day", count: { $sum: 1 } } },
-    ]).exec();
+    // 5-year range for annual
+    const years = Array.from({ length: 5 }, (_, i) => now.getFullYear() - 4 + i);
+    const annualRangeStart = new Date(years[0], 0, 1);
+    const annualRangeEnd = new Date(years[4], 11, 31, 23, 59, 59, 999);
 
-    const daysInThisMonth = new Date(thisMonthYear, thisMonthIndex + 1, 0).getDate();
-    const daysInLastMonth = new Date(lastMonthYear, lastMonthIndex + 1, 0).getDate();
+    // Run independent queries in parallel (improves performance)
+    const [
+      monthlyAgg,
+      dailyAggThis,
+      dailyAggLast,
+      weeklyAgg,
+      annualAgg,
+      approvedCount,
+      pendingCount,
+      rejectedCount,
+      totalFieldOfficers,
+      totalAdmins,
+      totalFarmers,
+      inactiveFieldOfficers,
+      inactiveAdmins,
+    ] = await Promise.all([
+      // Monthly aggregation
+      User.aggregate([
+        { $match: { role: "Farmer", createdAt: { $gte: startOfMonthlyRange, $lte: endOfMonthlyRange } } },
+        { $project: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } } },
+        { $group: { _id: { year: "$year", month: "$month" }, count: { $sum: 1 } } },
+      ]).exec(),
 
-    const thisMonth = Array.from({ length: daysInThisMonth }, (_, i) => {
-      const day = i + 1;
-      const found = dailyAggThis.find((d: any) => Number(d._id) === day);
-      const dateStr = new Date(thisMonthYear, thisMonthIndex, day).toISOString().slice(0, 10);
-      return { day, date: dateStr, count: found ? found.count : 0 };
+      // Daily - this month
+      User.aggregate([
+        { $match: { role: "Farmer", createdAt: { $gte: startOfThisMonth, $lte: endOfThisMonth } } },
+        { $project: { day: { $dayOfMonth: "$createdAt" } } },
+        { $group: { _id: "$day", count: { $sum: 1 } } },
+      ]).exec(),
+
+      // Daily - last month
+      User.aggregate([
+        { $match: { role: "Farmer", createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
+        { $project: { day: { $dayOfMonth: "$createdAt" } } },
+        { $group: { _id: "$day", count: { $sum: 1 } } },
+      ]).exec(),
+
+      // Weekly - current week
+      User.aggregate([
+        { $match: { role: "Farmer", createdAt: { $gte: startOfWeek, $lte: endOfWeek } } },
+        { $project: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" }, day: { $dayOfMonth: "$createdAt" } } },
+        { $group: { _id: { year: "$year", month: "$month", day: "$day" }, count: { $sum: 1 } } },
+      ]).exec(),
+
+      // Annual aggregation
+      User.aggregate([
+        { $match: { role: "Farmer", createdAt: { $gte: annualRangeStart, $lte: annualRangeEnd } } },
+        { $project: { year: { $year: "$createdAt" } } },
+        { $group: { _id: "$year", count: { $sum: 1 } } },
+      ]).exec(),
+
+      // Status counts (run in parallel)
+      User.countDocuments({ "role": "Farmer", "SubmissionStatus.status": "Approved" }),
+      User.countDocuments({ "role": "Farmer", "SubmissionStatus.status": "Pending" }),
+      User.countDocuments({ "role": "Farmer", "SubmissionStatus.status": "Rejected" }),
+
+      // Role counts
+      User.countDocuments({ role: "Field Officer" }),
+      User.countDocuments({ role: "Admin" }),
+      User.countDocuments({ role: "Farmer" }),
+      User.countDocuments({ role: "Field Officer", status: { $ne: "Active" } }),
+      User.countDocuments({ role: "Admin", status: { $ne: "Active" } }),
+    ]);
+
+    // Map results back into same shape as before
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthly = monthlyYears.map((y) => ({
+      year: y,
+      months: monthNames.map((m, idx) => {
+        const found = monthlyAgg.find((a) => Number(a._id.year) === y && Number(a._id.month) === idx + 1);
+        return { label: m, month: idx + 1, year: y, count: found ? found.count : 0 };
+      }),
+    }));
+
+    const daysArray = (agg: any[], year: number, monthIndex: number) =>
+      Array.from({ length: new Date(year, monthIndex + 1, 0).getDate() }, (_, i) => {
+        const day = i + 1;
+        const found = agg.find((d: any) => Number(d._id) === day);
+        const dateStr = new Date(year, monthIndex, day).toISOString().slice(0, 10);
+        return { day, date: dateStr, count: found ? found.count : 0 };
+      });
+
+    const thisMonth = daysArray(dailyAggThis, thisMonthYear, thisMonthIndex);
+    const lastMonth = daysArray(dailyAggLast, lastMonthYear, lastMonthIndex);
+
+    const weekDayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const thisWeek = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
+      const found = weeklyAgg.find(
+        (a) =>
+          Number(a._id.year) === d.getFullYear() &&
+          Number(a._id.month) === d.getMonth() + 1 &&
+          Number(a._id.day) === d.getDate()
+      );
+      return {
+        weekday: weekDayNames[d.getDay()],
+        day: d.getDate(),
+        date: d.toISOString().slice(0, 10),
+        count: found ? found.count : 0,
+      };
     });
 
-    const lastMonth = Array.from({ length: daysInLastMonth }, (_, i) => {
-      const day = i + 1;
-      const found = dailyAggLast.find((d: any) => Number(d._id) === day);
-      const dateStr = new Date(lastMonthYear, lastMonthIndex, day).toISOString().slice(0, 10);
-      return { day, date: dateStr, count: found ? found.count : 0 };
-    });
-
-    // Quarterly aggregates derived from the months of the requested year
     const monthsForRequestedYear = monthly.find((m) => m.year === year)?.months ?? [];
     const quarterly = [
       { quarter: "Q1", months: [1, 2, 3] },
       { quarter: "Q2", months: [4, 5, 6] },
       { quarter: "Q3", months: [7, 8, 9] },
       { quarter: "Q4", months: [10, 11, 12] },
-    ].map((q) => {
-      const qCount = monthsForRequestedYear
-        .filter((m) => q.months.includes(m.month))
-        .reduce((s, m) => s + m.count, 0);
-      return { quarter: q.quarter, year, count: qCount };
-    });
-
-    // Annual counts for the last 5 years (including current)
-    const years: number[] = [];
-    for (let i = 4; i >= 0; i--) {
-      years.push(now.getFullYear() - i);
-    }
-
-    const annualRangeStart = new Date(years[0], 0, 1, 0, 0, 0, 0);
-    const annualRangeEnd = new Date(years[years.length - 1], 11, 31, 23, 59, 59, 999);
-
-    const annualAgg = await User.aggregate([
-      {
-        $match: {
-          "role": "Farmer",
-
-          "createdAt": { $gte: annualRangeStart, $lte: annualRangeEnd },
-        },
-      },
-      {
-        $project: { year: { $year: "$createdAt" } },
-      },
-      {
-        $group: { _id: "$year", count: { $sum: 1 } },
-      },
-    ]).exec();
+    ].map((q) => ({
+      quarter: q.quarter,
+      year,
+      count: monthsForRequestedYear.filter((m) => q.months.includes(m.month)).reduce((s, m) => s + m.count, 0),
+    }));
 
     const annual = years.map((y) => {
       const found = annualAgg.find((a: any) => Number(a._id) === y);
       return { year: y, count: found ? found.count : 0 };
     });
 
-    const approvedCount = await User.countDocuments({
-      "role": "Farmer",
-      "SubmissionStatus.status": "Approved",
-    });
-
-    const pendingCount = await User.countDocuments({
-      "role": "Farmer",
-      "SubmissionStatus.status": "Pending",
-    });
-
-    const rejectedCount = await User.countDocuments({
-      "role": "Farmer",
-      "SubmissionStatus.status": "Rejected",
-    });
-
+    // Return same JSON structure
     return res.status(200).json({
       message: "Web dashboard statistics retrieved",
       data: {
+        fieldOfficers: totalFieldOfficers,
+        admins: totalAdmins,
+        farmers: totalFarmers,
+        inactiveFieldOfficers,
+        inactiveAdmins,
+        totalActiveStaff: totalFieldOfficers + totalAdmins - inactiveFieldOfficers - inactiveAdmins,
+        totalInactiveStaff: inactiveFieldOfficers + inactiveAdmins,
         pendingCount,
         approvedCount,
         rejectedCount,
         series: {
           lastMonth,
           thisMonth,
+          thisWeek,
           monthly,
           quarterly,
           annual,
