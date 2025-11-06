@@ -73,6 +73,48 @@ export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Respo
       return { year: y, months };
     });
 
+    // Daily counts for this month and last month (include all days even if count is 0)
+    const thisMonthIndex = now.getMonth(); // 0-based
+    const thisMonthYear = now.getFullYear();
+    const lastMonthDate = new Date(thisMonthYear, thisMonthIndex - 1, 1);
+    const lastMonthIndex = lastMonthDate.getMonth();
+    const lastMonthYear = lastMonthDate.getFullYear();
+
+    const startOfThisMonth = new Date(thisMonthYear, thisMonthIndex, 1, 0, 0, 0, 0);
+    const endOfThisMonth = new Date(thisMonthYear, thisMonthIndex + 1, 0, 23, 59, 59, 999);
+
+    const startOfLastMonth = new Date(lastMonthYear, lastMonthIndex, 1, 0, 0, 0, 0);
+    const endOfLastMonth = new Date(lastMonthYear, lastMonthIndex + 1, 0, 23, 59, 59, 999);
+
+    const dailyAggThis = await User.aggregate([
+      { $match: { role: "Farmer", createdAt: { $gte: startOfThisMonth, $lte: endOfThisMonth } } },
+      { $project: { day: { $dayOfMonth: "$createdAt" } } },
+      { $group: { _id: "$day", count: { $sum: 1 } } },
+    ]).exec();
+
+    const dailyAggLast = await User.aggregate([
+      { $match: { role: "Farmer", createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
+      { $project: { day: { $dayOfMonth: "$createdAt" } } },
+      { $group: { _id: "$day", count: { $sum: 1 } } },
+    ]).exec();
+
+    const daysInThisMonth = new Date(thisMonthYear, thisMonthIndex + 1, 0).getDate();
+    const daysInLastMonth = new Date(lastMonthYear, lastMonthIndex + 1, 0).getDate();
+
+    const thisMonth = Array.from({ length: daysInThisMonth }, (_, i) => {
+      const day = i + 1;
+      const found = dailyAggThis.find((d: any) => Number(d._id) === day);
+      const dateStr = new Date(thisMonthYear, thisMonthIndex, day).toISOString().slice(0, 10);
+      return { day, date: dateStr, count: found ? found.count : 0 };
+    });
+
+    const lastMonth = Array.from({ length: daysInLastMonth }, (_, i) => {
+      const day = i + 1;
+      const found = dailyAggLast.find((d: any) => Number(d._id) === day);
+      const dateStr = new Date(lastMonthYear, lastMonthIndex, day).toISOString().slice(0, 10);
+      return { day, date: dateStr, count: found ? found.count : 0 };
+    });
+
     // Quarterly aggregates derived from the months of the requested year
     const monthsForRequestedYear = monthly.find((m) => m.year === year)?.months ?? [];
     const quarterly = [
@@ -139,6 +181,8 @@ export const mobileAdminDashboard = async (req: AuthenticatedRequest, res: Respo
         approvedCount,
         rejectedCount,
         series: {
+          lastMonth,
+          thisMonth,
           monthly,
           quarterly,
           annual,
