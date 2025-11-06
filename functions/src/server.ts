@@ -8,8 +8,8 @@
  */
 
 import { onRequest } from "firebase-functions/v2/https";
-import app from "./routes/v1/app";
 import { connectToMongoDB } from "./config/db";
+import app from "./routes/v1/app";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -17,7 +17,7 @@ import { connectToMongoDB } from "./config/db";
 // export const api = onRequest(app);
 export const api = onRequest(async (req, res) => {
   await connectToMongoDB(); // ensure MongoDB is connected before handling request
-  return app(req, res);
+  app(req, res);
 });
 
 // onRequest((request, response) => {
