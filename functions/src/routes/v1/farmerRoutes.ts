@@ -6,7 +6,7 @@ import { getFarmerBiodata } from "../../controllers/v1/farmer/details/biodata";
 import { getFarmerBusinessType } from "../../controllers/v1/farmer/details/business_type";
 import { getFarmerConsent } from "../../controllers/v1/farmer/details/consent";
 import { getFarmerContact } from "../../controllers/v1/farmer/details/contact";
-import { downloadRawRejectedData } from "../../controllers/v1/farmer/details/downloadRawRejectedData";
+import { downloadRawData } from "../../controllers/v1/farmer/details/downloadRawData";
 import { getFarmerFarmInfoList } from "../../controllers/v1/farmer/details/farm_info_list";
 import { getFarmerHarvestPerCropList } from "../../controllers/v1/farmer/details/harvest_per_crop";
 import { getFarmerImage } from "../../controllers/v1/farmer/details/image";
@@ -136,7 +136,8 @@ edit.put("/work-force/:id", validateM(workForceSchema), editFarmerWorkForce);
 details.get("/submission/:id", getFarmerSubmission);
 details.get("/image/:id", getFarmerImage);
 details.get("/consent/:id", getFarmerConsent);
-download.get("/download-rejected-data", downloadRawRejectedData);
+download.get("/download-rejected-data", downloadRawData);
+download.get("/download-single-data/:id", downloadRawData);
 
 // management
 edit.put("/image-status/:id", validateM(imageSchema), updateImageStatus);

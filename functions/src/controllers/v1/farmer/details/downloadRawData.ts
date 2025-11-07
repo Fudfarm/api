@@ -82,21 +82,29 @@ import {
   Workforce,
 } from "../../../../models/v1/farmer";
 
-export const downloadRawRejectedData = async (req: AuthenticatedRequest, res: Response) => {
+export const downloadRawData = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // 1) Find rejected submissions
-    const rejectedSubs = await SubmissionStatus.find({ status: "Rejected" })
-      .select("recordID status comments isConsent isImage reasons message updatedAt createdAt")
-      .lean();
+    let candidateSubs = [];
+    if (!req.params.id) {
+      candidateSubs = await SubmissionStatus.find({ status: "Rejected" })
+        .select("recordID status comments isConsent isImage reasons message updatedAt createdAt")
+        .lean();
+    } else {
+      // user wants data for a single recordID
+      candidateSubs = await SubmissionStatus.find({ recordID: req.params.id })
+        .select("recordID status comments isConsent isImage reasons message updatedAt createdAt")
+        .lean();
+    }
 
-    if (!rejectedSubs || rejectedSubs.length === 0) {
+    if (!candidateSubs || candidateSubs.length === 0) {
       return res.status(200).json({
-        message: "Raw rejected data retrieved",
+        message: "No record found for the given criteria",
         data: { users: [] },
       });
     }
 
-    const userIds = rejectedSubs.map((s: any) => String(s.recordID));
+    const userIds = candidateSubs.map((s: any) => String(s.recordID));
 
     // 2) Fetch base user biodata
     const users = await User.find({ _id: { $in: userIds }, role: "Farmer" }).lean();
@@ -174,7 +182,7 @@ export const downloadRawRejectedData = async (req: AuthenticatedRequest, res: Re
     const shopItemListMap = groupBy(shopItems);
 
     // Also map submissions (rejected) by recordID
-    const submissionMap = toSingleMap(rejectedSubs as any);
+    const submissionMap = toSingleMap(candidateSubs as any);
 
     // 4) Compose final users array
     const resultUsers = userIds
