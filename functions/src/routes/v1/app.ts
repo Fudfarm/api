@@ -6,6 +6,7 @@ import staffRouter from "./admin/staffRoutes";
 import authRouter from "./authRoutes";
 import farmerRouter from "./farmerRoutes";
 import systemLogRouter from "./printLogRouter";
+import statRouter from "./stat";
 import systemInfoRouter from "./systeminfo";
 import userRouter from "./userRouter";
 
@@ -45,6 +46,7 @@ apiRouter.use("/", systemInfoRouter);
 apiRouter.use("/", userRouter);
 apiRouter.use("/farmer", farmerRouter);
 apiRouter.use("/log", systemLogRouter);
+apiRouter.use("/stat", statRouter);
 app.use("/api/v1", apiRouter);
 
 

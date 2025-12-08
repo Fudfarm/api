@@ -37,5 +37,6 @@ userRouter.get("/user/statistics/updates", AuthGuard(["Admin"]), getRecentlyUpda
 userRouter.get("/web-dashboard", AuthGuard(["Admin"]), webDashboardStats);
 userRouter.get("/mobile-field-officer-dashboard", AuthGuard([...USER_ROLES]), mobileFieldOfficerDashboard);
 userRouter.get("/mobile-admin-dashboard", AuthGuard(["Admin"]), mobileAdminDashboard);
+userRouter.get("/field-officer-stat", AuthGuard(["Admin"]), mobileAdminDashboard);
 
 export default userRouter;
