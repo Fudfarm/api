@@ -3,9 +3,9 @@ import { PipelineStage } from "mongoose";
 import { handleError } from "../../../function/error";
 import { AuthenticatedRequest } from "../../../middleware/auth";
 
+import User from "../../../models/v1/User";
 import { Address } from "../../../models/v1/farmer/Address";
 import { AnimalInfo } from "../../../models/v1/farmer/AnimalInfo";
-import { Biodata } from "../../../models/v1/farmer/Biodata";
 import { CropInfo } from "../../../models/v1/farmer/CropInfo";
 import { FarmInfo } from "../../../models/v1/farmer/FarmInfo";
 import { ShopLocation } from "../../../models/v1/farmer/ShopLocation";
@@ -21,12 +21,12 @@ const dayEnd = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(),
 
 const ensureIndexes = async () => {
   try {
-    await Biodata.collection.createIndex(
-      { createdAt: 1 },
-      { name: "biodata_createdAt_idx", background: true }
+    await User.collection.createIndex(
+      { role: 1, createdAt: 1 },
+      { name: "user_role_createdAt_idx", background: true }
     );
   } catch (err) {
-    console.warn("Failed creating biodata index:", err);
+    console.warn("Failed creating user index:", err);
   }
 };
 
@@ -46,7 +46,7 @@ const farmerDashboardStats = async (req: AuthenticatedRequest, res: Response) =>
     if (start) start = dayStart(start);
     if (end) end = dayEnd(end);
 
-    const match: Record<string, any> = {};
+    const match: Record<string, any> = { role: "Farmer" };
     if (start && end) match.createdAt = { $gte: start, $lte: end };
     else if (start) match.createdAt = { $gte: start };
     else if (end) match.createdAt = { $lte: end };
@@ -351,7 +351,7 @@ const farmerDashboardStats = async (req: AuthenticatedRequest, res: Response) =>
       },
     ];
 
-    const [r] = await Biodata.aggregate(pipeline).exec();
+    const [r] = await User.aggregate(pipeline).exec();
 
     return res.status(200).json({
       message: "Farmer dashboard statistics retrieved successfully",
