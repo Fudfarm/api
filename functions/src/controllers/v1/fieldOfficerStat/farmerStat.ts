@@ -79,7 +79,7 @@ const farmerDashboardStats = async (req: AuthenticatedRequest, res: Response) =>
               $project: {
                 age: {
                   $divide: [
-                    { $subtract: ["$$NOW", { $toDate: "$birthDate" }] },
+                    { $subtract: ["$$NOW", "$birthdate"] },
                     yearMs,
                   ],
                 },
