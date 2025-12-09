@@ -62,9 +62,7 @@ const fieldOfficerEnrollmentRangeStats = async (req: AuthenticatedRequest, res: 
     const skip = Math.max(0, Number(req.query.skip) || 0);
 
     // Extract fromDate and toDate from request body
-    const { fromDate, toDate } = req.body || {};
-
-    console.log("Received fromDate:", fromDate, " toDate:", toDate);
+    const { fromDate, toDate } = req.query || {};
 
     // Parse dates with fallback to today
     let rangeStart = parseDate(fromDate, true);
