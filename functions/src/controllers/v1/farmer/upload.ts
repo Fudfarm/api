@@ -201,7 +201,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
               await OtherFarmInfo.findOneAndUpdate(
                 { recordID },
                 {
-                  numCrops: data.otherFarmInfo.numCrops || 0,
+                  numCrops: 2, // data.otherFarmInfo.numCrops || 0,
                   numLivestock: data.otherFarmInfo.numLivestock || 0,
                   annualHarvest: data.otherFarmInfo.annualHarvest || "",
                   yearsExperience: data.otherFarmInfo.yearsExperience || 0,
@@ -348,7 +348,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
           await OtherFarmInfo.findOneAndUpdate(
             { recordID },
             {
-              numCrops: data.otherFarmInfo.numCrops || 0,
+              numCrops: 2, // data.otherFarmInfo.numCrops || 0,
               numLivestock: data.otherFarmInfo.numLivestock || 0,
               annualHarvest: data.otherFarmInfo.annualHarvest || "",
               yearsExperience: data.otherFarmInfo.yearsExperience || 0,
@@ -433,7 +433,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 town: farm.town,
                 district: farm.district,
                 landmark: farm.landmark,
-                numCrops: Number(farm.numCrops) || 0,
+                numCrops: 2, // Number(farm.numCrops) || 0,
                 farmSize: farm.farmSize,
                 unit: farm.unit,
                 verified: !!farm.verified,
