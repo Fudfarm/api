@@ -1,7 +1,41 @@
 import { Response } from "express";
+import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 import { handleError } from "../../../function/error";
+import { randomPassword } from "../../../function/function3";
+import {
+  SanitizeCatchError,
+  validateAddress,
+  validateArrayData,
+  validateBank,
+  validateBusinessType,
+  validateContact,
+  validateOccupation,
+  validateOtherFarmInfo,
+  validateSubmissionStatus,
+  validateUserData,
+  validateVerification,
+  validateWorkforce,
+} from "../../../function/uploadValidation";
 import { IUploadData, IUploadResponse } from "../../../interface/farmer";
 import { AuthenticatedRequest } from "../../../middleware/auth";
+import User from "../../../models/v1/User";
+import {
+  Address,
+  AnimalInfo,
+  Bank,
+  BusinessType,
+  Contact,
+  CropInfo,
+  FarmInfo,
+  Occupation,
+  OtherFarmInfo,
+  ShopItems,
+  ShopLocation,
+  SubmissionStatus,
+  Verification,
+  Workforce,
+} from "../../../models/v1/farmer";
 
 
 export const farmersUpload = async (req: AuthenticatedRequest, res: Response) => {
@@ -25,19 +59,9 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
       errors: [],
     };
 
-    console.log("Upload Data Received:", uploadData);
+    console.log("Upload Data Received:", JSON.stringify(uploadData, null, 10));
 
-    return res.status(200).json({
-      message: "test",
-      success: 2,
-      failed: 4,
-      successfulOfflineIDs: response.successfulOfflineIDs,
-      failedOfflineIDs: response.failedOfflineIDs,
-      errors: [
-        {"Test": "dere dfdfdf dfered" }],
-    });
-
-    /* for (const data of uploadData) {
+    for (const data of uploadData) {
       const session = await mongoose.startSession();
       try {
         await session.withTransaction(async () => {
@@ -498,7 +522,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
       successfulOfflineIDs: response.successfulOfflineIDs,
       failedOfflineIDs: response.failedOfflineIDs,
       errors: response.errors,
-    });*/
+    });
   } catch (error: any) {
     return handleError(error, res, "Error uploading farmer data");
   }
