@@ -424,6 +424,8 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
               await FarmInfo.deleteMany({ recordID }, { session });
 
             for (const farm of data.farmInfo) {
+              if (!farm) continue; // guard against null/undefined entries
+
               const farmInfo = new FarmInfo({
                 recordID,
                 state: farm.state,
@@ -431,10 +433,10 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 town: farm.town,
                 district: farm.district,
                 landmark: farm.landmark,
-                numCrops: farm.numCrops || 0,
+                numCrops: Number(farm.numCrops) || 0,
                 farmSize: farm.farmSize,
                 unit: farm.unit,
-                verified: farm.verified || false,
+                verified: !!farm.verified,
               });
               arrayPromises.push(farmInfo.save({ session }));
             }
