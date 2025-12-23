@@ -431,7 +431,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 town: farm.town,
                 district: farm.district,
                 landmark: farm.landmark,
-                numCrops: farm.numCrops,
+                numCrops: farm.numCrops || 0,
                 farmSize: farm.farmSize,
                 unit: farm.unit,
                 verified: farm.verified || false,
