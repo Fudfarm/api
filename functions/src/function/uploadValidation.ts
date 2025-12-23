@@ -89,9 +89,9 @@ export const validateUserData = (biodata: any): string[] => {
   if (!biodata.firstname || typeof biodata.firstname !== "string") {
     errors.push("Please provide a valid first name");
   }
-  if (!biodata.othernames || typeof biodata.othernames !== "string") {
-    errors.push("Please provide a valid other name");
-  }
+  // if (!biodata.othernames || typeof biodata.othernames !== "string") {
+  //   errors.push("Please provide a valid other name");
+  // }
   if (!["M", "F", "O"].includes(biodata.gender)) {
     errors.push("Please select a valid gender (M, F, or O)");
   }
@@ -120,12 +120,12 @@ export const validateAddress = (address: any): string[] => {
     resState: "residential state",
     resLga: "residential local government area",
     resTown: "residential town",
-    resDistrict: "residential district",
+    // resDistrict: "residential district",
     resLandmark: "residential landmark",
     permState: "permanent state",
     permLga: "permanent local government area",
     permTown: "permanent town",
-    permDistrict: "permanent district",
+    // permDistrict: "permanent district",
     permLandmark: "permanent landmark",
   };
 
@@ -357,9 +357,9 @@ export const validateArrayData = (data: IUploadData): string[] => {
       if (!farm.town || typeof farm.town !== "string") {
         errors.push(`Farm ${index + 1}: Please provide a valid town`);
       }
-      if (!farm.district || typeof farm.district !== "string") {
-        errors.push(`Farm ${index + 1}: Please provide a valid district`);
-      }
+      // if (!farm.district || typeof farm.district !== "string") {
+      //   errors.push(`Farm ${index + 1}: Please provide a valid district`);
+      // }
       if (!farm.landmark || typeof farm.landmark !== "string") {
         errors.push(`Farm ${index + 1}: Please provide a valid landmark`);
       }
@@ -388,9 +388,9 @@ export const validateArrayData = (data: IUploadData): string[] => {
       if (!shop.town || typeof shop.town !== "string") {
         errors.push(`Shop ${index + 1}: Please provide a valid town`);
       }
-      if (!shop.district || typeof shop.district !== "string") {
-        errors.push(`Shop ${index + 1}: Please provide a valid district`);
-      }
+      // if (!shop.district || typeof shop.district !== "string") {
+      //   errors.push(`Shop ${index + 1}: Please provide a valid district`);
+      // }
       if (!shop.landmark || typeof shop.landmark !== "string") {
         errors.push(`Shop ${index + 1}: Please provide a valid landmark`);
       }
