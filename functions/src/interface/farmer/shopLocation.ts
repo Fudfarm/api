@@ -4,7 +4,7 @@ export interface IShopLocation {
   state: string;
   lga: string;
   town: string;
-  district: string;
+  district?: string;
   landmark: string;
   goodsCount: number;
   verified: boolean;

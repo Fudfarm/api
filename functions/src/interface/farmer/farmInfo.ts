@@ -4,7 +4,7 @@ export interface IFarmInfo {
   state: string;
   lga: string;
   town: string;
-  district: string;
+  district?: string;
   landmark: string;
   numCrops: number;
   farmSize: number;

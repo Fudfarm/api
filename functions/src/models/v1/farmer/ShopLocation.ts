@@ -31,7 +31,7 @@ const shopLocationSchema = new Schema<IShopLocationDoc>(
     },
     district: {
       type: String,
-      required: true,
+      default: "",
     },
     landmark: {
       type: String,

@@ -31,7 +31,7 @@ const farmInfoSchema = new Schema<IFarmInfoDoc>(
     },
     district: {
       type: String,
-      required: true,
+      default: "",
     },
     landmark: {
       type: String,
