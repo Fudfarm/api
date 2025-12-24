@@ -199,20 +199,17 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 },
                 { upsert: true, session }
               );
-              {
-                const ofi = (data.otherFarmInfo as any) || {};
-                await OtherFarmInfo.findOneAndUpdate(
-                  { recordID },
-                  {
-                    numCrops: Number(ofi.numCrops) || 0,
-                    numLivestock: Number(ofi.numLivestock) || 0,
-                    annualHarvest: ofi.annualHarvest || "",
-                    yearsExperience: Number(ofi.yearsExperience) || 0,
-                    challenges: ofi.challenges || "",
-                  },
-                  { upsert: true, session }
-                );
-              }
+              await OtherFarmInfo.findOneAndUpdate(
+                { recordID },
+                {
+                  numCrops: data.otherFarmInfo.numCrops || 0,
+                  numLivestock: data.otherFarmInfo.numLivestock || 0,
+                  annualHarvest: data.otherFarmInfo.annualHarvest || "",
+                  yearsExperience: data.otherFarmInfo.yearsExperience || 0,
+                  challenges: data.otherFarmInfo.challenges || "",
+                },
+                { upsert: true, session }
+              );
               await BusinessType.findOneAndUpdate(
                 { recordID },
                 {
@@ -349,20 +346,17 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             },
             { upsert: true, session }
           );
-          {
-            const ofi = (data.otherFarmInfo as any) || {};
-            await OtherFarmInfo.findOneAndUpdate(
-              { recordID },
-              {
-                numCrops: Number(ofi.numCrops) || 0,
-                numLivestock: Number(ofi.numLivestock) || 0,
-                annualHarvest: ofi.annualHarvest || "",
-                yearsExperience: Number(ofi.yearsExperience) || 0,
-                challenges: ofi.challenges || "",
-              },
-              { upsert: true, session }
-            );
-          }
+          await OtherFarmInfo.findOneAndUpdate(
+            { recordID },
+            {
+              numCrops: data.otherFarmInfo.numCrops || 0,
+              numLivestock: data.otherFarmInfo.numLivestock || 0,
+              annualHarvest: data.otherFarmInfo.annualHarvest || "",
+              yearsExperience: data.otherFarmInfo.yearsExperience || 0,
+              challenges: data.otherFarmInfo.challenges || "",
+            },
+            { upsert: true, session }
+          );
           await BusinessType.findOneAndUpdate(
             { recordID },
             {
