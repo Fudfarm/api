@@ -59,7 +59,6 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
       errors: [],
     };
 
-    console.log("Upload Data Received:", JSON.stringify(uploadData, null, 10));
 
     for (const data of uploadData) {
       const session = await mongoose.startSession();
@@ -109,7 +108,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
               // Update user fields
               existingUser.surname = data.biodata.surname;
               existingUser.firstname = data.biodata.firstname;
-              existingUser.othernames = data.biodata.othernames;
+              existingUser.othernames = data.biodata.othernames || "";
               existingUser.email = data.contact.email || undefined;
               existingUser.phone = data.contact.phone1 || undefined;
               existingUser.gender = data.biodata.gender;
@@ -199,20 +198,17 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 },
                 { upsert: true, session }
               );
-              {
-                const ofi = (data.otherFarmInfo as any) || {};
-                await OtherFarmInfo.findOneAndUpdate(
-                  { recordID },
-                  {
-                    numCrops: Number(ofi.numCrops) || 0,
-                    numLivestock: Number(ofi.numLivestock) || 0,
-                    annualHarvest: ofi.annualHarvest || "",
-                    yearsExperience: Number(ofi.yearsExperience) || 0,
-                    challenges: ofi.challenges || "",
-                  },
-                  { upsert: true, session }
-                );
-              }
+              await OtherFarmInfo.findOneAndUpdate(
+                { recordID },
+                {
+                  numCrops: data.otherFarmInfo.numCrops || 0,
+                  numLivestock: data.otherFarmInfo.numLivestock || 0,
+                  annualHarvest: data.otherFarmInfo.annualHarvest || "",
+                  yearsExperience: data.otherFarmInfo.yearsExperience || 0,
+                  challenges: data.otherFarmInfo.challenges || "",
+                },
+                { upsert: true, session }
+              );
               await BusinessType.findOneAndUpdate(
                 { recordID },
                 {
@@ -349,20 +345,17 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             },
             { upsert: true, session }
           );
-          {
-            const ofi = (data.otherFarmInfo as any) || {};
-            await OtherFarmInfo.findOneAndUpdate(
-              { recordID },
-              {
-                numCrops: Number(ofi.numCrops) || 0,
-                numLivestock: Number(ofi.numLivestock) || 0,
-                annualHarvest: ofi.annualHarvest || "",
-                yearsExperience: Number(ofi.yearsExperience) || 0,
-                challenges: ofi.challenges || "",
-              },
-              { upsert: true, session }
-            );
-          }
+          await OtherFarmInfo.findOneAndUpdate(
+            { recordID },
+            {
+              numCrops: data.otherFarmInfo.numCrops || 0,
+              numLivestock: data.otherFarmInfo.numLivestock || 0,
+              annualHarvest: data.otherFarmInfo.annualHarvest || "",
+              yearsExperience: data.otherFarmInfo.yearsExperience || 0,
+              challenges: data.otherFarmInfo.challenges || "",
+            },
+            { upsert: true, session }
+          );
           await BusinessType.findOneAndUpdate(
             { recordID },
             {

@@ -24,7 +24,7 @@ export interface IUser {
   gender: string;
   maritalStatus: string;
   otherInfo?: string;
-  othernames: string;
+  othernames?: string;
   surname: string;
   phone?: string;
   noOfFamily?: number;

@@ -1,5 +1,5 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
 import bcrypt from "bcrypt";
+import mongoose, { Document, Model, Schema } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import { IUser, IUserMethods, USER_STATUSES } from "../../interface/user";
 
@@ -18,7 +18,7 @@ const userSchema = new Schema<UserDocument>(
     gender: { type: String, required: true},
     maritalStatus: { type: String, required: true},
     otherInfo: { type: String, default: ""},
-    othernames: { type: String, required: true},
+    othernames: { type: String, default: ""},
     surname: { type: String, required: true},
     phone: { type: String, required: false},
     noOfFamily: { type: Number, default: 0, required: false},
