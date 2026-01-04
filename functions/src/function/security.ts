@@ -10,11 +10,11 @@ import crypto from "crypto";
  * @return {string} The environment variable value.
  * @throws {Error} If the environment variable is not set.
  */
-function getEnv(name: string): string {
-  const value = process.env[name] || "";
+function getEnv(): string {
+  const value = process.env.PIN_ENCRYPTION_KEY || "";
   if (!value) {
     console.error("Unable to decrypt PIN - missing values");
-    throw new Error(`Missing required environment variable: ${name}`);
+    throw new Error("Missing required environment variable: PIN_ENCRYPTION_KEY");
   }
   return value;
 }
@@ -38,7 +38,7 @@ const ALGORITHM = "aes-256-gcm";
  * - NEVER stored in the database or client
  * @constant {Buffer}
  */
-const KEY = Buffer.from(getEnv("PIN_ENCRYPTION_KEY"), "hex");
+const KEY = Buffer.from(getEnv(), "hex");
 
 /**
  * Validate key length to ensure correct AES-256 usage.
