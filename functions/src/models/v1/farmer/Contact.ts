@@ -25,7 +25,12 @@ const contactSchema = new Schema<IContactDoc>(
     },
     email: {
       type: String,
+      unique: true,
+      sparse: true,
       lowercase: true,
+      trim: true,
+      default: undefined,
+      set: (v: string) => v || undefined,
     },
     website: {
       type: String,

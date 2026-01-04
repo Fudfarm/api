@@ -11,7 +11,15 @@ const userSchema = new Schema<UserDocument>(
   {
     _id: {type: String, default: uuidv4},
     offlineID: { type: String, default: "" },
-    email: { type: String, unique: true, lowercase: true, trim: true},
+    email: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+      default: undefined,
+      set: (v: string) => v || undefined,
+    },
     password: { type: String, required: true},
     pinEncryption: {
       type: {
