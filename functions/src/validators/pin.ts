@@ -13,6 +13,8 @@ export const pinSchema = z
 
     newPin: z
       .string({ required_error: "New pin is required" })
+      .min(6, { message: "Must be 6 characters long" })
+      .max(6, { message: "Must be 6 characters long" })
       .regex(PASSWORD_REGEX, "Invalid pin format"),
 
     confirmPin: z
