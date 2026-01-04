@@ -1,25 +1,6 @@
 import crypto from "crypto";
 
 /**
- * Retrieves a required environment variable and throws if it's missing.
- *
- * Prevents silent encryption failures and irreversible data loss caused
- * by missing keys.
- *
- * @param {string} name - Name of the environment variable.
- * @return {string} The environment variable value.
- * @throws {Error} If the environment variable is not set.
- */
-function getEnv(): string {
-  const value = process.env.PIN_ENCRYPTION_KEY || "";
-  if (!value) {
-    console.error("Unable to decrypt PIN - missing values");
-    throw new Error("Missing required environment variable: PIN_ENCRYPTION_KEY");
-  }
-  return value;
-}
-
-/**
  * Encryption algorithm used for PIN protection.
  * AES-256-GCM provides:
  * - Confidentiality (PIN is unreadable)
@@ -28,25 +9,6 @@ function getEnv(): string {
  * @constant {string}
  */
 const ALGORITHM = "aes-256-gcm";
-
-/**
- * Master encryption key used to encrypt/decrypt PINs.
- *
- * Requirements:
- * - 32 bytes (256 bits)
- * - Stored securely (ENV / Vault / KMS)
- * - NEVER stored in the database or client
- * @constant {Buffer}
- */
-const KEY = Buffer.from(getEnv(), "hex");
-
-/**
- * Validate key length to ensure correct AES-256 usage.
- * Failing fast here prevents permanent data corruption.
- */
-if (KEY.length !== 32) {
-  throw new Error("PIN_ENCRYPTION_KEY must be 32 bytes (64 hex characters)");
-}
 
 /**
  * Encrypts a PIN using AES-256-GCM.
@@ -59,38 +21,32 @@ if (KEY.length !== 32) {
  * @return {{encryptedPin: string, iv: string, authTag: string}} Object containing ciphertext and metadata (all hex-encoded).
  */
 export function encryptPin(pin: string) {
-  try {
-  /**
-   * Initialization Vector (IV)
-   * - Must be unique per encryption
-   * - 96 bits is recommended for GCM
-   * - Not secret, stored alongside ciphertext
-   */
-    const iv = crypto.randomBytes(12);
+  const keyHex = process.env.PIN_ENCRYPTION_KEY || "";
+  if (!keyHex) {
+    console.error("Unable to encrypt PIN - missing PIN_ENCRYPTION_KEY");
+    throw new Error("Missing required environment variable: PIN_ENCRYPTION_KEY");
+  }
 
-    /**
-   * Create AES-GCM cipher using key and IV
-   */
+  const KEY = Buffer.from(keyHex, "hex");
+  if (KEY.length !== 32) {
+    throw new Error("PIN_ENCRYPTION_KEY must be 32 bytes (64 hex characters)");
+  }
+
+  try {
+    const iv = crypto.randomBytes(12);
     const cipher = crypto.createCipheriv(ALGORITHM, KEY, iv);
 
-    /**
-   * Encrypt the PIN and finalize the cipher
-   */
     const encrypted = Buffer.concat([
       cipher.update(pin, "utf8"),
       cipher.final(),
     ]);
 
-    /**
-   * Authentication tag used to verify data integrity
-   * Prevents tampering or modification attacks
-   */
     const authTag = cipher.getAuthTag();
 
     return {
-      encryptedPin: encrypted.toString("hex"), // Ciphertext
-      iv: iv.toString("hex"), // Initialization Vector
-      authTag: authTag.toString("hex"), // Integrity tag
+      encryptedPin: encrypted.toString("hex"),
+      iv: iv.toString("hex"),
+      authTag: authTag.toString("hex"),
     };
   } catch (err) {
     console.error("PIN encryption failed:", err);
@@ -113,25 +69,26 @@ export function decryptPin(data: {
   iv: string;
   authTag: string;
 }) {
+  const keyHex = process.env.PIN_ENCRYPTION_KEY || "";
+  if (!keyHex) {
+    console.error("Unable to decrypt PIN - missing PIN_ENCRYPTION_KEY");
+    throw new Error("Missing required environment variable: PIN_ENCRYPTION_KEY");
+  }
+
+  const KEY = Buffer.from(keyHex, "hex");
+  if (KEY.length !== 32) {
+    throw new Error("PIN_ENCRYPTION_KEY must be 32 bytes (64 hex characters)");
+  }
+
   try {
-  /**
-   * Create decipher using same algorithm, key, and IV
-   */
     const decipher = crypto.createDecipheriv(
       ALGORITHM,
       KEY,
       Buffer.from(data.iv, "hex")
     );
 
-    /**
-   * Attach authentication tag to verify integrity
-   */
     decipher.setAuthTag(Buffer.from(data.authTag, "hex"));
 
-    /**
-   * Attempt decryption.
-   * Throws if authentication fails.
-   */
     const decrypted = Buffer.concat([
       decipher.update(Buffer.from(data.encryptedPin, "hex")),
       decipher.final(),
@@ -144,7 +101,6 @@ export function decryptPin(data: {
   }
 }
 
-
 /**
  * Calculate the number of full days remaining until the PIN encryption expires.
  *
@@ -155,18 +111,11 @@ export function decryptPin(data: {
  * @return {number} The number of full days left until expiration. Returns 0 for invalid or past dates.
  */
 export function getPinExpiryLeft(expiryInput: Date | string | number | null | undefined): number {
-  if (!expiryInput) {
-    return 0;
-  }
+  if (!expiryInput) return 0;
 
-  const expiryDate = expiryInput instanceof Date
-    ? expiryInput
-    : new Date(expiryInput);
+  const expiryDate = expiryInput instanceof Date ? expiryInput : new Date(expiryInput);
 
-  // Invalid date check
-  if (!(expiryDate instanceof Date) || isNaN(expiryDate.getTime())) {
-    return 0;
-  }
+  if (!(expiryDate instanceof Date) || isNaN(expiryDate.getTime())) return 0;
 
   const now = new Date();
   const msDiff = expiryDate.getTime() - now.getTime();
