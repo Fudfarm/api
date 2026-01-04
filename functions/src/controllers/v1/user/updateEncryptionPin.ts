@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import { Response } from "express";
 import { handleError } from "../../../function/error";
-import { encryptPin } from "../../../function/security";
+import { encryptPin, getPinExpiryLeft } from "../../../function/security";
 import { AuthenticatedRequest } from "../../../middleware/auth";
 import User from "../../../models/v1/User";
 
@@ -51,6 +51,7 @@ export const updateEncryptionPin = async (req: AuthenticatedRequest, res: Respon
     }
 
     const newPinEncryption = encryptPin(newPin);
+    const date = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     await User.updateOne(
       {
@@ -58,12 +59,14 @@ export const updateEncryptionPin = async (req: AuthenticatedRequest, res: Respon
       },
       {
         pinEncryption: newPinEncryption,
-        pinEncryptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        pinEncryptionExpiry: date, // 30 days from now
       }
     );
 
     return res.status(200).json({
       message: "Pin updated successfully.",
+      isEncryptionPinSet: true,
+      pinEncryptionExpiry: getPinExpiryLeft(date),
     });
   } catch (error) {
     return handleError(error, res, "Error updating pin");

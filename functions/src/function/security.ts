@@ -143,3 +143,34 @@ export function decryptPin(data: {
     throw new Error("Failed to decrypt PIN");
   }
 }
+
+
+/**
+ * Calculate the number of full days remaining until the PIN encryption expires.
+ *
+ * - Returns 0 if already expired, null, undefined, or invalid date is supplied.
+ * - Accepts a Date object, ISO date string, or timestamp (number).
+ *
+ * @param {Date | string | number | null | undefined} expiryInput - The expiration date of the PIN encryption.
+ * @return {number} The number of full days left until expiration. Returns 0 for invalid or past dates.
+ */
+export function getPinExpiryLeft(expiryInput: Date | string | number | null | undefined): number {
+  if (!expiryInput) {
+    return 0;
+  }
+
+  const expiryDate = expiryInput instanceof Date
+    ? expiryInput
+    : new Date(expiryInput);
+
+  // Invalid date check
+  if (!(expiryDate instanceof Date) || isNaN(expiryDate.getTime())) {
+    return 0;
+  }
+
+  const now = new Date();
+  const msDiff = expiryDate.getTime() - now.getTime();
+  const daysLeft = Math.floor(msDiff / (1000 * 60 * 60 * 24));
+
+  return Math.max(daysLeft, 0);
+}

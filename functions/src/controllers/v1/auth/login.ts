@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
+import { config } from "../../../config";
+import { handleAuthTokens } from "../../../function/cookie";
 import { handleError } from "../../../function/error";
+import { getClientIp } from "../../../function/function3";
+import { getPinExpiryLeft } from "../../../function/security";
+import { IUser } from "../../../interface/user";
+import { RefreshToken } from "../../../models/v1/RefreshToken";
 import User from "../../../models/v1/User";
 import { generateAccessToken, generateRefreshToken, hashToken } from "../../../utils/token";
-import { getClientIp } from "../../../function/function3";
-import { RefreshToken } from "../../../models/v1/RefreshToken";
-import { handleAuthTokens } from "../../../function/cookie";
-import { config } from "../../../config";
-import { IUser } from "../../../interface/user";
 
 export const loginUser = async (req: Request, res: Response) => {
   try {
@@ -99,5 +100,7 @@ export async function ReturnedData(user: IUser) {
     gender: user.gender,
     phone: user.phone || "",
     allowNotifications: user.allowNotifications ? true : false,
+    isEncryptionPinSet: user.pinEncryption ? true : false,
+    pinEncryptionExpiry: user.pinEncryptionExpiry ? getPinExpiryLeft(user.pinEncryptionExpiry) : null,
   };
 }
