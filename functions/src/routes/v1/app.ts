@@ -63,7 +63,7 @@ app.use((err: any, req: any, res: any, _next: any) => {
   console.error(err.stack);
   return res.status(500).json({
     success: false,
-    message: "Internal Server Error",
+    message: err.message || "Internal Server Error",
   });
 });
 

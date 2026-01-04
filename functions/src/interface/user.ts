@@ -19,6 +19,7 @@ export interface IUser {
   offlineID?: string;
   email?: string;
   password: string;
+  pinEncryption?: string;
   birthdate: Date;
   firstname: string;
   gender: string;

@@ -13,6 +13,7 @@ const userSchema = new Schema<UserDocument>(
     offlineID: { type: String, default: "" },
     email: { type: String, unique: true, lowercase: true, trim: true},
     password: { type: String, required: true},
+    pinEncryption: { type: String, required: false},
     birthdate: { type: Date, required: true},
     firstname: { type: String, required: true},
     gender: { type: String, required: true},
