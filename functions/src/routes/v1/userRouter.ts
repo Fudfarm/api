@@ -43,7 +43,7 @@ userRouter.get("/mobile-field-officer-dashboard", AuthGuard([...USER_ROLES]), mo
 userRouter.get("/mobile-admin-dashboard", AuthGuard(["Admin"]), mobileAdminDashboard);
 userRouter.get("/field-officer-stat", AuthGuard(["Admin"]), mobileAdminDashboard);
 
-userRouter.post("/set-encryption-key", validateM(pinSchema), updateEncryptionPin);
+userRouter.put("/set-encryption-key", validateM(pinSchema), updateEncryptionPin);
 userRouter.get("/show-user-encryption-key", AuthGuard(["Admin"]), validateM(pinShowSchema), showEncryptionPin);
 
 export default userRouter;
