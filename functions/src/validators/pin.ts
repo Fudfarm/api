@@ -1,7 +1,7 @@
 import { z } from "zod";
 // 🔐 Combined regex
 export const PASSWORD_REGEX = new RegExp(
-  "^[a-zA-Z0-9]{6}$"
+  "^[a-zA-Z0-9]{6,6}$"
 );
 
 export const pinSchema = z
