@@ -11,7 +11,7 @@ import crypto from "crypto";
  * @throws {Error} If the environment variable is not set.
  */
 function getEnv(name: string): string {
-  const value = process.env[name];
+  const value = process.env[name] || "";
   if (!value) {
     console.error("Unable to decrypt PIN - missing values");
     throw new Error(`Missing required environment variable: ${name}`);
