@@ -19,7 +19,8 @@ export interface IUser {
   offlineID?: string;
   email?: string;
   password: string;
-  pinEncryption?: string;
+  pinEncryption?: PinEncryptionComponents;
+  pinEncryptionExpiry?: Date;
   birthdate: Date;
   firstname: string;
   gender: string;
@@ -42,4 +43,10 @@ export interface IUser {
 
 export interface IUserMethods {
   comparePassword(password: string): Promise<boolean>;
+}
+
+export interface PinEncryptionComponents {
+  encryptedPin: string;
+  iv: string;
+  authTag: string;
 }
