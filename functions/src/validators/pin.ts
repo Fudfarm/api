@@ -7,7 +7,9 @@ export const PASSWORD_REGEX = new RegExp(
 export const pinSchema = z
   .object({
     // allow undefined, null, or an empty string to represent "no password"
-    password: z.string().nullable().optional(),
+    password: z.string({ required_error: "Password is required" }).min(2, {
+      message: "Password must be at least 2 characters long",
+    }),
 
     newPin: z
       .string({ required_error: "New pin is required" })

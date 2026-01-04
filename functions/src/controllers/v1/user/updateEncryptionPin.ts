@@ -37,18 +37,18 @@ export const updateEncryptionPin = async (req: AuthenticatedRequest, res: Respon
     }
 
     // If user has an existing pinEncryption, verify password
-    if (user.pinEncryption) {
-      if (!password) {
-        return res
-          .status(400)
-          .json({ message: "Password is required to update pin." });
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ message: "Your password is incorrect." });
-      }
+    // if (user.pinEncryption) {
+    if (!password) {
+      return res
+        .status(400)
+        .json({ message: "Password is required to update pin." });
     }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Your password is incorrect." });
+    }
+    // }
 
     const newPinEncryption = encryptPin(newPin);
     const date = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
