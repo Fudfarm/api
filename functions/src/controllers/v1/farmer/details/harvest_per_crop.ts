@@ -10,7 +10,9 @@ export const getFarmerHarvestPerCropList = async (req: AuthenticatedRequest, res
     const { id } = req.params;
     if (!id) return res.status(400).json({ message: "Farmer id is required" });
 
-    const cropInfo = await CropInfo.find({ recordID: id }).lean();
+    const cropInfo = await CropInfo.find({ recordID: id })
+      .populate({ path: "unitId", select: "unit" })
+      .lean();
     if (!cropInfo || cropInfo.length === 0)
       return res.status(404).json({ message: "Farmer crop info not found" });
 
@@ -33,11 +35,17 @@ export const getFarmerHarvestPerCropList = async (req: AuthenticatedRequest, res
  * @return {Promise<object>} Formatted harvest per crop response
  */
 export async function harvestPerCropResponse(crop: any) {
+  // When populated, `crop.unitId` will be an object { _id, unit }.
+  const populatedUnit = crop.unitId && typeof crop.unitId === "object" ? crop.unitId : null;
+  const unitId = populatedUnit ? populatedUnit._id : crop.unitId;
+  const unit = populatedUnit ? populatedUnit.unit : undefined;
+
   return {
     id: crop._id,
     crop: crop.crop,
     quantity: crop.quantity,
-    unit: crop.unit,
+    unitId,
+    unit,
     createdAt: crop.createdAt
       ? formatDateToShort(crop.createdAt.toISOString(), { includeTime: true })
       : undefined,

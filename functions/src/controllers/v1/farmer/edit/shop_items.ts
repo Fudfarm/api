@@ -16,6 +16,7 @@ export const editFarmerShopItem = async (req: AuthenticatedRequest, res: Respons
       quantity: data.quantity,
       category: data.category,
       verified: data.verified,
+      unitId: data.unitId,
     } }, { new: true }).lean();
     if (!item) return res.status(404).json({ message: "Item not found" });
 
@@ -42,6 +43,7 @@ export const addFarmerShopItem = async (req: AuthenticatedRequest, res: Response
       quantity: data.quantity,
       category: data.category,
       verified: data.verified ?? false,
+      unitId: data.unitId,
     });
 
     const saved = await itemDoc.save();

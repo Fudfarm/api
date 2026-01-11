@@ -1,8 +1,15 @@
 import express from "express";
+import { getAboutUs, updateAboutUs } from "../../controllers/v1/system/about";
 import { getContactInfo, updateContactInfo } from "../../controllers/v1/system/contact";
 import { getPrivacyPolicy, updatePrivacyPolicy } from "../../controllers/v1/system/privacy";
-import { getAboutUs, updateAboutUs } from "../../controllers/v1/system/about";
 import { getToc, updateToc } from "../../controllers/v1/system/toc";
+import {
+  createUnit,
+  deleteUnit,
+  getAllUnits,
+  getUnitById,
+  updateUnit,
+} from "../../controllers/v1/system/unit";
 import { AuthGuard } from "../../middleware/auth";
 
 const systemInfoRouter = express.Router();
@@ -18,5 +25,15 @@ systemInfoRouter.put("/contact", AuthGuard(["Admin"]), updateContactInfo);
 systemInfoRouter.put("/privacy", AuthGuard(["Admin"]), updatePrivacyPolicy);
 systemInfoRouter.put("/about", AuthGuard(["Admin"]), updateAboutUs);
 systemInfoRouter.put("/toc", AuthGuard(["Admin"]), updateToc);
+
+// units routes here
+// Public unit routes
+systemInfoRouter.get("/units", getAllUnits);
+systemInfoRouter.get("/units/:id", getUnitById);
+
+// Admin-only unit routes
+systemInfoRouter.post("/units", AuthGuard(["Admin"]), createUnit);
+systemInfoRouter.put("/units/:id", AuthGuard(["Admin"]), updateUnit);
+systemInfoRouter.delete("/units/:id", AuthGuard(["Admin"]), deleteUnit);
 
 export default systemInfoRouter;

@@ -14,7 +14,7 @@ export const editFarmerCrop = async (req: AuthenticatedRequest, res: Response) =
     const crop = await CropInfo.findByIdAndUpdate(cropId, { $set: {
       crop: data.crop,
       quantity: data.quantity,
-      unit: data.unit,
+      unitId: data.unitId,
     } }, { new: true }).lean();
     if (!crop) return res.status(404).json({ message: "Crop not found" });
 

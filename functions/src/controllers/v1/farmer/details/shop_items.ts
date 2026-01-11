@@ -10,7 +10,9 @@ export const getFarmerShopItemList = async (req: AuthenticatedRequest, res: Resp
     const { shopId } = req.params;
     if (!shopId) return res.status(400).json({ message: "Shop id is required" });
 
-    const shopItems = await ShopItems.find({ shopLocationID: shopId }).lean();
+    const shopItems = await ShopItems.find({ shopLocationID: shopId })
+      .populate({ path: "unitId", select: "unit" })
+      .lean();
     if (!shopItems || shopItems.length === 0)
       return res.status(404).json({ message: "Farmer shop items not found" });
 
@@ -34,11 +36,18 @@ export const getFarmerShopItemList = async (req: AuthenticatedRequest, res: Resp
  * @return {Promise<any>} Formatted shop item response
  */
 export async function ShopItemsResponse(item: any): Promise<any> {
+  // When populated, `item.unitId` will be an object { _id, unit }.
+  const populatedUnit = item.unitId && typeof item.unitId === "object" ? item.unitId : null;
+  const unitId = populatedUnit ? populatedUnit._id : item.unitId;
+  const unit = populatedUnit ? populatedUnit.unit : undefined;
+
   return {
     id: item._id,
     item: item.item,
     quantity: item.quantity,
     category: item.category,
+    unitId,
+    unit,
     verified: item.verified,
     createdAt: item.createdAt
       ? formatDateToShort(item.createdAt.toISOString(), { includeTime: true })

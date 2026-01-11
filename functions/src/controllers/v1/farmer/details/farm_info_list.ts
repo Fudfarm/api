@@ -10,7 +10,9 @@ export const getFarmerFarmInfoList = async (req: AuthenticatedRequest, res: Resp
     const { id } = req.params;
     if (!id) return res.status(400).json({ message: "Farmer id is required" });
 
-    const farmInfo = await FarmInfo.find({ recordID: id }).lean();
+    const farmInfo = await FarmInfo.find({ recordID: id })
+      .populate({ path: "unitId", select: "unit" })
+      .lean();
     if (!farmInfo || farmInfo.length === 0)
       return res.status(404).json({ message: "Farmer farm info not found" });
 
@@ -33,6 +35,11 @@ export const getFarmerFarmInfoList = async (req: AuthenticatedRequest, res: Resp
  * @return {Promise<object>} Formatted farm info response
  */
 export async function farmInfoResponse(farm: any) {
+  // When populated, `farm.unitId` will be an object { _id, unit }.
+  const populatedUnit = farm.unitId && typeof farm.unitId === "object" ? farm.unitId : null;
+  const unitId = populatedUnit ? populatedUnit._id : farm.unitId;
+  const unit = populatedUnit ? populatedUnit.unit : farm.unit;
+
   return {
     id: farm._id,
     state: farm.state,
@@ -42,7 +49,8 @@ export async function farmInfoResponse(farm: any) {
     landmark: farm.landmark,
     numCrops: farm.numCrops,
     farmSize: farm.farmSize,
-    unit: farm.unit,
+    unitId,
+    unit,
     verified: farm.verified,
     createdAt: farm.createdAt
       ? formatDateToShort(farm.createdAt.toISOString(), { includeTime: true })

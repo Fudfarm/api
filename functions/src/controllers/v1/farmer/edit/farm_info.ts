@@ -49,7 +49,7 @@ export const addFarmerFarm = async (req: AuthenticatedRequest, res: Response) =>
       landmark: data.landmark,
       numCrops: data.numCrops,
       farmSize: data.farmSize,
-      unit: data.unit,
+      unitId: data.unitId,
       verified: data.verified ?? false,
     });
 
