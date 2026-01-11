@@ -37,6 +37,7 @@ export async function AnimalInfoResponse(animal: any) {
     id: animal._id,
     animal: animal.animal,
     quantity: animal.quantity,
+    unitId: animal.unitId,
     createdAt: animal.createdAt
       ? formatDateToShort(animal.createdAt.toISOString(), { includeTime: true })
       : undefined,

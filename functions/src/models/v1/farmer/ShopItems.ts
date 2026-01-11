@@ -36,6 +36,11 @@ const shopItemsSchema = new Schema<IShopItemsDoc>(
       required: true,
       enum: ["Crop", "Animal", "Equipment", "Other"],
     },
+    unitId: {
+      type: String,
+      required: true,
+      ref: "Unit",
+    },
     verified: {
       type: Boolean,
       default: false,

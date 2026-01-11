@@ -26,6 +26,11 @@ const animalInfoSchema = new Schema<IAnimalInfoDoc>(
       required: true,
       min: 0,
     },
+    unitId: {
+      type: String,
+      required: true,
+      ref: "Unit",
+    },
   },
   {
     timestamps: true,

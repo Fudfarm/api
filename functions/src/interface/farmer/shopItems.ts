@@ -5,6 +5,7 @@ export interface IShopItems {
   item: string;
   quantity: number;
   category: string;
+  unitId: string;
   verified: boolean;
   createdAt?: Date;
   updatedAt?: Date;

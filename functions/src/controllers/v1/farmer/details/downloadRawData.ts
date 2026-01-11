@@ -42,20 +42,20 @@ const workforceFields = [
   "_id", "recordID", "staffSize", "labourType", "createdAt", "updatedAt",
 ];
 const farmInfoFields = [
-  "_id", "recordID", "state", "lga", "town", "district", "landmark", "numCrops", "farmSize", "unit", "verified",
+  "_id", "recordID", "state", "lga", "town", "district", "landmark", "numCrops", "farmSize", "unitId", "verified",
   "createdAt", "updatedAt",
 ];
 const cropInfoFields = [
-  "_id", "recordID", "crop", "quantity", "unit", "createdAt", "updatedAt",
+  "_id", "recordID", "crop", "quantity", "unitId", "createdAt", "updatedAt",
 ];
 const animalInfoFields = [
-  "_id", "recordID", "animal", "quantity", "createdAt", "updatedAt",
+  "_id", "recordID", "animal", "quantity", "unitId", "createdAt", "updatedAt",
 ];
 const shopLocationFields = [
   "_id", "recordID", "state", "lga", "town", "district", "landmark", "goodsCount", "verified", "createdAt", "updatedAt",
 ];
 const shopItemsFields = [
-  "_id", "recordID", "shopLocationID", "item", "quantity", "category", "verified", "createdAt", "updatedAt",
+  "_id", "recordID", "shopLocationID", "item", "quantity", "unitId", "category", "verified", "createdAt", "updatedAt",
 ];
 const submissionStatusFields = [
   "_id", "recordID", "isUpdated", "isConsent", "isImage", "isSubmitted", "submittedBy", "comments", "approvedBy", "rejectedBy",

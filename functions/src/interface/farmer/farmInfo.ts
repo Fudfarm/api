@@ -8,7 +8,7 @@ export interface IFarmInfo {
   landmark: string;
   numCrops: number;
   farmSize: number;
-  unit: string;
+  unitId: string;
   verified: boolean;
   createdAt?: Date;
   updatedAt?: Date;

@@ -3,7 +3,7 @@ export interface ICropInfo {
   recordID: string; // Reference to biodata _id
   crop: string;
   quantity: number;
-  unit: string;
+  unitId: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

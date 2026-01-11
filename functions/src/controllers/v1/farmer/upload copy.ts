@@ -396,6 +396,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 recordID,
                 animal: animal.animal,
                 quantity: animal.quantity,
+                unitId: animal.unitId,
               });
               arrayPromises.push(animalInfo.save({ session }));
             }
@@ -412,7 +413,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 recordID,
                 crop: crop.crop,
                 quantity: crop.quantity,
-                unit: crop.unit,
+                unitId: crop.unitId,
               });
               arrayPromises.push(cropInfo.save({ session }));
             }
@@ -436,7 +437,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                 landmark: farm.landmark,
                 numCrops: Number(farm.numCrops) || 0,
                 farmSize: farm.farmSize,
-                unit: farm.unit,
+                unitId: farm.unitId,
                 verified: !!farm.verified,
               });
               arrayPromises.push(farmInfo.save({ session }));
@@ -467,6 +468,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
                     shopLocationID: shopLocationRecord._id,
                     item: item.item,
                     quantity: item.quantity,
+                    unitId: item.unitId,
                     category: item.category,
                     verified: item.verified || false,
                   });

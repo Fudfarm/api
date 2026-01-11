@@ -47,9 +47,10 @@ const farmInfoSchema = new Schema<IFarmInfoDoc>(
       required: true,
       min: 0,
     },
-    unit: {
+    unitId: {
       type: String,
       required: true,
+      ref: "Unit",
     },
     verified: {
       type: Boolean,

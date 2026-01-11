@@ -14,6 +14,7 @@ export const editFarmerAnimal = async (req: AuthenticatedRequest, res: Response)
     const animal = await AnimalInfo.findByIdAndUpdate(animalId, { $set: {
       animal: data.animal,
       quantity: data.quantity,
+      unitId: data.unitId,
     } }, { new: true }).lean();
     if (!animal) return res.status(404).json({ message: "Animal not found" });
 
@@ -37,6 +38,7 @@ export const addFarmerAnimal = async (req: AuthenticatedRequest, res: Response) 
       recordID: userId,
       animal: data.animal,
       quantity: data.quantity,
+      unitId: data.unitId,
     });
 
     const saved = await animalDoc.save();

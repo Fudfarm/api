@@ -26,9 +26,10 @@ const cropInfoSchema = new Schema<ICropInfoDoc>(
       required: true,
       min: 0,
     },
-    unit: {
+    unitId: {
       type: String,
       required: true,
+      ref: "Unit",
     },
   },
   {
