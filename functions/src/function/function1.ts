@@ -39,7 +39,7 @@ import { Response } from "express";
 export function cleanPhoneOrExit(
   res: Response,
   rawPhone: string,
-  countryCode: string
+  countryCode: string,
 ): string | never {
   const formattedPhone = cleanPhone(rawPhone, countryCode);
 

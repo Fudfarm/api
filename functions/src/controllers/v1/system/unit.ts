@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { handleError } from "../../../function/error";
+import { capitalizeWords } from "../../../function/function1";
 import { formatDateToShort } from "../../../function/function3";
 import { Unit } from "../../../models/v1/farmer/Unit";
 
@@ -14,7 +15,10 @@ export const getAllUnits = async (req: Request, res: Response) => {
     const units = await Unit.find(filter).sort({ type: 1, unit: 1 });
     return res.status(200).json({
       mssage: "Units retrieved",
-      data: units.map((u) => formatReturn(u)),
+      data: {
+        type: capitalizeWords(type || "all"),
+        units: units.map((u) => formatReturn(u)),
+      },
     });
   } catch (err) {
     return handleError(err, res, "Failed to fetch units");
