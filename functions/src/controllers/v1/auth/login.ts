@@ -111,17 +111,15 @@ export async function ReturnedData(user: IUser, device: string) {
 
 // only mobile application have prepare data
 const prepareData = async (device: string) => {
+  if (!(device && device.toLowerCase().trim() === "mobile")) return {}; // no prepare data for now
+
   return {
-    units: await getUnits(device),
+    units: await getUnits(),
   };
 };
 
-const getUnits = async (device: string) => {
-  if (device && device.toLowerCase().trim() === "mobile") {
-    const units = await Unit.find().sort({ type: 1, unit: 1 });
+const getUnits = async () => {
+  const units = await Unit.find().sort({ type: 1, unit: 1 });
 
-    return units.map((u) => ({ id: u._id, type: u.type, unit: u.unit }));
-  }
-
-  return [];
+  return units.map((u) => ({ id: u._id, type: u.type, unit: u.unit }));
 };

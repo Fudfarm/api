@@ -1,10 +1,14 @@
 import { Request, Response } from "express";
+import { config } from "../../../config";
+import { handleAuthTokens } from "../../../function/cookie";
 import { handleError } from "../../../function/error";
-import { generateAccessToken, hashToken, verifyRefreshToken } from "../../../utils/token";
 import { RefreshToken } from "../../../models/v1/RefreshToken";
 import User from "../../../models/v1/User";
-import { handleAuthTokens } from "../../../function/cookie";
-import { config } from "../../../config";
+import {
+  generateAccessToken,
+  hashToken,
+  verifyRefreshToken,
+} from "../../../utils/token";
 import { ReturnedData } from "./login";
 
 export const refresh = async (req: Request, res: Response) => {
@@ -50,12 +54,7 @@ export const refresh = async (req: Request, res: Response) => {
     let nonCookieToken = {};
 
     if (!device || device.toLowerCase().trim() === "web") {
-      handleAuthTokens(
-        res,
-        newAccessToken,
-        refreshToken,
-        config
-      );
+      handleAuthTokens(res, newAccessToken, refreshToken, config);
     } else {
       nonCookieToken = { newAccessToken, refreshToken };
     }
@@ -63,7 +62,7 @@ export const refresh = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Login successful",
       nonCookieToken, // used for non-web clients
-      data: await ReturnedData(user),
+      data: await ReturnedData(user, device),
     });
   } catch (err) {
     return handleError(err, res, "Error refreshing token");
