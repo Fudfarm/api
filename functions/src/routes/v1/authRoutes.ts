@@ -24,7 +24,7 @@ authRouter.post(
 authRouter.post(
   "/login-web-x3fvr45dnl8ilo73clvg",
   validateM(loginSchema),
-  verifyTurnstile,
+  // verifyTurnstile,
   loginUser,
 );
 authRouter.post("/refresh", refresh);
