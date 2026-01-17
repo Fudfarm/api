@@ -5,9 +5,11 @@ import { CropInfo } from "./CropInfo";
 import { FarmInfo } from "./FarmInfo";
 import { ShopItems } from "./ShopItems";
 
+export const unitTypes = ["Crop", "Animal", "Equipment", "Other"] as const;
+
 export interface IUnitDoc extends Document {
   _id: string;
-  type: "Crop" | "Animal";
+  type: (typeof unitTypes)[number];
   unit: string;
 }
 
@@ -19,7 +21,7 @@ const unitSchema = new Schema<IUnitDoc>(
     },
     type: {
       type: String,
-      enum: ["Crop", "Animal", "Equipment", "Other"],
+      enum: unitTypes,
       required: true,
     },
     unit: {
@@ -29,17 +31,14 @@ const unitSchema = new Schema<IUnitDoc>(
       uppercase: true, // KG === kg === Kg
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**
  * Compound uniqueness
  * Prevents same (type + quantity) twice
  */
-unitSchema.index(
-  { type: 1, unit: 1 },
-  { unique: true }
-);
+unitSchema.index({ type: 1, unit: 1 }, { unique: true });
 
 /**
  * Prevent deletion if unit is in use
@@ -52,32 +51,29 @@ unitSchema.pre(
 
     if (await AnimalInfo.exists({ unitId })) {
       return next(
-        new Error("Cannot delete unit: it is used by animal information")
+        new Error("Cannot delete unit: it is used by animal information"),
       );
     }
 
     if (await CropInfo.exists({ unitId })) {
       return next(
-        new Error("Cannot delete unit: it is used by crop information")
+        new Error("Cannot delete unit: it is used by crop information"),
       );
     }
 
     if (await FarmInfo.exists({ unitId })) {
       return next(
-        new Error("Cannot delete unit: it is used by farm information")
+        new Error("Cannot delete unit: it is used by farm information"),
       );
     }
 
     if (await ShopItems.exists({ unitId })) {
-      return next(
-        new Error("Cannot delete unit: it is used by store items")
-      );
+      return next(new Error("Cannot delete unit: it is used by store items"));
     }
 
     next();
-  }
+  },
 );
 
 export const Unit: Model<IUnitDoc> =
-  mongoose.models.Unit ||
-  mongoose.model<IUnitDoc>("Unit", unitSchema);
+  mongoose.models.Unit || mongoose.model<IUnitDoc>("Unit", unitSchema);
