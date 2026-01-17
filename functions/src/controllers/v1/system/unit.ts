@@ -36,7 +36,7 @@ export const getAllLeanUnits = async (req: Request, res: Response) =>
   fetchUnits(
     req,
     res,
-    (u) => ({ id: u._id, type: u.type, unit: u.unit }),
+    (u) => ({ id: u._id, type: u.type, unit: u.unit.toLowerCase() }),
     "Lean units retrieved",
   );
 
@@ -81,7 +81,7 @@ const formatReturn = (unit: any): object => {
   return {
     id: unit._id,
     type: unit.type,
-    unit: unit.unit,
+    unit: unit.unit.toLowerCase(),
     createdAt: unit.createdAt
       ? formatDateToShort(unit.createdAt.toISOString(), { includeTime: true })
       : undefined,
