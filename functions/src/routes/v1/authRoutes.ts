@@ -19,13 +19,13 @@ const authRouter = Router();
 authRouter.post(
   "/login-mobile-xwshzm189nb2az2zw3xe",
   validateM(loginSchema),
-  loginUser
+  loginUser,
 );
 authRouter.post(
   "/login-web-x3fvr45dnl8ilo73clvg",
   validateM(loginSchema),
-  verifyTurnstile,
-  loginUser
+  // verifyTurnstile,
+  loginUser,
 );
 authRouter.post("/refresh", refresh);
 authRouter.post("/logout", logout);
@@ -36,19 +36,19 @@ authRouter.post("/devices", getDevices);
 authRouter.post(
   "/forgot-password-mobile-hns9cqyzmqb0kislfccz",
   validateM(emailSchema),
-  forgotPassword
+  forgotPassword,
 );
 authRouter.post(
   "/forgot-password-web-gt7yels9utz05plsncrd",
   validateM(emailSchema),
   verifyTurnstile,
-  forgotPassword
+  forgotPassword,
 );
 authRouter.post("/valid-reset-password-token", validResetPwdToken);
 authRouter.post(
   "/reset-password",
   validateM(resetPasswordSchema),
-  resetPassword
+  resetPassword,
 );
 
 export default authRouter;
