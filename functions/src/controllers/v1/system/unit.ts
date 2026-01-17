@@ -12,7 +12,10 @@ export const getAllUnits = async (req: Request, res: Response) => {
     if (type) filter.type = type;
 
     const units = await Unit.find(filter).sort({ type: 1, unit: 1 });
-    return res.status(200).json(units.map((u) => formatReturn(u)));
+    return res.status(200).json({
+      mssage: "Units retrieved",
+      data: units.map((u) => formatReturn(u)),
+    });
   } catch (err) {
     return handleError(err, res, "Failed to fetch units");
   }
@@ -25,7 +28,10 @@ export const getUnitById = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Unit not found" });
     }
 
-    return res.status(200).json(formatReturn(unit));
+    return res.status(200).json({
+      message: "Unit retrieved",
+      data: formatReturn(unit),
+    });
   } catch (err) {
     return handleError(err, res, "Failed to fetch unit");
   }
@@ -38,7 +44,10 @@ export const createUnit = async (req: Request, res: Response) => {
     const newUnit = new Unit({ type, unit });
     await newUnit.save();
 
-    return res.status(201).json(formatReturn(newUnit));
+    return res.status(201).json({
+      message: "Unit created",
+      data: formatReturn(newUnit),
+    });
   } catch (err: any) {
     // Handle duplicate compound key error
     if (err.code === 11000) {
@@ -77,7 +86,10 @@ export const updateUnit = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Unit not found" });
     }
 
-    return res.status(200).json(formatReturn(updatedUnit));
+    return res.status(200).json({
+      message: "Unit updated",
+      data: formatReturn(updatedUnit),
+    });
   } catch (err: any) {
     if (err.code === 11000) {
       return handleError(err, res, "Failed to create unit");
