@@ -5,9 +5,14 @@ import { handleError } from "../../../function/error";
 import { getClientIp } from "../../../function/function3";
 import { getPinExpiryLeft } from "../../../function/security";
 import { IUser } from "../../../interface/user";
+import { Unit } from "../../../models/v1/farmer/Unit";
 import { RefreshToken } from "../../../models/v1/RefreshToken";
 import User from "../../../models/v1/User";
-import { generateAccessToken, generateRefreshToken, hashToken } from "../../../utils/token";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  hashToken,
+} from "../../../utils/token";
 
 export const loginUser = async (req: Request, res: Response) => {
   try {
@@ -57,18 +62,13 @@ export const loginUser = async (req: Request, res: Response) => {
       {
         updatedAt: new Date(),
         lastLoginAt: new Date(),
-      }
+      },
     );
 
     let nonCookieToken = {};
 
     if (!device || device.toLowerCase().trim() === "web") {
-      handleAuthTokens(
-        res,
-        accessToken,
-        refreshToken,
-        config
-      );
+      handleAuthTokens(res, accessToken, refreshToken, config);
     } else {
       nonCookieToken = { accessToken, refreshToken };
     }
@@ -76,20 +76,20 @@ export const loginUser = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Login successful",
       nonCookieToken, // used for non-web clients
-      data: await ReturnedData(user),
+      data: await ReturnedData(user, device),
     });
   } catch (error) {
     return handleError(error, res, "Error logging in");
   }
 };
 
-
 /**
  * Returns selected user data fields.
  * @param {IUser} user - The user object.
+ * @param {string} device - The device type used for login.
  * @return {object} An object containing user data.
  */
-export async function ReturnedData(user: IUser) {
+export async function ReturnedData(user: IUser, device: string) {
   return {
     userId: user.id,
     email: user.email,
@@ -101,6 +101,27 @@ export async function ReturnedData(user: IUser) {
     phone: user.phone || "",
     allowNotifications: user.allowNotifications ? true : false,
     isEncryptionPinSet: user.pinEncryption ? true : false,
-    pinEncryptionExpiry: user.pinEncryptionExpiry ? getPinExpiryLeft(user.pinEncryptionExpiry) : null,
+    pinEncryptionExpiry: user.pinEncryptionExpiry
+      ? getPinExpiryLeft(user.pinEncryptionExpiry)
+      : null,
+    // in case of mobile application, some data are sent along
+    prepare: await prepareData(device),
   };
 }
+
+// only mobile application have prepare data
+const prepareData = async (device: string) => {
+  return {
+    units: await getUnits(device),
+  };
+};
+
+const getUnits = async (device: string) => {
+  if (device && device.toLowerCase().trim() === "mobile") {
+    const units = await Unit.find().sort({ type: 1, unit: 1 });
+
+    return units.map((u) => ({ id: u._id, type: u.type, unit: u.unit }));
+  }
+
+  return [];
+};
