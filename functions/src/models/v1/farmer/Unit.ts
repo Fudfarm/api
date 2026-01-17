@@ -5,7 +5,7 @@ import { CropInfo } from "./CropInfo";
 import { FarmInfo } from "./FarmInfo";
 import { ShopItems } from "./ShopItems";
 
-export const unitTypes = ["Crop", "Animal", "Tool", "Other"] as const;
+export const unitTypes = ["Crop", "Animal", "Tool", "Farm", "Other"] as const;
 
 export interface IUnitDoc extends Document {
   _id: string;
