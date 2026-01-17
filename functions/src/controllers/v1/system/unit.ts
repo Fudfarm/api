@@ -4,9 +4,13 @@ import { capitalizeWords } from "../../../function/function1";
 import { formatDateToShort } from "../../../function/function3";
 import { Unit } from "../../../models/v1/farmer/Unit";
 
-export const getAllUnits = async (req: Request, res: Response) => {
+const fetchUnits = async (
+  req: Request,
+  res: Response,
+  mapper: (unit: any) => object,
+  message: string,
+) => {
   try {
-    // Optional filter by `type` query parameter (e.g. `?type=weight`)
     const type =
       typeof req.query.type === "string" ? req.query.type : undefined;
     const filter: Record<string, any> = {};
@@ -14,16 +18,27 @@ export const getAllUnits = async (req: Request, res: Response) => {
 
     const units = await Unit.find(filter).sort({ type: 1, unit: 1 });
     return res.status(200).json({
-      mssage: "Units retrieved",
+      message,
       data: {
         type: capitalizeWords(type || "all"),
-        units: units.map((u) => formatReturn(u)),
+        units: units.map(mapper),
       },
     });
   } catch (err) {
     return handleError(err, res, "Failed to fetch units");
   }
 };
+
+export const getAllUnits = async (req: Request, res: Response) =>
+  fetchUnits(req, res, formatReturn, "Units retrieved");
+
+export const getAllLeanUnits = async (req: Request, res: Response) =>
+  fetchUnits(
+    req,
+    res,
+    (u) => ({ id: u._id, type: u.type, unit: u.unit }),
+    "Lean units retrieved",
+  );
 
 export const getUnitById = async (req: Request, res: Response) => {
   try {
