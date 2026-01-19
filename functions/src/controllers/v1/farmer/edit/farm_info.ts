@@ -4,39 +4,57 @@ import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { FarmInfo } from "../../../../models/v1/farmer";
 import { farmInfoResponse } from "../details/farm_info_list";
 
-export const editFarmerFarm = async (req: AuthenticatedRequest, res: Response) => {
+export const editFarmerFarm = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   try {
     const { farmId } = req.params;
-    if (!farmId) return res.status(400).json({ message: "Farm id is required" });
+    if (!farmId)
+      return res.status(400).json({ message: "Farm id is required" });
 
     const data = req.body;
 
-    const farm = await FarmInfo.findByIdAndUpdate(farmId, { $set: {
-      state: data.state,
-      lga: data.lga,
-      town: data.town,
-      district: data.district,
-      landmark: data.landmark,
-      numCrops: data.numCrops,
-      farmSize: data.farmSize,
-      unit: data.unit,
-      verified: data.verified,
-    } }, { new: true }).lean();
+    const farm = await FarmInfo.findByIdAndUpdate(
+      farmId,
+      {
+        $set: {
+          state: data.state,
+          lga: data.lga,
+          town: data.town,
+          district: data.district,
+          landmark: data.landmark,
+          numCrops: data.numCrops,
+          farmSize: data.farmSize,
+          unitId: data.unitId,
+          verified: data.verified,
+        },
+      },
+      { new: true },
+    ).lean();
     if (!farm) return res.status(404).json({ message: "Farm not found" });
+
+    const updatedFarm = await FarmInfo.findById(farmId)
+      .populate({ path: "unitId", select: "unit" })
+      .lean();
 
     return res.status(200).json({
       message: "Farm updated",
-      data: await farmInfoResponse(farm),
+      data: await farmInfoResponse(updatedFarm),
     });
   } catch (error) {
     return handleError(error, res, "Error updating farm");
   }
 };
 
-export const addFarmerFarm = async (req: AuthenticatedRequest, res: Response) => {
+export const addFarmerFarm = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   try {
     const { userId } = req.params;
-    if (!userId) return res.status(400).json({ message: "User id is required" });
+    if (!userId)
+      return res.status(400).json({ message: "User id is required" });
 
     const data = req.body;
 
@@ -55,19 +73,27 @@ export const addFarmerFarm = async (req: AuthenticatedRequest, res: Response) =>
 
     const saved = await farmDoc.save();
 
+    const newFarm = await FarmInfo.findById(saved._id)
+      .populate({ path: "unitId", select: "unit" })
+      .lean();
+
     return res.status(201).json({
       message: "Farm created",
-      data: await farmInfoResponse(saved),
+      data: await farmInfoResponse(newFarm),
     });
   } catch (error) {
     return handleError(error, res, "Error creating farm");
   }
 };
 
-export const destroyFarmerFarm = async (req: AuthenticatedRequest, res: Response) => {
+export const destroyFarmerFarm = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   try {
     const { farmId } = req.params;
-    if (!farmId) return res.status(400).json({ message: "Farm id is required" });
+    if (!farmId)
+      return res.status(400).json({ message: "Farm id is required" });
 
     const deleted = await FarmInfo.findByIdAndDelete(farmId).lean();
     if (!deleted) return res.status(404).json({ message: "Farm not found" });
