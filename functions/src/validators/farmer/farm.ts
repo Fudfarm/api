@@ -10,7 +10,7 @@ export const farmSchema = z.object({
   state: nonEmpty("State"),
   lga: nonEmpty("lga"),
   town: nonEmpty("town"),
-  district: nonEmpty("district"),
+  district: z.string().trim().optional(),
   landmark: nonEmpty("landmark"),
   numCrops: z.number().int().min(0, "numCrops must be a positive integer"),
   farmSize: z.preprocess(

@@ -1,13 +1,16 @@
 import { z } from "zod";
 
 const nonEmpty = (name: string) =>
-  z.string({ required_error: `${name} is required` }).trim().min(1, `${name} is required`);
+  z
+    .string({ required_error: `${name} is required` })
+    .trim()
+    .min(1, `${name} is required`);
 
 export const addressSchema = z.object({
   resState: nonEmpty("resState"),
   resLga: nonEmpty("resLga"),
   resTown: nonEmpty("resTown"),
-  resDistrict: nonEmpty("resDistrict"),
+  resDistrict: z.string().trim().optional(),
   resStreet: z.string().trim().optional(),
   resLandmark: nonEmpty("resLandmark"),
   resHouseNumber: z.string().trim().optional(),
@@ -18,7 +21,7 @@ export const addressSchema = z.object({
   permState: nonEmpty("permState"),
   permLga: nonEmpty("permLga"),
   permTown: nonEmpty("permTown"),
-  permDistrict: nonEmpty("permDistrict"),
+  permDistrict: z.string().trim().optional(),
   permStreet: z.string().trim().optional(),
   permLandmark: nonEmpty("permLandmark"),
   permHouseNumber: z.string().trim().optional(),
