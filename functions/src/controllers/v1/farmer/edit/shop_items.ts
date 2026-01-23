@@ -49,20 +49,19 @@ export const addFarmerShopItem = async (
     if (!shopId)
       return res.status(400).json({ message: "Shop id is required" });
 
-    const shop = await ShopLocation.findById(shopId).select("_id").lean();
+    const shop = await ShopLocation.findById(shopId)
+      .select("_id recordID")
+      .lean();
     if (!shop) return res.status(404).json({ message: "Shop not found" });
 
-    if (!req.body.recordID)
-      return res.status(400).json({ message: "Farmer ID is required" });
-
-    const user = await User.findById(req.body.recordID).select("_id").lean();
+    const user = await User.findById(shop.recordID).select("_id").lean();
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const data = req.body;
 
     const itemDoc = new ShopItems({
       shopLocationID: shopId,
-      recordID: data.recordID,
+      recordID: shop.recordID,
       item: data.item,
       quantity: data.quantity,
       category: data.category,
