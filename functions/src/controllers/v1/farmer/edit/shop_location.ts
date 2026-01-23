@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
-import { ShopLocation } from "../../../../models/v1/farmer";
+import { ShopItems, ShopLocation } from "../../../../models/v1/farmer";
 import User from "../../../../models/v1/User";
 import { ShopLocationResponse } from "../details/shop_location";
 
@@ -85,6 +85,9 @@ export const destroyFarmerShopLocation = async (
     const { shopId } = req.params;
     if (!shopId)
       return res.status(400).json({ message: "Shop id is required" });
+
+    // delete shop items
+    await ShopItems.deleteMany({ shopLocationID: shopId });
 
     const shop = await ShopLocation.findByIdAndDelete(shopId).lean();
     if (!shop) return res.status(404).json({ message: "Shop not found" });

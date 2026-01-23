@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { ShopItems, ShopLocation } from "../../../../models/v1/farmer";
+import User from "../../../../models/v1/User";
 import { ShopItemsResponse } from "../details/shop_items";
 
 export const editFarmerShopItem = async (
@@ -50,6 +51,12 @@ export const addFarmerShopItem = async (
 
     const shop = await ShopLocation.findById(shopId).select("_id").lean();
     if (!shop) return res.status(404).json({ message: "Shop not found" });
+
+    if (!req.body.recordID)
+      return res.status(400).json({ message: "Farmer ID is required" });
+
+    const user = await User.findById(req.body.recordID).select("_id").lean();
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const data = req.body;
 
