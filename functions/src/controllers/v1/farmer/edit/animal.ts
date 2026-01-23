@@ -2,6 +2,7 @@ import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
 import { AnimalInfo } from "../../../../models/v1/farmer";
+import User from "../../../../models/v1/User";
 import { AnimalInfoResponse } from "../details/animal_list";
 
 export const editFarmerAnimal = async (
@@ -49,6 +50,10 @@ export const addFarmerAnimal = async (
     const { userId } = req.params;
     if (!userId)
       return res.status(400).json({ message: "User id is required" });
+
+    // check if user exists
+    const user = await User.findById(userId).select("_id").lean();
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const data = req.body;
 
