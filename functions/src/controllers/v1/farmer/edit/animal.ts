@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { handleError } from "../../../../function/error";
 import { AuthenticatedRequest } from "../../../../middleware/auth";
-import { AnimalInfo } from "../../../../models/v1/farmer";
+import { AnimalInfo, BusinessType } from "../../../../models/v1/farmer";
 import User from "../../../../models/v1/User";
 import { AnimalInfoResponse } from "../details/animal_list";
 
@@ -54,6 +54,19 @@ export const addFarmerAnimal = async (
     // check if user exists
     const user = await User.findById(userId).select("_id").lean();
     if (!user) return res.status(404).json({ message: "User not found" });
+
+    const businessType = await BusinessType.findOne({ recordID: userId })
+      .select("isFarmer")
+      .lean();
+    if (!businessType) return res.status(404).json({
+      message: "Farmer business type not found. Please set one.",
+    });
+
+    if (!businessType.isFarmer) {
+      return res.status(403).json({
+        message: "This user is not a farmer. Cannot add a farm location.",
+      });
+    }
 
     const data = req.body;
 
