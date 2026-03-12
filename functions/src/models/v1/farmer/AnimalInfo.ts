@@ -28,7 +28,7 @@ const animalInfoSchema = new Schema<IAnimalInfoDoc>(
     },
     unitId: {
       type: String,
-      required: false, // suppress unit
+      required: true,
       ref: "Unit",
     },
   },

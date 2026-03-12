@@ -38,7 +38,7 @@ const shopItemsSchema = new Schema<IShopItemsDoc>(
     },
     unitId: {
       type: String,
-      required: false, // suppress unit
+      required: true,
       ref: "Unit",
     },
     verified: {

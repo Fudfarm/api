@@ -327,10 +327,9 @@ export const validateArrayData = (data: IUploadData): string[] => {
       if (typeof animal.quantity !== "number" || animal.quantity < 0) {
         errors.push(`Animal ${index + 1}: Please provide a valid quantity (must be 0 or greater)`);
       }
-      // suppress unit
-      // if (!animal.unitId || typeof animal.unitId !== "string") {
-      //   errors.push(`Animal ${index + 1}: Please provide a valid unit for farm size`);
-      // }
+      if (!animal.unitId || typeof animal.unitId !== "string") {
+        errors.push(`Animal ${index + 1}: Please provide a valid unit for farm size`);
+      }
     });
   }
 
@@ -343,10 +342,9 @@ export const validateArrayData = (data: IUploadData): string[] => {
       if (typeof crop.quantity !== "number" || crop.quantity < 0) {
         errors.push(`Crop ${index + 1}: Please provide a valid quantity (must be 0 or greater)`);
       }
-      // suppress unit
-      // if (!crop.unitId || typeof crop.unitId !== "string") {
-      //   errors.push(`Crop ${index + 1}: Please provide a valid unit of measurement`);
-      // }
+      if (!crop.unitId || typeof crop.unitId !== "string") {
+        errors.push(`Crop ${index + 1}: Please provide a valid unit of measurement`);
+      }
     });
   }
 
@@ -375,10 +373,9 @@ export const validateArrayData = (data: IUploadData): string[] => {
       if (typeof farm.farmSize !== "number" || farm.farmSize <= 0) {
         errors.push(`Farm ${index + 1}: Please provide a valid farm size (must be greater than 0)`);
       }
-      // suppress unit
-      // if (!farm.unitId || typeof farm.unitId !== "string") {
-      //   errors.push(`Farm ${index + 1}: Please provide a valid unit for farm size`);
-      // }
+      if (!farm.unitId || typeof farm.unitId !== "string") {
+        errors.push(`Farm ${index + 1}: Please provide a valid unit for farm size`);
+      }
     });
   }
 
@@ -415,10 +412,9 @@ export const validateArrayData = (data: IUploadData): string[] => {
       if (!item.category || typeof item.category !== "string") {
         errors.push(`Shop Item ${index + 1}: Please provide a valid category`);
       }
-      // suppress unit
-      // if (!item.unitId || typeof item.unitId !== "string") {
-      //   errors.push(`Shop Item ${index + 1}: Please provide a valid unit for shop item`);
-      // }
+      if (!item.unitId || typeof item.unitId !== "string") {
+        errors.push(`Shop Item ${index + 1}: Please provide a valid unit for shop item`);
+      }
     });
   }
 
