@@ -28,7 +28,7 @@ const cropInfoSchema = new Schema<ICropInfoDoc>(
     },
     unitId: {
       type: String,
-      required: true,
+      required: false, // suppress unit
       ref: "Unit",
     },
   },
