@@ -443,7 +443,7 @@ export const farmersUpload = async (req: AuthenticatedRequest, res: Response) =>
             }
           }
 
-          // Create shop location records and their items
+          // Create shop location records and their items.
           if (data.shopLocation && Array.isArray(data.shopLocation)) {
             for (const shop of data.shopLocation) {
               const shopLocationRecord = new ShopLocation({
